@@ -89,6 +89,11 @@ const props = defineProps({
     type: Number,
     default: null,
   },
+  // A hall has no members, meetings, ranks or dues, so those sections and the lodge particulars are hidden.
+  isHall: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const isSuperAdmin = computed(() => !!usePage().props.auth?.user?.is_super_admin);
@@ -97,11 +102,12 @@ const isSuperAdmin = computed(() => !!usePage().props.auth?.user?.is_super_admin
 // admins see that column in the matrix.
 const visibleRoles = computed(() => props.availableRoles.filter(r => r.code !== 'owner' || isSuperAdmin.value));
 
+const HALL_HIDDEN_TABS = ['positions', 'ranks', 'officers', 'subscriptions', 'dining', 'bookings'];
 const validTabs = [
   'general', 'positions', 'ranks', 'officers', 'branding', 'roles', 'modules',
   'accounting', 'subscriptions', 'payments', 'events', 'dining',
   'communications', 'news-tags', 'website', 'bookings'
-];
+].filter((tab) => !props.isHall || !HALL_HIDDEN_TABS.includes(tab));
 
 // Event and booking payment options are set up once for the lodge on their own page, which comes back here.
 const paymentOptionsUrl = (tab) => `${route('admin.payment_options.index', { clubSlug: props.club.slug })}?return=${encodeURIComponent(`/${props.club.slug}/admin/settings?tab=${tab}`)}`;
@@ -204,13 +210,13 @@ const updateMemberRole = (userId, newRole) => {
       <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
 
         <!-- Left Settings Sidebar Navigation -->
-        <SettingsSectionNav v-model="activeTab" />
+        <SettingsSectionNav v-model="activeTab" :hidden="isHall ? HALL_HIDDEN_TABS : []" />
 
         <!-- Right Content Panel -->
         <div class="lg:col-span-3 space-y-6">
 
       <!-- TAB 1: GENERAL SETTINGS -->
-      <GeneralSettingsTab v-if="activeTab === 'general'" :form="form" :hall-label="hallLabel" :halls-only="hallsOnly" :on-hall-change="onHallChange" :on-province-change="onProvinceChange" :open-formula-builder="openFormulaBuilder" :other-venues="otherVenues" :selected-hall-address="selectedHallAddress" :provinces="provinces" />
+      <GeneralSettingsTab v-if="activeTab === 'general'" :form="form" :is-hall="isHall" :hall-label="hallLabel" :halls-only="hallsOnly" :on-hall-change="onHallChange" :on-province-change="onProvinceChange" :open-formula-builder="openFormulaBuilder" :other-venues="otherVenues" :selected-hall-address="selectedHallAddress" :provinces="provinces" />
 
       <!-- TAB: CLUB POSITIONS & RANKS -->
       <PositionsSettingsTab v-if="activeTab === 'positions'" :form="form" :positions="positions" />

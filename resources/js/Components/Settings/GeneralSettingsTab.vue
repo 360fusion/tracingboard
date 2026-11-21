@@ -16,7 +16,9 @@ defineProps({
     openFormulaBuilder: { type: [Object, Array, Function, String, Number, Boolean], required: true },
     otherVenues: { type: [Object, Array, Function, String, Number, Boolean], required: true },
     selectedHallAddress: { type: [Object, Array, Function, String, Number, Boolean], required: true },
-    provinces: { type: [Object, Array, Function, String, Number, Boolean], required: false }
+    provinces: { type: [Object, Array, Function, String, Number, Boolean], required: false },
+    // A hall has no lodge particulars, number or meeting place of its own.
+    isHall: { type: Boolean, default: false }
 });
 </script>
 
@@ -24,7 +26,7 @@ defineProps({
     <div class="space-y-6">
 
       <!-- Lodge Details Card (Matches Lodge Particulars Specs) -->
-      <Card>
+      <Card v-if="!isHall">
         <template #header>
           <h2 class="text-xl font-bold text-slate-900 dark:text-white">Details</h2>
         </template>
@@ -135,7 +137,7 @@ defineProps({
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <Input v-model="form.name" required label="Club or organisation name" />
-          <Input v-model="form.lodge_number" placeholder="e.g. 1418" label="Lodge or club number" />
+          <Input v-if="!isHall" v-model="form.lodge_number" placeholder="e.g. 1418" label="Lodge or club number" />
 
           <div class="space-y-1.5">
             <label for="settings-province" class="block text-xs font-medium text-slate-700 dark:text-slate-300">Masonic province</label>
@@ -147,7 +149,7 @@ defineProps({
             </select>
           </div>
 
-          <div class="space-y-1.5">
+          <div v-if="!isHall" class="space-y-1.5">
             <label for="settings-hall" class="block text-xs font-medium text-slate-700 dark:text-slate-300">Masonic hall or meeting place</label>
             <select id="settings-hall" v-model="form.masonic_hall_id" @change="onHallChange" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white">
               <option value="">No Masonic hall selected</option>

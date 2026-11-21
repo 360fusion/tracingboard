@@ -2,11 +2,14 @@
 // The settings page's section picker: a dropdown on phones and a grouped side navigation on wider screens.
 import Card from '@/Components/Ui/Card.vue';
 import UiIcon from '@/Components/Ui/UiIcon.vue';
+import { computed } from 'vue';
 
 const activeTab = defineModel({ type: String, required: true });
+// Section keys this club does not have (a hall's lodge-only sections).
+const props = defineProps({ hidden: { type: Array, default: () => [] } });
 
 // The settings sections, grouped as the side navigation (and the phone dropdown) shows them.
-const settingsNav = [
+const allSettingsNav = [
   { label: 'Workspace', items: [
     { key: 'general', label: 'General', icon: 'building' },
     { key: 'positions', label: 'Club positions', icon: 'award' },
@@ -29,6 +32,10 @@ const settingsNav = [
     { key: 'bookings', label: 'Equipment bookings', icon: 'clock' },
   ] },
 ];
+
+const settingsNav = computed(() => allSettingsNav
+  .map((group) => ({ ...group, items: group.items.filter((item) => !props.hidden.includes(item.key)) }))
+  .filter((group) => group.items.length));
 </script>
 
 <template>

@@ -153,6 +153,12 @@ return [
     'hall_hidden_sections' => ['members', 'users', 'candidates', 'meetings', 'officers', 'committee', 'visitors', 'subscriptions', 'dues-subscriptions', 'charity'],
 
     /**
+     * Capabilities a hall has no use for (they guard only hidden sections, or lodge-to-lodge communications), so its
+     * Roles and permissions screen leaves them out.
+     */
+    'hall_hidden_capabilities' => ['manage_meetings', 'manage_members', 'manage_subscriptions', 'pass_on_communications'],
+
+    /**
      * Always permitted, regardless of the club's matrix. Without this a club
      * could edit its own matrix in a way that locked its owner out for good.
      */

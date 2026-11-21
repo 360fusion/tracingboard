@@ -153,6 +153,11 @@ class ClubSettingsController extends Controller
             }
         }
 
+        // A hall's screen does not list the capabilities it has no use for, so keep whatever was stored for them.
+        if ($club->isHall()) {
+            $clean += array_intersect_key($current, array_flip(config('club_permissions.hall_hidden_capabilities')));
+        }
+
         if (! $isOwner) {
             unset($clean['manage_settings']);
 

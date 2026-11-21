@@ -179,6 +179,10 @@ class ClubSettingsScreenData
             $club->settings['permission_matrix'] ?? []
         );
 
+        if ($club->isHall()) {
+            $settings['permission_matrix'] = array_diff_key($settings['permission_matrix'], array_flip(config('club_permissions.hall_hidden_capabilities')));
+        }
+
         $domainMembers = Member::where('club_id', $club->id)
             ->orderBy('last_name')
             ->orderBy('first_name')
@@ -238,6 +242,8 @@ class ClubSettingsScreenData
         $rankUsage = fn (string $column) => Member::where('club_id', $club->id)->whereNotNull($column)->selectRaw("{$column} as rank_value, count(*) as total")->groupBy($column)->pluck('total', 'rank_value')->all();
 
         return [
+            // A hall has no members, meetings, ranks or dues: the page hides those sections and lodge particulars.
+            'isHall' => $club->isHall(),
             'ranks' => [
                 'grandLodgeName' => $club->province?->grandLodge?->name,
                 'usage' => ['grand' => $rankUsage('grand_rank'), 'provincial' => $rankUsage('provincial_rank')],
