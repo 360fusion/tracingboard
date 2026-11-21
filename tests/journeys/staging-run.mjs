@@ -25,7 +25,7 @@ foreach ([['Wealden Lodge', '${LODGE_NO}'], ['Lodge of Unity', '99421'], ["St Ai
     App\\Models\\Lodge::firstOrCreate(['slug' => Illuminate\\Support\\Str::slug($name.' '.$number)], ['club_type_id' => $craft->id, 'name' => $name, 'number' => $number, 'status' => 'active', 'masonic_hall_id' => $hall->id]);
 }
 echo 'ok';`;
-const out = execFileSync('ssh', [...SSH, 'cd ~/manager.360fusionhosting.co.uk/current && php artisan tinker --no-interaction'], { input: setup }).toString();
+const out = execFileSync('ssh', [...SSH, 'cd ~/staging.tracingboard.app/current && php artisan tinker --no-interaction'], { input: setup }).toString();
 if (!out.includes('ok')) throw new Error('setting up the test lodges failed: ' + out);
 
 let src = fs.readFileSync(`${HERE}/full-run.mjs`, 'utf8');
@@ -42,11 +42,11 @@ swap("const artisan = (...args) => sh('php', ['artisan', ...args]);", `
 const SSH = ${JSON.stringify(SSH)};
 const remote = (cmd, input) => execFileSync('ssh', [...SSH, cmd], { input, maxBuffer: 64e6 }).toString();
 const shq = (s) => "'" + String(s).replace(/'/g, "'\\\\''") + "'";
-const artisan = (...args) => remote('cd ~/manager.360fusionhosting.co.uk/current && php artisan ' + args.map(shq).join(' ') + ' --no-interaction');
+const artisan = (...args) => remote('cd ~/staging.tracingboard.app/current && php artisan ' + args.map(shq).join(' ') + ' --no-interaction');
 const sleepSync = (ms) => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
 `);
 swap("const pgpass = (fs.readFileSync(`${ROOT}/.env`, 'utf8').match(/^DB_PASSWORD=(.*)$/m) || [])[1]?.replace(/\"/g, '') || '';", '');
-src = src.replace(/const sql = \(q\) => sh\('psql'.*\n/, `const sql = (q) => remote(\`cd ~/manager.360fusionhosting.co.uk && e(){ grep "^$1=" .env | cut -d= -f2- | tr -d '"'; } && PGPASSWORD="$(e DB_PASSWORD)" psql -h 127.0.0.1 -U "$(e DB_USERNAME)" -d "$(e DB_DATABASE)" -qAt -v ON_ERROR_STOP=1 -f -\`, q).trim();\n`);
+src = src.replace(/const sql = \(q\) => sh\('psql'.*\n/, `const sql = (q) => remote(\`cd ~/staging.tracingboard.app && e(){ grep "^$1=" .env | cut -d= -f2- | tr -d '"'; } && PGPASSWORD="$(e DB_PASSWORD)" psql -h 127.0.0.1 -U "$(e DB_USERNAME)" -d "$(e DB_DATABASE)" -qAt -v ON_ERROR_STOP=1 -f -\`, q).trim();\n`);
 swap("    console.log('Rebuilding the demo database...');\n    sh('sh', ['tests/journeys/reset-demo.sh']);", "    console.log('Staging: nothing is reset.');");
 swap('logStart = fs.statSync(LOG).size;', 'logStart = Date.now() - 5000;');
 
