@@ -37,6 +37,20 @@ class EventQuoteController extends Controller
         return $this->respond($request, $event, $pricing);
     }
 
+    /**
+     * The member's price for an event on its public page (a hall's event has no member-area page).
+     */
+    public function publicMember(Request $request, string $clubSlug, string $eventSlug, EventPricing $pricing): JsonResponse
+    {
+        $club = $this->findClub($clubSlug);
+        $user = Auth::user();
+        $event = Event::where('club_id', $club->id)->published()->visibleTo($user)->where('slug', $eventSlug)->firstOrFail();
+
+        abort_unless($event->canBeRsvpedBy($user), 403);
+
+        return $this->respond($request, $event, $pricing);
+    }
+
     public function guest(Request $request, string $clubSlug, string $eventSlug, EventPricing $pricing): JsonResponse
     {
         $club = $this->findClub($clubSlug);

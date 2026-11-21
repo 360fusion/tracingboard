@@ -4,12 +4,16 @@ namespace Tests\Feature\Halls;
 
 use App\Enums\Visibility;
 use App\Models\Club;
+use App\Models\ClubPaymentMethod;
 use App\Models\Event;
+use App\Models\EventPaymentMethod;
 use App\Models\MasonicHall;
 use App\Models\User;
 use App\Services\Events\EventRegistrationService;
+use App\Services\Payment\StripeGateway;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
+use Mockery\MockInterface;
 use Tests\TestCase;
 
 class HallEventAudienceTest extends TestCase
@@ -133,5 +137,45 @@ class HallEventAudienceTest extends TestCase
         $other->users()->attach($outsider->id, ['role' => 'member', 'status' => 'active']);
         $this->actingAs($outsider)->post($url, $payload)->assertNotFound();
         $this->assertDatabaseMissing('event_registrations', ['user_id' => $outsider->id]);
+    }
+
+    private function priceHallEventWithCard(): EventPaymentMethod
+    {
+        config(['events.online_payments' => true]);
+        $this->event->update(['requires_payment' => true, 'price' => 40]);
+        $card = ClubPaymentMethod::create(['club_id' => $this->hallClub->id, 'type' => 'card_online', 'label' => 'Pay online', 'sort_order' => 0, 'config' => ['stripe_secret_key' => 'sk_test_x', 'stripe_webhook_secret' => 'whsec_x']]);
+
+        return EventPaymentMethod::create(['event_id' => $this->event->id, 'payment_method_id' => $card->id, 'is_enabled' => true]);
+    }
+
+    public function test_member_gets_the_price_quote_on_the_public_hall_event_page(): void
+    {
+        $this->priceHallEventWithCard();
+
+        $this->actingAs($this->member)
+            ->postJson("/site/{$this->hallClub->slug}/events/open-evening/member-quote", ['attendees' => [['is_guest' => false], ['is_guest' => true]]])
+            ->assertOk()
+            ->assertJsonPath('options.0.total', 80);
+    }
+
+    public function test_online_payment_for_a_hall_booking_returns_to_the_public_event_page(): void
+    {
+        $option = $this->priceHallEventWithCard();
+        $captured = null;
+        $this->mock(StripeGateway::class, function (MockInterface $mock) use (&$captured) {
+            $mock->shouldReceive('createCheckoutSession')->once()->andReturnUsing(function ($method, $params) use (&$captured) {
+                $captured = $params;
+
+                return ['id' => 'cs_test_1', 'url' => 'https://checkout.stripe.test/pay/cs_test_1'];
+            });
+        });
+
+        $this->actingAs($this->member)->post("/site/{$this->hallClub->slug}/events/open-evening/member-register", [
+            'attendance_status' => 'attending', 'payment_method' => $option->id, 'attendees' => [['name' => 'Me']],
+        ], ['X-Inertia' => 'true'])->assertStatus(409);
+
+        $page = "/site/{$this->hallClub->slug}/events/open-evening";
+        $this->assertStringEndsWith($page.'?payment=success', $captured['success_url']);
+        $this->assertStringEndsWith($page.'?payment=cancelled', $captured['cancel_url']);
     }
 }

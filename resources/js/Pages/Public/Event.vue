@@ -44,14 +44,14 @@ const form = useForm({
 // Live price from the server, so what is shown is what is charged.
 const showPromo = ref(false);
 const { quote, error: quoteError, refresh } = useEventQuote(
-  route('public.event.quote', { clubSlug: props.club.slug, eventSlug: props.event.slug }),
+  route(props.canBookAsMember ? 'public.event.member_quote' : 'public.event.quote', { clubSlug: props.club.slug, eventSlug: props.event.slug }),
   () => ({
     promo_code: form.promo_code || null,
     attendees: form.attendees.map((a, index) => ({ is_guest: index > 0, ticket_tier_id: a.ticket_tier_id, attending_dining: a.attending_dining })),
   }),
 );
 
-watch(() => [form.attendees, form.promo_code], () => { if (props.canBookAsGuest && props.event.requires_payment) refresh(); }, { deep: true, immediate: true });
+watch(() => [form.attendees, form.promo_code], () => { if ((props.canBookAsGuest || props.canBookAsMember) && props.event.requires_payment) refresh(); }, { deep: true, immediate: true });
 
 watch(quote, (value) => {
   const options = value?.options ?? [];

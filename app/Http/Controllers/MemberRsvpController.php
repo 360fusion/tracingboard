@@ -62,14 +62,19 @@ class MemberRsvpController extends Controller
 
         // Chose to pay online (card or PayPal): straight on to the payment page for what they owe.
         if ($registration->status === 'attending' && $registration->paymentMethod?->isOnline() && $online->canPay($registration)) {
-            $back = route('member.events', ['slug' => $club->slug]);
+            // A hall has no member area: its bookers come back to the event's public page.
+            $isHall = $club->isHall();
+            $back = $isHall ? route('public.event', ['clubSlug' => $club->slug, 'eventSlug' => $event->slug]) : route('member.events', ['slug' => $club->slug]);
+            $paypalReturn = $isHall
+                ? route('public.event.member_paypal_return', ['clubSlug' => $club->slug, 'eventSlug' => $event->slug])
+                : route('member.events.paypal_return', ['slug' => $club->slug, 'id' => $event->id]);
 
             return Inertia::location($online->start(
                 $registration,
                 NativeApp::returnUrl($request, $back.'?payment=success'),
                 NativeApp::returnUrl($request, $back.'?payment=cancelled'),
                 null,
-                NativeApp::returnUrl($request, route('member.events.paypal_return', ['slug' => $club->slug, 'id' => $event->id])),
+                NativeApp::returnUrl($request, $paypalReturn),
             ));
         }
 
