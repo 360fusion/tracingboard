@@ -120,13 +120,24 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
     }
 
     /**
-     * IDs of the clubs this user is an active member of.
+     * IDs of the clubs this user is an active member of. A hall board row is not membership, so halls are left out.
      *
      * @return Collection<int, int>
      */
     public function activeClubIds(): Collection
     {
-        return $this->clubs()->wherePivot('status', ClubMemberStatus::Active->value)->pluck('clubs.id');
+        return $this->clubs()->notHalls()->wherePivot('status', ClubMemberStatus::Active->value)->pluck('clubs.id');
+    }
+
+    /**
+     * IDs of the hall clubs this user is on the board of.
+     *
+     * @return Collection<int, int>
+     */
+    public function boardHallClubIds(): Collection
+    {
+        return $this->clubs()->whereHas('clubType', fn ($type) => $type->where('code', ClubType::HALL))
+            ->wherePivot('status', ClubMemberStatus::Active->value)->pluck('clubs.id');
     }
 
     /**
