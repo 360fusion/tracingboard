@@ -118,6 +118,24 @@ class HallBoardTest extends TestCase
         $this->assertSame(1, Member::where('club_id', $this->club->id)->where('email', 'tom@example.com')->count());
     }
 
+    public function test_a_signed_in_person_who_was_removed_can_be_invited_again(): void
+    {
+        $invite = ['name' => 'Tom Reasurer', 'email' => 'tom@example.com', 'office' => 'Treasurer', 'role' => 'treasurer'];
+        $this->actingAs($this->owner)->post($this->url(), $invite);
+        $user = User::where('email', 'tom@example.com')->firstOrFail();
+        $user->forceFill(['email_verified_at' => now()])->save();
+        $this->club->users()->updateExistingPivot($user->id, ['status' => 'active', 'invitation_accepted_at' => now(), 'invitation_token' => null]);
+
+        $this->delete($this->url("/{$user->id}"));
+        $this->assertSame('past', $this->club->users()->where('users.id', $user->id)->first()->pivot->status);
+
+        $this->post($this->url(), $invite)->assertSessionMissing('error');
+
+        $this->assertSame(1, $this->club->users()->where('users.id', $user->id)->count());
+        $this->assertContains($this->club->users()->where('users.id', $user->id)->first()->pivot->status, ['pending', 'active']);
+        $this->assertSame(1, Member::where('club_id', $this->club->id)->where('email', 'tom@example.com')->count());
+    }
+
     public function test_removal_clears_the_invitation_token_and_a_past_person_is_not_found(): void
     {
         $sec = $this->staff('secretary');
