@@ -24,10 +24,11 @@ class SuperAdminHallController extends Controller
     /**
      * List every masonic hall, with the number of lodges and other bodies that meet in it.
      */
-    public function masonicHallsIndex(): Response
+    public function masonicHallsIndex(Request $request): Response
     {
         return Inertia::render('SuperAdmin/MasonicHalls/Index', [
-            'halls' => MasonicHall::with(['province:id,name', 'club:id,slug'])->withCount('clubs')->orderBy('name')->get()->each(fn (MasonicHall $h) => $h->setAttribute('club_slug', $h->club?->slug)->unsetRelation('club')),
+            'halls' => MasonicHall::with(['province:id,name', 'club:id,slug'])->withCount('clubs')->orderBy('name')->get()->each(fn (MasonicHall $h) => $h->setAttribute('club_slug', $h->club?->slug)
+                ->setAttribute('board_url', $h->club ? HallClubs::landingUrl($h->club, $request->user(), false) : null)->unsetRelation('club')),
             'provinces' => Province::orderBy('name')->get(['id', 'name']),
             'kinds' => MasonicHall::KINDS,
         ]);
@@ -78,11 +79,17 @@ class SuperAdminHallController extends Controller
     }
 
     /**
-     * Delete a masonic hall. Lodges that met there are simply left without a hall.
+     * Delete a masonic hall. Lodges that met there are simply left without a hall. A hall with a board keeps its row,
+     * since its club points at it.
      */
     public function destroyMasonicHall(int $id): RedirectResponse
     {
         $hall = MasonicHall::findOrFail($id);
+
+        if ($hall->club_id) {
+            return back()->with('error', "'{$hall->name}' has a board, so it can't be deleted.");
+        }
+
         $name = $hall->name;
         $hall->delete();
 

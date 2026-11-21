@@ -98,4 +98,27 @@ class SuperAdminHallBoardTest extends TestCase
         $this->actingAs(User::factory()->create(['is_super_admin' => true]))->get(route('superadmin.masonic_halls.index'))
             ->assertInertia(fn ($page) => $page->has('halls.0.club_slug')->missing('halls.0.club'));
     }
+
+    public function test_the_halls_list_links_each_board_to_its_hall_admin(): void
+    {
+        $hall = MasonicHall::factory()->create();
+        $club = app(HallClubs::class)->createFor($hall);
+        MasonicHall::factory()->create();
+
+        $this->actingAs(User::factory()->create(['is_super_admin' => true]))->get(route('superadmin.masonic_halls.index'))
+            ->assertInertia(fn ($page) => $page->where('halls', fn ($halls) => collect($halls)->pluck('board_url')->filter()->values()->all() === [route('admin.hall.edit', ['clubSlug' => $club->slug], false)]));
+    }
+
+    public function test_a_hall_with_a_board_cannot_be_deleted(): void
+    {
+        $hall = MasonicHall::factory()->create();
+        app(HallClubs::class)->createFor($hall);
+        $bare = MasonicHall::factory()->create();
+        $admin = User::factory()->create(['is_super_admin' => true]);
+
+        $this->actingAs($admin)->delete(route('superadmin.masonic_halls.destroy', $hall->id))->assertSessionHas('error');
+        $this->assertModelExists($hall);
+        $this->delete(route('superadmin.masonic_halls.destroy', $bare->id))->assertSessionHas('success');
+        $this->assertModelMissing($bare);
+    }
 }

@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Auth;
 use App\Domains\ClubAccounting\Services\MemberInvitationService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Invitation\AcceptRequest;
+use App\Models\Club;
 use App\Models\User;
+use App\Services\Halls\HallClubs;
 use App\Services\SummonsSender;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -47,7 +49,7 @@ class InvitationController extends Controller
             $this->invitations->linkMatchingMember($club, $user);
             app(SummonsSender::class)->sendUpcomingTo($club, $user);
 
-            return redirect()->route('member.dashboard', ['slug' => $club->slug])
+            return $this->landing($club, $user)
                 ->with('success', "Welcome to {$club->name}! You now have access to your new club portal.");
         }
 
@@ -126,8 +128,18 @@ class InvitationController extends Controller
         Auth::login($user);
         request()->session()->regenerate();
 
-        return redirect()->route('member.dashboard', ['slug' => $club->slug])
+        return $this->landing($club, $user)
             ->with('success', "Welcome to {$club->name}! Your access has been confirmed.");
+    }
+
+    /**
+     * A hall has no member area, so its board starts in the hall's admin.
+     */
+    private function landing(Club $club, User $user): RedirectResponse
+    {
+        return $club->isHall()
+            ? redirect(HallClubs::landingUrl($club, $user))
+            : redirect()->route('member.dashboard', ['slug' => $club->slug]);
     }
 
     /**

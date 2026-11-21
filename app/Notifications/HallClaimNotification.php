@@ -5,6 +5,8 @@ namespace App\Notifications;
 use App\Mail\LodgeClaimMail;
 use App\Models\Club;
 use App\Models\HallClaim;
+use App\Models\User;
+use App\Services\Halls\HallClubs;
 use Illuminate\Notifications\Notification;
 
 /**
@@ -26,6 +28,7 @@ class HallClaimNotification extends Notification
         public readonly array $params = [],
         public readonly string $actionLabel = 'Open',
         public readonly bool $important = false,
+        public readonly ?Club $hallClub = null,
     ) {}
 
     public static function submitted(HallClaim $claim): self
@@ -76,10 +79,11 @@ class HallClaimNotification extends Notification
             'You now run '.$claim->hall->name,
             'Your claim was approved. You can set up the hall board, its details and its events for '.$club->name.'.',
             $claim->hall->name,
-            'member.dashboard',
-            ['slug' => $club->slug],
+            'admin.hall.edit',
+            ['clubSlug' => $club->slug],
             'Open your hall',
             true,
+            $club,
         );
     }
 
@@ -115,13 +119,21 @@ class HallClaimNotification extends Notification
             'body' => mb_strimwidth(strip_tags($this->body), 0, 200, '…'),
             'important' => $this->important,
             'club' => ['id' => null, 'name' => $this->hallName, 'slug' => null],
-            'url' => route($this->route, $this->params, false),
+            'url' => $this->url($notifiable, false),
         ];
     }
 
     public function toMail(object $notifiable): LodgeClaimMail
     {
-        return (new LodgeClaimMail($this->title, $this->body, $this->actionLabel, route($this->route, $this->params)))
+        return (new LodgeClaimMail($this->title, $this->body, $this->actionLabel, $this->url($notifiable)))
             ->to($notifiable->email);
+    }
+
+    /** A hall link goes where that person's role lets them in. */
+    private function url(object $notifiable, bool $absolute = true): string
+    {
+        return $this->hallClub && $notifiable instanceof User
+            ? HallClubs::landingUrl($this->hallClub, $notifiable, $absolute)
+            : route($this->route, $this->params, $absolute);
     }
 }

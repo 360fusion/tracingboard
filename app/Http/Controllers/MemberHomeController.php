@@ -12,6 +12,7 @@ use App\Models\MasonicHall;
 use App\Models\Meeting;
 use App\Models\MeetingRsvp;
 use App\Models\User;
+use App\Services\Halls\HallClubs;
 use App\Services\Meetings\MeetingDiningPayment;
 use App\Services\Meetings\MeetingReplies;
 use App\Services\MemberFeed;
@@ -41,7 +42,7 @@ class MemberHomeController extends Controller
 
         // Someone who is only on a hall's board has no member area: their home is the hall's admin.
         if ($user->activeClubIds()->isEmpty() && $hallId = $user->boardHallClubIds()->first()) {
-            return redirect('/'.Club::findOrFail($hallId)->slug.'/admin');
+            return redirect(HallClubs::landingUrl(Club::findOrFail($hallId), $user));
         }
 
         $scope = MemberScope::for($user);

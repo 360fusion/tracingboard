@@ -65,7 +65,9 @@ class HallClaimTest extends TestCase
         $this->assertSame('owner', $club->users()->whereKey($this->claimant->id)->first()->pivot->role);
         $this->assertSame(HallClaim::APPROVED, $claim->fresh()->status);
         $this->assertSame($this->superAdmin->id, $claim->fresh()->decided_by);
-        Notification::assertSentTo($this->claimant, HallClaimNotification::class, fn ($n) => str_starts_with($n->title, 'You now run'));
+        Notification::assertSentTo($this->claimant, HallClaimNotification::class, fn ($n) => str_starts_with($n->title, 'You now run')
+            && $n->toArray($this->claimant)['url'] === route('admin.hall.edit', ['clubSlug' => $club->slug], false)
+            && $n->toMail($this->claimant)->actionUrl === route('admin.hall.edit', ['clubSlug' => $club->slug]));
     }
 
     public function test_cannot_claim_a_hall_that_already_has_a_board(): void

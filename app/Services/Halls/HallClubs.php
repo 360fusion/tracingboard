@@ -8,6 +8,7 @@ use App\Models\Club;
 use App\Models\ClubType;
 use App\Models\MasonicHall;
 use App\Models\User;
+use App\Support\ClubAccess;
 use App\Support\ReservedClubSlugs;
 use DomainException;
 use Illuminate\Support\Facades\DB;
@@ -49,6 +50,17 @@ class HallClubs
 
             return $club;
         });
+    }
+
+    /**
+     * Where someone on the hall's board starts: the hall details when they may edit them, else the admin dashboard.
+     * There is no /{slug}/admin page and a hall has no member area, so every way into a hall comes through here.
+     */
+    public static function landingUrl(Club $club, ?User $user, bool $absolute = true): string
+    {
+        return ClubAccess::can($user, $club, 'manage_hall')
+            ? route('admin.hall.edit', ['clubSlug' => $club->slug], $absolute)
+            : route('admin.analytics', ['slug' => $club->slug], $absolute);
     }
 
     private function uniqueSlug(MasonicHall $hall): string

@@ -175,7 +175,7 @@ const provinceOptions = computed(() => props.provinces.map((p) => ({ value: p.id
                                 <td class="py-3.5 px-3" :class="h.province ? 'text-slate-700 dark:text-slate-300' : 'text-amber-700 dark:text-amber-400'">{{ h.province?.name || 'No province' }}</td>
                                 <td class="py-3.5 px-3 text-slate-700 dark:text-slate-300">{{ h.clubs_count }}</td>
                                 <td class="py-3.5 px-4 text-right whitespace-nowrap space-x-2">
-                                    <Link v-if="h.club_slug" :href="`/${h.club_slug}/admin`" class="text-sm text-blue-600 hover:underline dark:text-blue-400">Board</Link>
+                                    <Link v-if="h.board_url" :href="h.board_url" class="text-sm text-blue-600 hover:underline dark:text-blue-400">Board</Link>
                                     <Button variant="secondary" size="sm" @click="openBoard(h)">{{ h.club_slug ? 'Invite to board' : 'Set up board' }}</Button>
                                     <Button variant="secondary" size="sm" @click="openEdit(h)">Edit</Button>
                                     <Button variant="danger" size="sm" @click="deleteHall(h)">Delete</Button>
