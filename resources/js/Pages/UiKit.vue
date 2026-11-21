@@ -42,7 +42,7 @@ const alertVariants = ['info', 'success', 'warning', 'danger'];
 
 // The default colour for each order; super admins can change these per order.
 const orders = [
-    { name: 'Craft Lodge', colour: 'sky' },
+    { name: 'Craft Lodge', colour: 'navy' },
     { name: 'Royal Arch Chapter', colour: 'red' },
     { name: 'Mark Master Masons Lodge', colour: 'orange' },
     { name: 'Royal Ark Mariner Lodge', colour: 'teal' },
@@ -56,6 +56,7 @@ const orders = [
     { name: 'SRIA College', colour: 'violet' },
     { name: 'Royal Order of Scotland', colour: 'cyan' },
     { name: 'Order of the Scarlet Cord', colour: 'lime' },
+    { name: 'Other (rowing, rugby, boating)', colour: 'slate' },
 ];
 </script>
 
@@ -129,7 +130,7 @@ const orders = [
                         </div>
 
                         <div class="flex flex-wrap items-center gap-4 border-t border-slate-200 pt-4 dark:border-slate-800">
-                            <DateTile v-for="order in orders.slice(0, 6)" :key="order.name" date="2026-11-05T19:00:00" :colour="order.colour" />
+                            <DateTile v-for="order in orders" :key="order.name" date="2026-11-05T19:00:00" :colour="order.colour" />
                             <DateTile v-for="order in orders.slice(0, 4)" :key="`sm-${order.name}`" date="2026-11-05T19:00:00" :colour="order.colour" size="sm" />
                         </div>
                     </div>

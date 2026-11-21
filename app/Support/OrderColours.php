@@ -14,20 +14,20 @@ final class OrderColours
      */
     public const KEYS = [
         'red', 'orange', 'amber', 'yellow', 'lime', 'green', 'emerald', 'teal', 'cyan', 'sky',
-        'blue', 'indigo', 'violet', 'purple', 'fuchsia', 'pink', 'rose', 'slate', 'stone',
+        'blue', 'navy', 'indigo', 'violet', 'purple', 'fuchsia', 'pink', 'rose', 'slate', 'stone',
     ];
 
     public const DEFAULT = 'slate';
 
     /**
      * Starting colours. Where an order's regalia has a well-known colour it follows that
-     * (Craft blue, Royal Arch red, Rose Croix pink, Red Cross of Constantine purple,
-     * Templar black, Allied Masonic Degrees green); the rest are chosen to stay apart.
+     * (Craft navy, Royal Arch red, Rose Croix pink, Red Cross of Constantine purple,
+     * Templar black, Allied Masonic Degrees green); the rest are chosen to stay apart. Anything that is not an order (rowing, rugby, boating) is black.
      *
      * @var array<string, string>
      */
     private const BY_CODE = [
-        'craft_lodge' => 'sky',
+        'craft_lodge' => 'navy',
         'royal_arch' => 'red',
         'mark_lodge' => 'orange',
         'royal_ark_mariner' => 'teal',
@@ -41,8 +41,6 @@ final class OrderColours
         'sria_college' => 'violet',
         'royal_order_scotland' => 'cyan',
         'scarlet_cord' => 'lime',
-        'rowing' => 'blue',
-        'rugby' => 'green',
     ];
 
     public static function for(string $code): string

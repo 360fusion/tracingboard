@@ -26,7 +26,7 @@ class OrderColourTest extends TestCase
 
     public function test_the_well_known_orders_have_their_traditional_colours(): void
     {
-        $this->assertSame('sky', OrderColours::for('craft_lodge'));
+        $this->assertSame('navy', OrderColours::for('craft_lodge'));
         $this->assertSame('red', OrderColours::for('royal_arch'));
         $this->assertSame('pink', OrderColours::for('rose_croix'));
         $this->assertSame('purple', OrderColours::for('red_cross_constantine'));

@@ -18,6 +18,7 @@ const PALETTE = {
     cyan: { label: 'Cyan', tile: 'bg-cyan-600 text-white', soft: 'bg-cyan-50 text-cyan-800 dark:bg-cyan-950/50 dark:text-cyan-300', dot: 'bg-cyan-500', header: 'bg-cyan-800 dark:bg-cyan-900' },
     sky: { label: 'Light blue', tile: 'bg-sky-600 text-white', soft: 'bg-sky-50 text-sky-700 dark:bg-sky-950/50 dark:text-sky-300', dot: 'bg-sky-400', header: 'bg-sky-800 dark:bg-sky-900' },
     blue: { label: 'Blue', tile: 'bg-blue-600 text-white', soft: 'bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300', dot: 'bg-blue-500', header: 'bg-blue-800 dark:bg-blue-900' },
+    navy: { label: 'Navy', tile: 'bg-navy-800 text-white dark:bg-navy-700', soft: 'bg-navy-50 text-navy-700 dark:bg-navy-950/50 dark:text-navy-300', dot: 'bg-navy-700 dark:bg-navy-300', header: 'bg-navy-800 dark:bg-navy-900' },
     indigo: { label: 'Indigo', tile: 'bg-indigo-600 text-white', soft: 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-300', dot: 'bg-indigo-500', header: 'bg-indigo-800 dark:bg-indigo-900' },
     violet: { label: 'Violet', tile: 'bg-violet-600 text-white', soft: 'bg-violet-50 text-violet-700 dark:bg-violet-950/50 dark:text-violet-300', dot: 'bg-violet-500', header: 'bg-violet-800 dark:bg-violet-900' },
     purple: { label: 'Purple', tile: 'bg-purple-700 text-white', soft: 'bg-purple-50 text-purple-700 dark:bg-purple-950/50 dark:text-purple-300', dot: 'bg-purple-600', header: 'bg-purple-800 dark:bg-purple-900' },

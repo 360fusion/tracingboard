@@ -46,6 +46,16 @@
     --color-blue-900: oklch(30% 0.11 266);
     --color-blue-950: oklch(22% 0.08 266);
 
+    /* Lodge navy: the .cm-nav top bar's shade, offered as an order colour. */
+    --color-navy-50: oklch(97% 0.012 266);
+    --color-navy-100: oklch(93% 0.025 266);
+    --color-navy-300: oklch(80% 0.05 266);
+    --color-navy-500: oklch(50% 0.09 266);
+    --color-navy-700: oklch(37.2% 0.075 266);
+    --color-navy-800: oklch(27.9% 0.075 266);
+    --color-navy-900: oklch(20.8% 0.065 266);
+    --color-navy-950: oklch(12.9% 0.05 266);
+
     --color-gold-50: oklch(98% 0.014 82);
     --color-gold-100: oklch(95.2% 0.045 82);
     --color-gold-200: oklch(90.5% 0.08 82);
