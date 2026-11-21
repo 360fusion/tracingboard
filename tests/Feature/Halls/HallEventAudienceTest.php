@@ -147,7 +147,10 @@ class HallEventAudienceTest extends TestCase
 
         $this->assertDatabaseHas('event_registrations', ['event_id' => $this->event->id, 'user_id' => $this->member->id]);
 
-        $this->actingAs($this->member)->get("{$this->hallEventsUrl()}/{$this->event->id}/ticket")->assertOk();
+        // The ticket page is the other hall page in the member area, so it also leaves out the lodge tabs.
+        $this->actingAs($this->member)->get("{$this->hallEventsUrl()}/{$this->event->id}/ticket")
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->where('club.is_hall', true));
     }
 
     public function test_hall_events_page_marks_the_club_as_a_hall_so_the_lodge_tabs_are_left_out(): void
