@@ -82,7 +82,7 @@ function send() {
                         </div>
 
                         <Alert v-if="isSummons && chosenLodge?.publishes_own" variant="warning">
-                            {{ chosenLodge.name }} publishes its summonses on Club Manager, so your members already get the date, time and venue. Attach the PDF only if you have the full summons.
+                            {{ chosenLodge.name }} publishes its summonses on Tracing Board, so your members already get the date, time and venue. Attach the PDF only if you have the full summons.
                         </Alert>
                     </template>
 

@@ -138,7 +138,7 @@ const inputClass = 'w-full rounded-xl border border-slate-300 bg-white px-3 py-2
                             <Button v-if="signedIn && lodge.own_club_slug" size="sm" class="min-w-20" :href="route('member.dashboard', { slug: lodge.own_club_slug })">Open</Button>
                             <Badge v-else-if="lodge.following" variant="info">Following</Badge>
                             <Button v-else-if="signedIn" size="sm" class="min-w-20" :disabled="following[lodge.slug]" @click="follow(lodge)">Follow</Button>
-                            <Badge v-if="lodge.is_managed" variant="success">On ClubManager</Badge>
+                            <Badge v-if="lodge.is_managed" variant="success">On Tracing Board</Badge>
                         </div>
                     </div>
 

@@ -1,6 +1,6 @@
 {
     "appId": "uk.clubmanager.app",
-    "appName": "Club Manager",
+    "appName": "Tracing Board",
     "webDir": "mobile/www",
     "ios": { "path": "mobile/ios" },
     "android": { "path": "mobile/android" },

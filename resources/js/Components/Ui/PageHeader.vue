@@ -3,6 +3,7 @@
 // for, and room for a status badge beside the title and actions on the right.
 import { inject } from 'vue';
 import { Link } from '@inertiajs/vue3';
+import LevelRule from './LevelRule.vue';
 
 defineProps({
     title: { type: String, required: true },
@@ -28,6 +29,7 @@ const heading = inject('layoutHasHeading', false) ? 'h2' : 'h1';
                 <component :is="heading" class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{{ title }}</component>
                 <slot name="badge" />
             </div>
+            <LevelRule class="mt-2" />
             <p v-if="description" class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ description }}</p>
         </div>
         <div v-if="$slots.actions" class="flex shrink-0 items-center gap-2">

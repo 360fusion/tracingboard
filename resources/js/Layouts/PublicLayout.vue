@@ -24,7 +24,7 @@ const followError = computed(() => page.props.errors?.follow ?? null);
     </MembersLayout>
 
     <template v-else>
-    <Head :title="`${title} - ClubManager`">
+    <Head :title="title">
         <meta v-if="description" name="description" :content="description" />
     </Head>
 
@@ -36,7 +36,7 @@ const followError = computed(() => page.props.errors?.follow ?? null);
         <header class="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
             <div class="mx-auto flex h-14 max-w-6xl items-center justify-between gap-2 px-3 sm:gap-4 sm:px-4">
                 <div class="flex min-w-0 items-center gap-3 sm:gap-6">
-                    <Link :href="route('home')" class="text-base font-bold tracking-tight">ClubManager</Link>
+                    <Link :href="route('home')" class="flex items-center gap-2 font-display text-lg font-bold tracking-tight"><img src="/icons/tracing-board-mark.svg" alt="" class="h-7 w-7">Tracing Board</Link>
                     <nav aria-label="Main" class="flex items-center gap-4 text-sm font-medium text-slate-600 dark:text-slate-300">
                         <Link :href="route('lodges.index')" class="whitespace-nowrap hover:text-slate-900 dark:hover:text-white">Find a lodge</Link>
                     </nav>

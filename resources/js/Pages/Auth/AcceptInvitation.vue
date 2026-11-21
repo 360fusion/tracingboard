@@ -5,6 +5,7 @@ import Button from '@/Components/Ui/Button.vue';
 import Card from '@/Components/Ui/Card.vue';
 import Input from '@/Components/Ui/Input.vue';
 import UiIcon from '@/Components/Ui/UiIcon.vue';
+import LevelRule from '@/Components/Ui/LevelRule.vue';
 
 const props = defineProps({
   club: {
@@ -49,7 +50,7 @@ const submit = () => {
           <UiIcon name="bank" :size="36" />
         </div>
         <h1 class="font-display text-3xl font-semibold text-slate-900 dark:text-white">{{ isExistingUser ? `Welcome back, ${user.name}` : `Welcome to ${club.name}` }}</h1>
-        <div class="w-10 h-0.75 rounded-full bg-gold-500 dark:bg-gold-400" aria-hidden="true"></div>
+        <LevelRule />
         <p class="text-sm text-slate-500 dark:text-slate-400">
           {{ isExistingUser ? `Sign in with your password to join ${club.name}.` : `${club.name} has invited you to its meetings, dinners and notices. Choose a password to finish.` }}
         </p>

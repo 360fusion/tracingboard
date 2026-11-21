@@ -7,6 +7,7 @@ import Card from '@/Components/Ui/Card.vue';
 import UiIcon from '@/Components/Ui/UiIcon.vue';
 import { isNativeApp } from '@/Support/nativeApp';
 import WebPushCard from '@/Components/WebPushCard.vue';
+import EmptyState from '@/Components/Ui/EmptyState.vue';
 
 const props = defineProps({
     notifications: { type: Object, required: true },
@@ -96,7 +97,10 @@ const markAllRead = () => router.optimistic((current) => ({
                 </Card>
             </section>
 
-            <Card v-if="!notifications.data.length" padding="sm"><p class="py-4 text-center text-sm text-slate-500 dark:text-slate-400">{{ filters.unread || filters.category ? 'Nothing matches those filters.' : "Nothing here yet. Summonses, news, events and newsletters from your lodges will appear here." }}</p></Card>
+            <Card v-if="!notifications.data.length" padding="sm">
+                <p v-if="filters.unread || filters.category" class="py-4 text-center text-sm text-slate-500 dark:text-slate-400">Nothing matches those filters.</p>
+                <EmptyState v-else title="Your inbox is empty">Summonses, news, events and newsletters from your lodges will appear here.</EmptyState>
+            </Card>
 
             <WebPushCard v-if="!isNativeApp" />
 

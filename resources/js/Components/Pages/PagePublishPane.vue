@@ -104,7 +104,7 @@ const saveTarget = () => targetForm.post(`${base.value}/targets`, { preserveScro
         <Card padding="lg" class="space-y-5">
             <div class="border-b border-slate-200 dark:border-slate-800 pb-4">
                 <h2 class="text-xl font-bold text-slate-900 dark:text-white">Publish as static files</h2>
-                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Builds your website as plain web pages that any web host can serve, with no database or code running behind them. Each build is kept as a version, so you can go back to an earlier one. Events, bookings, the contact form and members-only pages still come from Club Manager.</p>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Builds your website as plain web pages that any web host can serve, with no database or code running behind them. Each build is kept as a version, so you can go back to an earlier one. Events, bookings, the contact form and members-only pages still come from Tracing Board.</p>
             </div>
 
             <div class="flex flex-wrap items-center gap-3">

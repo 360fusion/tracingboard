@@ -14,7 +14,7 @@ use App\Support\VisitorSummons;
 use Illuminate\Support\Facades\Mail;
 
 /**
- * A lodge on Club Manager that shares its summonses' key facts with anyone publishes its own: when it publishes one,
+ * A lodge on Tracing Board that shares its summonses' key facts with anyone publishes its own: when it publishes one,
  * lodges that list it get the key facts without their Secretary passing it on. A lodge that keeps them to its members,
  * or to visitors it approves, would reach hardly anyone that way, so for this it is treated like a lodge not on the
  * platform and Secretaries pass its summonses on by hand.

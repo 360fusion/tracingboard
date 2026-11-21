@@ -78,7 +78,7 @@ const confirmListing = () => router.post(route('lodges.listing_checked', props.l
                     <Link :href="route('lodges.index')" class="text-sm text-blue-600 hover:underline dark:text-blue-400">← All lodges</Link>
                     <div class="mt-2 flex flex-wrap items-center gap-3">
                         <h1 class="text-2xl font-semibold tracking-tight">{{ lodge.name }}</h1>
-                        <Badge v-if="lodge.is_managed" variant="success">On ClubManager</Badge>
+                        <Badge v-if="lodge.is_managed" variant="success">On Tracing Board</Badge>
                     </div>
                     <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
                         {{ lodge.order }}<span v-if="lodge.number"> · No. {{ lodge.number }}</span><span v-if="lodge.province"> · {{ lodge.province }}</span>

@@ -108,7 +108,7 @@ class SiteDeployer
 
         if (! $head) {
             // A brand-new repository has no commits, and Git's API can't add to it until it has one.
-            $this->github($api->put('contents/README.md', ['message' => 'Start the website repository', 'branch' => $branch, 'content' => base64_encode("Website published by Club Manager.\n")]));
+            $this->github($api->put('contents/README.md', ['message' => 'Start the website repository', 'branch' => $branch, 'content' => base64_encode("Website published by Tracing Board.\n")]));
             $head = $this->github($api->get('git/ref/heads/'.rawurlencode($branch)));
         }
 

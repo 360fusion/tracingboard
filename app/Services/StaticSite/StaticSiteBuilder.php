@@ -391,7 +391,7 @@ class StaticSiteBuilder
     private function htaccess(Club $club): string
     {
         $clean = fn (string $value) => preg_replace('/["\\\\\x00-\x1f\x7f\s]/', '', $value);
-        $lines = ['# Written by Club Manager with each published version of the website.', 'ErrorDocument 404 /404.html', 'Options -Indexes', '<IfModule mod_headers.c>'];
+        $lines = ['# Written by Tracing Board with each published version of the website.', 'ErrorDocument 404 /404.html', 'Options -Indexes', '<IfModule mod_headers.c>'];
 
         foreach (self::securityHeaders() as $name => $value) {
             $lines[] = '    Header always set '.$name.' "'.$value.'"';

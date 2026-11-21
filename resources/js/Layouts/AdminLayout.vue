@@ -203,7 +203,7 @@ provide('layoutHasHeading', true);
             :class="[
               'flex items-center gap-3 px-3.5 py-2 rounded-xl transition-all',
               currentActiveTab === 'dashboard' 
-                ? 'bg-slate-800 text-white font-bold shadow-sm' 
+                ? 'tb-plumb bg-slate-800 text-white font-bold shadow-sm' 
                 : 'hover:bg-slate-800 hover:text-white text-slate-300'
             ]"
           >
@@ -219,7 +219,7 @@ provide('layoutHasHeading', true);
             :class="[
               'flex items-center gap-3 px-3.5 py-2 rounded-xl transition-all',
               currentActiveTab === 'meetings' || currentActiveTab === 'committee'
-                ? 'bg-slate-800 text-white font-bold shadow-sm' 
+                ? 'tb-plumb bg-slate-800 text-white font-bold shadow-sm' 
                 : 'hover:bg-slate-800 hover:text-white text-slate-300'
             ]"
           >
@@ -235,7 +235,7 @@ provide('layoutHasHeading', true);
             :class="[
               'flex items-center gap-3 px-3.5 py-2 rounded-xl transition-all',
               currentActiveTab === 'events' 
-                ? 'bg-slate-800 text-white font-bold shadow-sm' 
+                ? 'tb-plumb bg-slate-800 text-white font-bold shadow-sm' 
                 : 'hover:bg-slate-800 hover:text-white text-slate-300'
             ]"
           >
@@ -251,7 +251,7 @@ provide('layoutHasHeading', true);
             :class="[
               'flex items-center gap-3 px-3.5 py-2 rounded-xl transition-all',
               currentActiveTab === 'users' || currentActiveTab === 'members' || currentActiveTab === 'candidates' || currentActiveTab === 'subscriptions'
-                ? 'bg-slate-800 text-white font-bold shadow-sm' 
+                ? 'tb-plumb bg-slate-800 text-white font-bold shadow-sm' 
                 : 'hover:bg-slate-800 hover:text-white text-slate-300'
             ]"
           >
@@ -267,7 +267,7 @@ provide('layoutHasHeading', true);
             :class="[
               'flex items-center gap-3 px-3.5 py-2 rounded-xl transition-all',
               currentActiveTab === 'posts' || currentActiveTab === 'newsletters' || currentActiveTab === 'updates'
-                ? 'bg-slate-800 text-white font-bold shadow-sm' 
+                ? 'tb-plumb bg-slate-800 text-white font-bold shadow-sm' 
                 : 'hover:bg-slate-800 hover:text-white text-slate-300'
             ]"
           >
@@ -283,7 +283,7 @@ provide('layoutHasHeading', true);
             :class="[
               'flex items-center gap-3 px-3.5 py-2 rounded-xl transition-all',
               currentActiveTab === 'pages' 
-                ? 'bg-slate-800 text-white font-bold shadow-sm' 
+                ? 'tb-plumb bg-slate-800 text-white font-bold shadow-sm' 
                 : 'hover:bg-slate-800 hover:text-white text-slate-300'
             ]"
           >
@@ -299,7 +299,7 @@ provide('layoutHasHeading', true);
             :class="[
               'flex items-center gap-3 px-3.5 py-2 rounded-xl transition-all',
               currentActiveTab === 'media'
-                ? 'bg-slate-800 text-white font-bold shadow-sm'
+                ? 'tb-plumb bg-slate-800 text-white font-bold shadow-sm'
                 : 'hover:bg-slate-800 hover:text-white text-slate-300'
             ]"
           >
@@ -315,7 +315,7 @@ provide('layoutHasHeading', true);
             :class="[
               'flex items-center gap-3 px-3.5 py-2 rounded-xl transition-all',
               currentActiveTab === 'accounting'
-                ? 'bg-slate-800 text-white font-bold shadow-sm'
+                ? 'tb-plumb bg-slate-800 text-white font-bold shadow-sm'
                 : 'hover:bg-slate-800 hover:text-white text-slate-300'
             ]"
           >
@@ -331,7 +331,7 @@ provide('layoutHasHeading', true);
             :class="[
               'flex items-center gap-3 px-3.5 py-2 rounded-xl transition-all',
               currentActiveTab === 'charity'
-                ? 'bg-slate-800 text-white font-bold shadow-sm'
+                ? 'tb-plumb bg-slate-800 text-white font-bold shadow-sm'
                 : 'hover:bg-slate-800 hover:text-white text-slate-300'
             ]"
           >
@@ -345,7 +345,7 @@ provide('layoutHasHeading', true);
             :class="[
               'flex items-center gap-3 px-3.5 py-2 rounded-xl transition-all',
               currentActiveTab === 'activity'
-                ? 'bg-slate-800 text-white font-bold shadow-sm'
+                ? 'tb-plumb bg-slate-800 text-white font-bold shadow-sm'
                 : 'hover:bg-slate-800 hover:text-white text-slate-300'
             ]"
           >
@@ -359,7 +359,7 @@ provide('layoutHasHeading', true);
             :class="[
               'flex items-center gap-3 px-3.5 py-2 rounded-xl transition-all',
               currentActiveTab === 'webhooks'
-                ? 'bg-slate-800 text-white font-bold shadow-sm'
+                ? 'tb-plumb bg-slate-800 text-white font-bold shadow-sm'
                 : 'hover:bg-slate-800 hover:text-white text-slate-300'
             ]"
           >
@@ -373,7 +373,7 @@ provide('layoutHasHeading', true);
             :class="[
               'flex items-center gap-3 px-3.5 py-2 rounded-xl transition-all',
               currentActiveTab === 'settings' || currentActiveTab === 'profile' 
-                ? 'bg-slate-800 text-white font-bold shadow-sm' 
+                ? 'tb-plumb bg-slate-800 text-white font-bold shadow-sm' 
                 : 'hover:bg-slate-800 hover:text-white text-slate-300'
             ]"
           >

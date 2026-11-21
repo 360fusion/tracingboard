@@ -45,7 +45,7 @@ const notNow = () => {
         <section role="dialog" aria-labelledby="biometric-offer-title" class="mx-auto max-w-md space-y-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-xl dark:border-slate-700 dark:bg-slate-900">
             <h2 id="biometric-offer-title" class="text-base font-semibold text-slate-900 dark:text-white">Sign in with {{ method }} next time?</h2>
             <p class="text-sm text-slate-600 dark:text-slate-300">
-                Your phone keeps a sign-in key that only {{ method }} can unlock. Club Manager never sees your face or fingerprint. You can turn it off in App settings.
+                Your phone keeps a sign-in key that only {{ method }} can unlock. Tracing Board never sees your face or fingerprint. You can turn it off in App settings.
             </p>
             <p v-if="message" class="text-sm text-rose-700 dark:text-rose-400" role="alert">{{ message }}</p>
             <div class="flex gap-2">

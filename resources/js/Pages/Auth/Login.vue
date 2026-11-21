@@ -8,6 +8,7 @@ import Button from '@/Components/Ui/Button.vue';
 import Card from '@/Components/Ui/Card.vue';
 import Input from '@/Components/Ui/Input.vue';
 import UiIcon from '@/Components/Ui/UiIcon.vue';
+import LevelRule from '@/Components/Ui/LevelRule.vue';
 
 const props = defineProps({
     demoCredentials: { type: Object, default: null },
@@ -70,12 +71,9 @@ const submit = () => {
     <div class="min-h-dvh bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-200 font-sans flex flex-col justify-center px-4 sm:px-6 py-8">
         <div class="w-full max-w-sm mx-auto flex flex-col gap-6">
             <div class="flex flex-col items-center gap-3 text-center">
-                <!-- cm-nav gives the tile the lodge navy of the app's top bar. -->
-                <div class="cm-nav w-18 h-18 rounded-2xl bg-slate-800 text-gold-500 dark:text-gold-400 flex items-center justify-center">
-                    <UiIcon name="bank" :size="36" />
-                </div>
-                <h1 class="font-display text-3xl font-semibold text-slate-900 dark:text-white">Club Manager</h1>
-                <div class="w-10 h-0.75 rounded-full bg-gold-500 dark:bg-gold-400" aria-hidden="true"></div>
+                <img src="/icons/tracing-board-mark.svg" alt="" class="w-18 h-18">
+                <h1 class="font-display text-3xl font-semibold text-slate-900 dark:text-white">Tracing Board</h1>
+                <LevelRule />
                 <p class="text-sm text-slate-500 dark:text-slate-400">Your lodge meetings, dinners and notices in one place.</p>
             </div>
 

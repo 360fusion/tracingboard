@@ -50,7 +50,7 @@ public class AppLockPlugin: CAPPlugin, CAPBridgedPlugin {
     }
 
     @objc func authenticate(_ call: CAPPluginCall) {
-        let reason = call.getString("reason") ?? "Unlock Club Manager"
+        let reason = call.getString("reason") ?? "Unlock Tracing Board"
 
         LAContext().evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason) { success, error in
             if success {
@@ -103,7 +103,7 @@ public class AppLockPlugin: CAPPlugin, CAPBridgedPlugin {
     @objc func readSignInKey(_ call: CAPPluginCall) {
         let context = LAContext()
         context.localizedCancelTitle = "Use password"
-        let reason = call.getString("reason") ?? "Sign in to Club Manager"
+        let reason = call.getString("reason") ?? "Sign in to Tracing Board"
 
         context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) { [weak self] success, _ in
             guard success, let self = self else {

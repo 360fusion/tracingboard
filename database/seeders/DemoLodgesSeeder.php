@@ -128,7 +128,7 @@ class DemoLodgesSeeder extends Seeder
             'enabled_modules' => $type->available_modules,
             'currency' => 'GBP',
             'installation_month' => $installation,
-            'tagline' => 'A demo lodge for trying Club Manager',
+            'tagline' => 'A demo lodge for trying Tracing Board',
         ]);
         $club->save();
 

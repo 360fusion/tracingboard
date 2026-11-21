@@ -16,11 +16,11 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B50}\u{2B1C}\u{2705}\u{2
 
 // Words that keep their capital in a sentence-case label: proper names, brands, places and Masonic bodies.
 const KEEP = new Set(`Grand Provincial Royal Gift Masonic Stripe PayPal SumUp GoCardless Apple Google Xero HMRC UGLE Eventbrite Paddle
-Relief Worshipful Freemasonry England Scotland Ireland Wales English Scottish Irish US UK ClubManager Cashier I P Visa Mastercard Craft
+Relief Worshipful Freemasonry England Scotland Ireland Wales English Scottish Irish US UK ClubManager Tracing Cashier I P Visa Mastercard Craft
 WhatsApp Facebook Instagram LinkedIn Outlook Microsoft Word Excel PowerPoint Zoom Festival Monday Tuesday Wednesday Thursday Friday Saturday Sunday
 January February March April May June July August September October November December`.split(/\s+/));
 // Words that keep their capital only right after the word that makes them a name ("Grand Lodge", "Apple Pay").
-const AFTER = { Lodge: ['Grand'], Lodges: ['Grand'], Arch: ['Royal'], Aid: ['Gift'], Chest: ['Relief'], Master: ['Worshipful'], Pay: ['Apple', 'Google'], Connect: ['Stripe'] };
+const AFTER = { Lodge: ['Grand'], Lodges: ['Grand'], Arch: ['Royal'], Aid: ['Gift'], Chest: ['Relief'], Master: ['Worshipful'], Pay: ['Apple', 'Google'], Connect: ['Stripe'], Board: ['Tracing'] };
 
 const BUTTON_OPEN = /<(button|Button|x-button|Link|a|label)\b((?:[^>"']|"[^"]*"|'[^']*')*)>/g;
 const LABELLED = /<(button|Button|x-button|Link|a)\b(?:[^>"']|"[^"]*"|'[^']*')*>([\s\S]*?)<\/\1>/g;

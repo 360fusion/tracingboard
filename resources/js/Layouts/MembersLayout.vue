@@ -105,7 +105,7 @@ provide('layoutHasHeading', !props.ownHeading);
 </script>
 
 <template>
-    <Head :title="`${title} - ClubManager`" />
+    <Head :title="title" />
 
     <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[200] focus:px-4 focus:py-2 focus:rounded-xl focus:bg-blue-600 focus:text-white focus:font-bold focus:text-sm focus:shadow-lg">
         Skip to main content
@@ -113,9 +113,9 @@ provide('layoutHasHeading', !props.ownHeading);
 
     <div class="min-h-dvh bg-slate-100 font-sans text-slate-800 dark:bg-slate-950 dark:text-slate-200 lg:flex">
         <aside v-if="side" class="cm-nav sticky top-0 hidden h-dvh w-64 shrink-0 flex-col gap-6 overflow-y-auto bg-slate-800 p-4 text-slate-300 lg:flex">
-            <Link :href="route('members.dashboard')" class="flex items-center gap-2.5 px-2 pt-1" aria-label="ClubManager home">
-                <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-sm font-black text-white shadow-md shadow-blue-600/30">CM</span>
-                <span class="text-base font-bold tracking-tight text-white">ClubManager</span>
+            <Link :href="route('members.dashboard')" class="flex items-center gap-2.5 px-2 pt-1" aria-label="Tracing Board home">
+                <img src="/icons/tracing-board-mark-gold.svg" alt="" class="h-9 w-9">
+                <span class="font-display text-lg font-bold tracking-tight text-white">Tracing Board</span>
             </Link>
 
             <ClubSwitcher :club="club" :active-tab="activeTab" tone="onDark" block />
@@ -127,7 +127,7 @@ provide('layoutHasHeading', !props.ownHeading);
                             :href="item.href"
                             prefetch
                             :aria-current="activeTab === item.key ? 'page' : undefined"
-                            :class="['flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors', activeTab === item.key ? 'bg-slate-700/70 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white']"
+                            :class="['flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors', activeTab === item.key ? 'tb-plumb bg-slate-700/70 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white']"
                         >
                             <svg class="h-5 w-5 shrink-0" :class="activeTab === item.key ? 'text-blue-400' : 'text-slate-500 dark:text-slate-400'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" :d="ICONS[item.key]" /></svg>
                             {{ item.label }}
@@ -147,9 +147,9 @@ provide('layoutHasHeading', !props.ownHeading);
             <header :class="['cm-nav app-top-bar sticky top-0 z-40 text-slate-200', lodge ? lodgeColour.header : 'border-b border-slate-800 bg-slate-800', side ? 'lg:hidden' : '']">
                 <div class="mx-auto flex max-w-6xl items-center justify-between gap-3 px-3 py-3 sm:px-6">
                     <div class="flex min-w-0 flex-1 items-center gap-3">
-                        <Link :href="route('members.dashboard')" :class="['flex shrink-0 items-center gap-2']" aria-label="ClubManager home">
-                            <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-sm font-black text-white shadow-md shadow-blue-600/30">CM</span>
-                            <span v-if="!lodge" class="hidden text-base font-bold tracking-tight text-white md:inline">ClubManager</span>
+                        <Link :href="route('members.dashboard')" :class="['flex shrink-0 items-center gap-2']" aria-label="Tracing Board home">
+                            <img src="/icons/tracing-board-mark.svg" alt="" class="h-8 w-8">
+                            <span v-if="!lodge" class="hidden font-display text-lg font-bold tracking-tight text-white md:inline">Tracing Board</span>
                         </Link>
                         <!-- Phones: the lodge's name is the dropdown listing the other lodges, as before; wider screens show the name and number. -->
                         <ClubSwitcher :club="club" :active-tab="activeTab" tone="onDark" plain class="sm:hidden" />

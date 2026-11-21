@@ -80,7 +80,7 @@ class IcsCalendar
         return implode("\r\n", [
             'BEGIN:VCALENDAR',
             'VERSION:2.0',
-            'PRODID:-//ClubManager//Member calendar//EN',
+            'PRODID:-//TracingBoard//Member calendar//EN',
             'CALSCALE:GREGORIAN',
             'METHOD:PUBLISH',
             $this->fold('X-WR-CALNAME:'.$this->escape($this->name)),

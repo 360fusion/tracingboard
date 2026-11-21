@@ -85,7 +85,7 @@ class StorePassedOnItemRequest extends ClubRequest
 
         // Its own summons already reaches the members; only the full PDF, if the Secretary has it, adds anything.
         if ($this->input('type') === PassedOnItem::SUMMONS && ! $this->hasFile('attachment') && PlatformSummons::publishesOwn($lodge)) {
-            $fail($lodge->displayName().' publishes its own summonses on Club Manager, so your members already get them.');
+            $fail($lodge->displayName().' publishes its own summonses on Tracing Board, so your members already get them.');
         }
     }
 

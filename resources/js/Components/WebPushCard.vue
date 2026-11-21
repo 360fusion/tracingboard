@@ -44,7 +44,7 @@ async function change(on) {
     <Card v-if="state !== 'unsupported'" padding="sm" class="space-y-2 text-sm">
         <template v-if="state === 'home-screen'">
             <p class="font-medium text-slate-900 dark:text-white">Get notifications on this iPhone</p>
-            <p class="text-slate-600 dark:text-slate-300">Add Club Manager to your Home Screen first: tap Share, then Add to Home Screen. Open it from there and turn notifications on here.</p>
+            <p class="text-slate-600 dark:text-slate-300">Add Tracing Board to your Home Screen first: tap Share, then Add to Home Screen. Open it from there and turn notifications on here.</p>
         </template>
         <template v-else-if="state === 'blocked'">
             <p class="font-medium text-slate-900 dark:text-white">Notifications are blocked</p>

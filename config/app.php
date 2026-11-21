@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'ClubManager'),
+    'name' => env('APP_NAME', 'Tracing Board'),
 
     /*
     |--------------------------------------------------------------------------

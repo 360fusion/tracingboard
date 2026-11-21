@@ -11,6 +11,7 @@ import DateTile from '@/Components/Ui/DateTile.vue';
 import QuickReply from '@/Components/QuickReply.vue';
 import InstallTip from '@/Components/InstallTip.vue';
 import { orderColour } from '@/Utils/orderColour';
+import EmptyState from '@/Components/Ui/EmptyState.vue';
 
 const props = defineProps({
     clubs: { type: Array, default: () => [] },
@@ -222,7 +223,8 @@ const chip = (active) => ['inline-flex min-h-11 shrink-0 items-center rounded-fu
                         </ul>
 
                         <Card v-else padding="sm">
-                            <p class="py-4 text-center text-sm text-slate-500 dark:text-slate-400">{{ (feed ?? []).length ? 'Nothing matches those filters.' : 'Nothing new yet. News and events from your lodges will show up here.' }}</p>
+                            <p v-if="(feed ?? []).length" class="py-4 text-center text-sm text-slate-500 dark:text-slate-400">Nothing matches those filters.</p>
+                            <EmptyState v-else title="Nothing new yet">News and events from your lodges will show up here.</EmptyState>
                         </Card>
                     </Deferred>
                 </section>

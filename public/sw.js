@@ -31,7 +31,7 @@ self.addEventListener('push', (event) => {
     let data = {};
     try { data = event.data ? event.data.json() : {}; } catch { data = { body: event.data?.text() }; }
 
-    const shown = self.registration.showNotification(data.title || 'Club Manager', {
+    const shown = self.registration.showNotification(data.title || 'Tracing Board', {
         body: data.body || '',
         icon: '/icons/icon-192.png',
         badge: '/icons/icon-192.png',

@@ -12,6 +12,7 @@ import Input from '@/Components/Ui/Input.vue';
 import Select from '@/Components/Ui/Select.vue';
 import Modal from '@/Components/Ui/Modal.vue';
 import ConfirmDialog from '@/Components/Ui/ConfirmDialog.vue';
+import EmptyState from '@/Components/Ui/EmptyState.vue';
 
 const props = defineProps({
   club: Object,
@@ -257,13 +258,14 @@ const publishMeeting = () => {
         <Button class="mt-4" variant="secondary" @click="clearFilters">Reset all filters</Button>
       </Card>
 
-      <Card v-else class="text-center">
-        <h3 class="text-base font-semibold text-slate-900 dark:text-white">No meetings scheduled yet</h3>
-        <p class="mx-auto mt-1 max-w-md text-sm text-slate-500 dark:text-slate-400">Use the rule-based recurring engine to calculate and generate your annual meeting dates, or create a single meeting summons by hand.</p>
-        <div class="mt-4 flex flex-wrap items-center justify-center gap-2">
-          <Button :href="route('admin.meetings.create', { clubSlug: club.slug })">Add a meeting</Button>
-          <Button variant="secondary" @click="showSeasonModal = true">Generate season meetings</Button>
-        </div>
+      <Card v-else>
+        <EmptyState title="Nothing on the board yet">
+          Add a single meeting, or set out the whole season from your lodge's regular meeting days.
+          <template #actions>
+            <Button :href="route('admin.meetings.create', { clubSlug: club.slug })">Add a meeting</Button>
+            <Button variant="secondary" @click="showSeasonModal = true">Generate season meetings</Button>
+          </template>
+        </EmptyState>
       </Card>
     </div>
 

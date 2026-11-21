@@ -166,7 +166,7 @@ export async function turnOffBiometricSignIn(user) {
 export async function signInWithBiometrics({ onFinish } = {}) {
     let key;
     try {
-        ({ key } = await (await lockPlugin()).AppLock.readSignInKey({ reason: 'Sign in to Club Manager' }));
+        ({ key } = await (await lockPlugin()).AppLock.readSignInKey({ reason: 'Sign in to Tracing Board' }));
     } catch (error) {
         if (error?.code === 'NOT_FOUND') writeJson(SIGN_IN_OWNER, null);
         onFinish?.();
@@ -186,8 +186,8 @@ function cover() {
     el = document.createElement('div');
     el.id = 'app-lock';
     el.className = 'cm-nav fixed inset-0 z-[300] flex flex-col items-center justify-center gap-6 bg-slate-800 text-white';
-    el.innerHTML = '<div class="flex h-20 w-20 items-center justify-center rounded-2xl bg-blue-600 text-2xl font-black" aria-hidden="true">CM</div>'
-        + '<button type="button" class="min-h-11 rounded-xl bg-white px-6 text-sm font-semibold text-slate-900">Unlock Club Manager</button>';
+    el.innerHTML = '<img src="/icons/tracing-board-mark.svg" alt="" class="h-20 w-20">'
+        + '<button type="button" class="min-h-11 rounded-xl bg-white px-6 text-sm font-semibold text-slate-900">Unlock Tracing Board</button>';
     el.querySelector('button').addEventListener('click', unlock);
     document.body.appendChild(el);
     return el;
@@ -205,7 +205,7 @@ function lock() {
 
 async function unlock() {
     try {
-        await (await lockPlugin()).AppLock.authenticate({ reason: 'Unlock Club Manager' });
+        await (await lockPlugin()).AppLock.authenticate({ reason: 'Unlock Tracing Board' });
         locked = false;
         document.getElementById('app-lock')?.remove();
     } catch {

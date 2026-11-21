@@ -8,6 +8,7 @@ import Button from '@/Components/Ui/Button.vue';
 import ConfirmDialog from '@/Components/Ui/ConfirmDialog.vue';
 import Pagination from '@/Components/Ui/Pagination.vue';
 import { formatEventTime } from '@/Utils/localDateTime';
+import EmptyState from '@/Components/Ui/EmptyState.vue';
 
 const props = defineProps({
   club: Object,
@@ -72,9 +73,13 @@ const deleteEvent = () => {
         <Pagination :links="events.links" />
       </div>
 
-      <Card v-else class="text-center">
-        <p class="text-sm text-slate-500 dark:text-slate-400">No events yet.</p>
-        <Button class="mt-4" :href="route('admin.events.create', { clubSlug: club.slug })">Create your first event</Button>
+      <Card v-else>
+        <EmptyState title="No events yet">
+          Ladies' nights, festive boards and anything members book a place for.
+          <template #actions>
+            <Button :href="route('admin.events.create', { clubSlug: club.slug })">Create your first event</Button>
+          </template>
+        </EmptyState>
       </Card>
     </div>
 

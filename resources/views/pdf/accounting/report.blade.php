@@ -37,7 +37,7 @@
     @include('pdf.accounting.reports.'.$reportKey)
 
     <div class="footer">
-        Generated from the club's accounting records by Club Manager.
+        Generated from the club's accounting records by Tracing Board.
     </div>
 </div>
 </body>

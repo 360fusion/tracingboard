@@ -186,7 +186,7 @@ class ContentBlocksTest extends TestCase
         $this->actingAs($admin)->postJson($url, ['q' => '  great queen   street, london '])->assertOk()->assertJson(['found' => true]);
 
         Http::assertSentCount(1);
-        Http::assertSent(fn ($request) => str_contains($request->header('User-Agent')[0], 'ClubManager') && $request['limit'] === 5);
+        Http::assertSent(fn ($request) => str_contains($request->header('User-Agent')[0], 'TracingBoard') && $request['limit'] === 5);
     }
 
     public function test_a_uk_postcode_is_searched_first_because_it_pins_the_building(): void

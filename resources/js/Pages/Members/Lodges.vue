@@ -6,6 +6,7 @@ import Card from '@/Components/Ui/Card.vue';
 import Badge from '@/Components/Ui/Badge.vue';
 import Button from '@/Components/Ui/Button.vue';
 import { formatMeetingDate } from '@/Utils/lodgeDates';
+import EmptyState from '@/Components/Ui/EmptyState.vue';
 
 const props = defineProps({
     visits: { type: Array, default: () => [] },
@@ -122,9 +123,9 @@ function unfollow(lodge) {
             <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Following</h2>
 
             <Card v-if="!lodges.length">
-                <p class="py-6 text-center text-sm text-slate-500 dark:text-slate-400">
-                    You are not following any lodges yet. <Link :href="route('lodges.index')" class="text-blue-600 hover:underline dark:text-blue-400">Find a lodge</Link> and press Follow to see its meetings in your calendar.
-                </p>
+                <EmptyState title="You are not following any lodges yet">
+                    <Link :href="route('lodges.index')" class="text-blue-600 hover:underline dark:text-blue-400">Find a lodge</Link> and press Follow to see its meetings in your calendar.
+                </EmptyState>
             </Card>
 
             <ul v-else class="grid gap-3 md:grid-cols-2">

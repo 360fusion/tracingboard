@@ -106,7 +106,7 @@
         </div>
 
         <div class="footer">
-            Sent via Club Manager • Masonic Lodge Governance & Administration
+            Sent via Tracing Board • Masonic Lodge Governance & Administration
         </div>
     </div>
 </body>

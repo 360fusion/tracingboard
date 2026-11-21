@@ -82,7 +82,7 @@ class CheckLodgeSourcesCommand extends Command
     private function fetch(string $url): array
     {
         try {
-            $response = Http::withUserAgent('ClubManagerDirectoryCheck/1.0')->timeout(20)->get($url);
+            $response = Http::withUserAgent('TracingBoardDirectoryCheck/1.0')->timeout(20)->get($url);
         } catch (Throwable) {
             return [0, null];
         }

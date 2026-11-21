@@ -7,7 +7,7 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* The Club Manager design system (https://claude.ai/artifact/UGtfNAY5wi6pJKf4c8bdkM). Its warm greys and lodge blue
+/* The Tracing Board design system (https://claude.ai/artifact/56TQQ2sEA3sbvYx7ySvmNX). Its warm greys and lodge blue
    replace Tailwind's slate and blue step for step, so the existing slate-* and blue-* classes take the new palette.
    Club websites keep Tailwind's stock fonts and corners: withSiteStyle (Support/siteThemes.js) resets them. */
 @theme {
@@ -272,5 +272,72 @@
     ::view-transition-old(*),
     ::view-transition-new(*) {
         animation: none !important;
+    }
+}
+
+/* The active item in a side nav carries a plumb line and bob at its left edge (the logo's stem). The text does not move. */
+.tb-plumb {
+    position: relative;
+}
+.tb-plumb::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.5rem;
+    bottom: 0.875rem;
+    width: 2px;
+    background: var(--color-gold-400);
+}
+.tb-plumb::after {
+    content: "";
+    position: absolute;
+    left: -3px;
+    bottom: 0.5rem;
+    width: 8px;
+    height: 8px;
+    background: var(--color-gold-400);
+    transform: rotate(45deg);
+}
+
+/* Page loads: a level whose bubble rocks until the next page arrives (the logo's crossbar), in place of a progress bar. */
+.tb-page-level {
+    position: fixed;
+    top: calc(env(safe-area-inset-top, 0px) + 0.75rem);
+    left: 50%;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 5rem;
+    height: 0.625rem;
+    border-radius: 9999px;
+    background: var(--color-gold-500);
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.25);
+    transform: translateX(-50%);
+}
+.tb-page-level > span {
+    position: relative;
+    width: 2rem;
+    height: 0.3125rem;
+    border-radius: 9999px;
+    background: var(--color-gold-800);
+}
+.tb-page-level > span > span {
+    position: absolute;
+    top: 0.0625rem;
+    left: 0.125rem;
+    width: 0.1875rem;
+    height: 0.1875rem;
+    border-radius: 9999px;
+    background: var(--color-gold-100);
+    animation: tb-bubble 0.9s ease-in-out infinite alternate;
+}
+@keyframes tb-bubble {
+    to { left: calc(100% - 0.3125rem); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .tb-page-level > span > span {
+        left: calc(50% - 0.09375rem);
+        animation: none;
     }
 }

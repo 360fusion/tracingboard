@@ -25,7 +25,7 @@ class PushDatabaseNotification
 
         SendPushNotification::dispatch(
             $event->notifiable->id,
-            (string) ($data['title'] ?? 'Club Manager'),
+            (string) ($data['title'] ?? 'Tracing Board'),
             (string) ($data['body'] ?? ''),
             // Opening it goes through the inbox, so it is marked read.
             NativeApp::safePath(route('members.notifications.open', ['id' => $event->response->id], false)),

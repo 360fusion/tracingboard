@@ -9,6 +9,7 @@ import { startNativeApp } from './Support/nativeApp';
 import { startWebApp } from './Support/webPush';
 import { startOfflineReplies } from './Support/offlineReplies';
 import { startPageTimings } from './Support/pageTimings';
+import { startPageLevel } from './Support/pageLevel';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 const pages = import.meta.glob('./Pages/**/*.vue');
@@ -65,13 +66,13 @@ createInertiaApp({
         startWebApp(props.initialPage);
         startOfflineReplies(props.initialPage);
         startPageTimings(props.initialPage);
+        startPageLevel();
 
         return app
             .use(plugin)
             .use(ZiggyVue)
             .mount(el);
     },
-    progress: {
-        color: '#6366f1',
-    },
+    // Page loads show a level instead of a progress bar (Support/pageLevel.js).
+    progress: false,
 });

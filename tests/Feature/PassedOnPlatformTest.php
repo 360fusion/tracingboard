@@ -246,7 +246,7 @@ class PassedOnPlatformTest extends TestCase
     {
         $this->actingAs($this->ourSecretary)->post(route('member.pass_on.store', $this->ours->slug), [
             'kind' => 'sister', 'type' => 'summons', 'lodge_slug' => $this->theirLodge->slug, 'title' => 'Regular meeting', 'body' => 'Hello', 'meeting_date' => now()->addDays(14)->toDateString(),
-        ])->assertSessionHasErrors(['lodge_slug' => $this->theirLodge->displayName().' publishes its own summonses on Club Manager, so your members already get them.']);
+        ])->assertSessionHasErrors(['lodge_slug' => $this->theirLodge->displayName().' publishes its own summonses on Tracing Board, so your members already get them.']);
 
         $this->actingAs($this->ourSecretary)->post(route('member.pass_on.store', $this->ours->slug), [
             'kind' => 'sister', 'type' => 'notice', 'lodge_slug' => $this->theirLodge->slug, 'title' => 'Ladies night', 'body' => 'Tickets now',

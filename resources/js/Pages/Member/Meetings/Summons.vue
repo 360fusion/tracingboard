@@ -13,6 +13,7 @@ import Alert from '@/Components/Ui/Alert.vue';
 import Button from '@/Components/Ui/Button.vue';
 import ConfirmDialog from '@/Components/Ui/ConfirmDialog.vue';
 import { useClipboard } from '@/Composables/useClipboard';
+import LevelRule from '@/Components/Ui/LevelRule.vue';
 
 const props = defineProps({
   club: { type: Object, required: true },
@@ -151,7 +152,7 @@ const grantStatusLabel = (grantStatus) => {
           <Badge :variant="status.variant">{{ status.label }}</Badge>
         </div>
         <h1 class="text-[26px] font-semibold leading-8 text-slate-900 dark:text-white">{{ meeting.title || 'Regular meeting' }}</h1>
-        <div class="h-[3px] w-10 rounded-full bg-gold-500 dark:bg-gold-400" aria-hidden="true" />
+        <LevelRule />
         <div class="flex items-start gap-2.5 text-sm text-slate-700 dark:text-slate-300">
           <svg class="mt-0.5 h-[18px] w-[18px] shrink-0 text-slate-500 dark:text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
           <div>

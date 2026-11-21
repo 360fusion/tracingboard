@@ -59,7 +59,7 @@ class MemberCalendarController extends Controller
         $user = User::where('calendar_token', $token)->firstOrFail();
         $scope = MemberScope::for($user);
 
-        $ics = new IcsCalendar('ClubManager', parse_url(config('app.url'), PHP_URL_HOST) ?: 'clubmanager');
+        $ics = new IcsCalendar('Tracing Board', parse_url(config('app.url'), PHP_URL_HOST) ?: 'clubmanager');
 
         $items = $this->calendar->items($scope, CarbonImmutable::now()->subMonth(), CarbonImmutable::now()->addMonths(12));
 
@@ -93,7 +93,7 @@ class MemberCalendarController extends Controller
 
         return response($ics->render(), 200, [
             'Content-Type' => 'text/calendar; charset=utf-8',
-            'Content-Disposition' => 'inline; filename="clubmanager.ics"',
+            'Content-Disposition' => 'inline; filename="tracingboard.ics"',
             'Cache-Control' => 'private, max-age=900',
         ]);
     }

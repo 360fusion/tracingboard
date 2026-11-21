@@ -490,7 +490,7 @@ class ClubTypeSeeder extends Seeder
             ['template_key' => 'account_invitation'],
             [
                 'name' => 'Invitation to sign in',
-                'subject' => '{{club_name}} has invited you to Club Manager',
+                'subject' => '{{club_name}} has invited you to Tracing Board',
                 'body_html' => '<p>Dear {{member_name}},</p><p>{{club_name}} has invited you to see its meetings, reply to summonses and book dinners online.</p><p><a href="{{invite_url}}" style="display:inline-block;padding:10px 20px;background:#2563eb;color:#ffffff;text-decoration:none;border-radius:6px;font-weight:bold;">Choose your password</a></p><p>This link works for {{expiry_days}} days.</p>',
                 'available_placeholders' => ['member_name', 'club_name', 'invite_url', 'expiry_days'],
             ]

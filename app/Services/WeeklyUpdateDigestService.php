@@ -247,7 +247,7 @@ class WeeklyUpdateDigestService
 
         // Footer
         $html .= '<div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid #e2e8f0; text-align: center; font-size: 11px; color: #94a3b8;">';
-        $html .= '<p style="margin: 0;">Sent by <strong>'.e($club->name).'</strong> via ClubManager Governance Portal.</p>';
+        $html .= '<p style="margin: 0;">Sent by <strong>'.e($club->name).'</strong> via Tracing Board.</p>';
         $html .= '</div>';
 
         $html .= '</div>';

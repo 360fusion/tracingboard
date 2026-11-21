@@ -65,7 +65,7 @@ return [
     // OpenStreetMap's Nominatim refuses generic or default User-Agents, so identify the platform (optionally
     // with a contact address) for the Map block's address search.
     'nominatim' => [
-        'user_agent' => env('NOMINATIM_USER_AGENT', 'ClubManager/1.0 (+'.env('APP_URL', 'http://localhost').')'),
+        'user_agent' => env('NOMINATIM_USER_AGENT', 'TracingBoard/1.0 (+'.env('APP_URL', 'http://localhost').')'),
         // Nominatim allows one request a second; follow-up attempts within a search wait this long.
         'gap_ms' => 1100,
     ],

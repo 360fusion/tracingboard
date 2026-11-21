@@ -217,7 +217,7 @@ const showsPayment = () => form.attendance_status === 'attending_dining' || form
       </div>
 
       <p class="text-center text-xs text-slate-500 dark:text-slate-400">
-        Passwordless access through your private link · Club Manager
+        Passwordless access through your private link · Tracing Board
       </p>
 
     </div>

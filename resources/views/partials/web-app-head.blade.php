@@ -4,7 +4,7 @@
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Club Manager">
+<meta name="apple-mobile-web-app-title" content="Tracing Board">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 {{-- iPhones show these while the home-screen app opens (the manifest's colours are ignored there); one per screen size. --}}
 <link rel="apple-touch-startup-image" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/icons/splash/launch-1320x2868.png">

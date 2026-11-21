@@ -27,7 +27,7 @@ const filterClubs = () => {
 </script>
 
 <template>
-    <Head title="Club Manager hub - Multi-tenant platform" />
+    <Head title="Tracing Board hub - Multi-tenant platform" />
 
     <!-- The landing page is always dark, so the kit components take their dark look on it. -->
     <div class="dark min-h-dvh bg-slate-950 text-slate-100 font-sans selection:bg-blue-500 selection:text-white">
@@ -47,7 +47,7 @@ const filterClubs = () => {
                     </div>
                     <div class="flex items-center gap-2">
                         <span class="font-semibold text-xl tracking-tight text-white">
-                            ClubManager
+                            Tracing Board
                         </span>
                         <Badge variant="info">PostgreSQL powered</Badge>
                     </div>
@@ -145,7 +145,7 @@ const filterClubs = () => {
 
                 <p class="text-slate-500 dark:text-slate-400 text-lg sm:text-xl leading-relaxed">
                     Rowing clubs need boat allocations and erg splits. Rugby clubs need pitch bookings and 15-player lineups.
-                    ClubManager dynamically activates domain-specific feature modules per organization.
+                    Tracing Board dynamically activates domain-specific feature modules per organization.
                 </p>
 
                 <!-- Filter pills -->

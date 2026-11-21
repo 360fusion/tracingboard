@@ -180,7 +180,7 @@
 
     <div class="footer">
         Thank you for your support of {{ $club->name }}.<br>
-        Generated via ClubManager Platform • All Rights Reserved
+        Generated via Tracing Board • All Rights Reserved
     </div>
 </div>
 

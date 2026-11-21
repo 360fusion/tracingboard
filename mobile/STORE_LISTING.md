@@ -1,4 +1,4 @@
-# Club Manager: App Store and Google Play listing
+# Tracing Board: App Store and Google Play listing
 
 Draft text and answers for both stores. Check the privacy answers against how the live site is actually set up before
 submitting: they describe this codebase as of 19 Nov 2026.
@@ -7,7 +7,7 @@ submitting: they describe this codebase as of 19 Nov 2026.
 
 | Field | Limit | Text |
 |---|---|---|
-| App name | 30 | Club Manager |
+| App name | 30 | Tracing Board |
 | Subtitle (Apple) | 30 | Your lodge, in your pocket |
 | Short description (Google) | 80 | Summonses, dining bookings and tickets for your lodge or club, all in one place. |
 | Promotional text (Apple, can change without review) | 170 | Book the festive board, show your ticket at the door and never miss a summons. New: a QR ticket for every dinner booking. |
@@ -19,7 +19,7 @@ submitting: they describe this codebase as of 19 Nov 2026.
 
 ## Description (both stores)
 
-Club Manager is the members' app for lodges and clubs that run on Club Manager.
+Tracing Board is the members' app for lodges and clubs that run on Tracing Board.
 
 For members:
 - See every summons and meeting across your lodges in one calendar, and add them to your phone's calendar.
@@ -31,9 +31,9 @@ For members:
 
 For secretaries, treasurers and organisers:
 - Publish events, see who has booked and what they are eating, and check guests in at the door by scanning their tickets.
-- Everything you manage on the Club Manager website is available in the app, under the same sign-in.
+- Everything you manage on the Tracing Board website is available in the app, under the same sign-in.
 
-Club Manager is for members of lodges and clubs that use it. Your lodge or club gives you your account.
+Tracing Board is for members of lodges and clubs that use it. Your lodge or club gives you your account.
 
 ## What's new (first release)
 
@@ -84,7 +84,7 @@ notifications.
 
 ## Age rating
 
-No objectionable content, no unrestricted web browsing (the app only opens the Club Manager site; other links open
+No objectionable content, no unrestricted web browsing (the app only opens the Tracing Board site; other links open
 in the browser), no gambling, no user-to-user chat. Apple: 4+. Google (IARC): Everyone.
 
 ## Screenshots needed

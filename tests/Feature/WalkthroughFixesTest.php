@@ -187,6 +187,19 @@ class WalkthroughFixesTest extends TestCase
             ->assertDontSee('No members match these filters');
     }
 
+    public function test_the_invitation_subject_names_tracing_board_unless_a_superadmin_changed_it(): void
+    {
+        $migration = require database_path('migrations/2026_11_21_152655_rename_app_in_account_invitation_subject.php');
+        DB::table('default_email_templates')->updateOrInsert(['template_key' => 'account_invitation'], ['subject' => '{{club_name}} has invited you to Club Manager', 'body_html' => '<p>Hi</p>', 'name' => 'Invitation to sign in', 'available_placeholders' => '[]']);
+
+        $migration->up();
+        $this->assertSame('{{club_name}} has invited you to Tracing Board', DB::table('default_email_templates')->where('template_key', 'account_invitation')->value('subject'));
+
+        DB::table('default_email_templates')->where('template_key', 'account_invitation')->update(['subject' => 'Our own words']);
+        $migration->up();
+        $this->assertSame('Our own words', DB::table('default_email_templates')->where('template_key', 'account_invitation')->value('subject'));
+    }
+
     public function test_the_invitation_email_is_reworded_unless_a_superadmin_changed_it(): void
     {
         $migration = require database_path('migrations/2026_11_21_112425_reword_account_invitation_email.php');

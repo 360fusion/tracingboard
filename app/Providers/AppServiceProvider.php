@@ -234,7 +234,7 @@ class AppServiceProvider extends ServiceProvider
             ], false));
 
             $memberName = $notifiable->name ?? 'Member';
-            $clubName = config('app.name', 'Club Manager');
+            $clubName = config('app.name', 'Tracing Board');
             $expireMinutes = config('auth.passwords.'.config('auth.defaults.passwords').'.expire', 60);
 
             $subject = $template?->subject ?? '{{club_name}} - Reset Your Account Password';
