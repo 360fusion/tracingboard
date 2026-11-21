@@ -81,7 +81,7 @@ class ClubDomain
      */
     public static function instructions(): array
     {
-        $target = (string) config('services.club_domain.target', 'manager.360fusionhosting.co.uk');
+        $target = (string) config('services.club_domain.target', 'sites.tracingboard.app');
 
         return [
             'type' => 'CNAME',

@@ -72,6 +72,6 @@ return [
 
     // The host a lodge's custom domain must point at (CNAME, or the same A record); each server sets its own.
     'club_domain' => [
-        'target' => env('CLUB_DOMAIN_TARGET', 'manager.360fusionhosting.co.uk'),
+        'target' => env('CLUB_DOMAIN_TARGET', 'sites.tracingboard.app'),
     ],
 ];
