@@ -33,7 +33,7 @@ class NewsletterTypeAdminController extends Controller
             'icon' => '📜',
             'is_external_subscribable' => true,
             'require_approval' => false,
-            'is_mandatory' => true,
+            'is_mandatory' => ! $club->isHall(),
             'require_home_club_info' => true,
             'default_roles' => ['member', 'admin', 'treasurer'],
         ]);
@@ -176,7 +176,9 @@ class NewsletterTypeAdminController extends Controller
 
         $types = NewsletterType::where('club_id', $club->id)->get();
 
+        // A hall's members are the lodges' members: only its own visitor subscribers are listed, never those people.
         $subscriptions = NewsletterSubscription::where('club_id', $club->id)
+            ->when($club->isHall(), fn ($q) => $q->whereNull('user_id'))
             ->with(['newsletterType', 'user'])
             ->orderByDesc('created_at')
             ->get();

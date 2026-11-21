@@ -22,7 +22,7 @@ class StoreNewsletterTypeRequest extends ClubRequest
             'icon' => 'required|string|max:10',
             'is_external_subscribable' => 'required|boolean',
             'require_approval' => 'required|boolean',
-            'is_mandatory' => 'required|boolean',
+            'is_mandatory' => ['required', 'boolean', fn ($attribute, $value, $fail) => $value && $this->club()->isHall() ? $fail('A hall newsletter channel cannot be mandatory: members must be able to unsubscribe.') : null],
             'require_home_club_info' => 'required|boolean',
             'default_roles' => 'nullable|array|max:10',
             'sender_name' => 'nullable|string|max:255',

@@ -3,8 +3,10 @@
 namespace App\Services\Newsletters;
 
 use App\Enums\ClubMemberStatus;
+use App\Models\Club;
 use App\Models\Newsletter;
 use App\Models\NewsletterSubscription;
+use App\Models\User;
 use Illuminate\Support\Collection;
 
 /**
@@ -25,7 +27,7 @@ class NewsletterAudience
         $club = $newsletter->club;
         $type = $newsletter->newsletterType;
         $roles = Newsletter::rolesReached($newsletter->target_roles ?: ['member']);
-        $mandatory = $type === null || $type->is_mandatory;
+        $mandatory = ! $club->isHall() && ($type === null || $type->is_mandatory);
 
         $rows = NewsletterSubscription::where('club_id', $club->id)
             ->when($type, fn ($q) => $q->where('newsletter_type_id', $type->id), fn ($q) => $q->whereRaw('1 = 0'))
@@ -33,14 +35,11 @@ class NewsletterAudience
 
         $optedOut = $rows->where('status', 'unsubscribed')->whereNotNull('user_id')->pluck('user_id')->all();
 
-        $members = $club->users()
-            ->wherePivot('status', ClubMemberStatus::Active->value)
-            ->wherePivotIn('role', $roles)
-            ->get()
+        $members = $this->memberUsers($club, $roles)
             ->reject(fn ($user) => ! $mandatory && in_array($user->id, $optedOut, true))
             ->map(fn ($user) => ['email' => $user->email, 'name' => $user->name, 'user_id' => $user->id, 'subscription_id' => $rows->firstWhere('user_id', $user->id)?->id, 'visitor' => false]);
 
-        $memberIds = $club->users()->wherePivot('status', ClubMemberStatus::Active->value)->pluck('users.id')->all();
+        $memberIds = $this->memberUsers($club, null)->pluck('id')->all();
 
         $visitors = $rows->where('status', 'active')
             ->reject(fn (NewsletterSubscription $row) => $row->user_id !== null && in_array($row->user_id, $memberIds, true))
@@ -50,6 +49,26 @@ class NewsletterAudience
             ->filter(fn (array $person) => filter_var($person['email'], FILTER_VALIDATE_EMAIL))
             ->unique(fn (array $person) => strtolower($person['email']))
             ->values();
+    }
+
+    /**
+     * Active members of the club. A hall has none of its own: its members are those of the lodges that meet there
+     * (any role; the board's rows on the hall club do not count).
+     *
+     * @param  list<string>|null  $roles
+     * @return Collection<int, User>
+     */
+    private function memberUsers(Club $club, ?array $roles): Collection
+    {
+        if ($club->isHall()) {
+            $lodgeIds = $club->hall?->memberClubIds() ?? collect();
+
+            return User::whereHas('clubs', fn ($q) => $q->whereIn('clubs.id', $lodgeIds)->where('club_user.status', ClubMemberStatus::Active->value))->get();
+        }
+
+        $members = $club->users()->wherePivot('status', ClubMemberStatus::Active->value);
+
+        return $roles === null ? $members->get() : $members->wherePivotIn('role', $roles)->get();
     }
 
     /**
