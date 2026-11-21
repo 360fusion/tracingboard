@@ -49,11 +49,15 @@ Done 21 Nov 2026: Forge site with the deploy script, both queue workers and the 
 
 Still to do for this setup:
 - [x] PostgreSQL user and database `tracingboard` created; first deploy of `bc605a6` ran every migration (21 Nov 2026). The password has special characters, so it is single-quoted in `.env`; keep the quotes if it is ever changed.
-- [ ] Nightly `pg_dump` of `tracingboard` copied off the server (Forge does not back up this PostgreSQL).
+- [x] Nightly `pg_dump` (Forge job "Tracing Board database backup", midnight UTC): `~/backups/backup-tracingboard.sh` reads the password from `.env`, writes `~/backups/tracingboard/*.dump` (custom format, 14 days kept). Restore with `pg_restore -h 127.0.0.1 -U tracingboard -d tracingboard --clean <file>`.
+- [x] Each dump is also uploaded to Cloudflare R2 bucket `tracingboard-backups` (`database/`), private, with a token limited to that bucket and the server's IPv4/IPv6 (`R2_BACKUP_KEY_ID`/`R2_BACKUP_SECRET` in `.env`). R2 keeps every dump: add a lifecycle rule if it ever matters (about 50 MB a month now).
+- [x] Restore tested 21 Nov 2026: dump downloaded from R2, restored into a scratch database, row counts matched live.
+- [ ] Failure alert for the nightly job (Forge heartbeat), so a broken backup is noticed.
 - [x] Web-push keys made; directory seeded (9,688 lodges, 945 halls); workers restarted; `/up` answers 200.
 - [ ] Sign up on https://tracingboard.app, then `php artisan superadmin:grant <your email>` in Forge's Commands tab.
-- [ ] Set `OPS_ALERT_EMAILS` and `SECURITY_CONTACT_EMAIL` (`app:doctor` fails without them). Its "Proxies trusted" failure is a false alarm from the command line: nothing sits in front of this server.
-- [ ] Mail provider (below).
+- [x] `SECURITY_CONTACT_EMAIL=security@tracingboard.app` (security.txt live); Cloudflare Email Routing forwards `security@` and `hello@` to ben@360fusion.co.uk (root MX/SPF are Cloudflare's; Mailgun stays on `mail.`). Alerts go to the superadmin while `OPS_ALERT_EMAILS` is empty.
+- [ ] Turn on two-factor for the superadmin account (`/superadmin` is locked until then). Its "Proxies trusted" failure is a false alarm from the command line: nothing sits in front of this server.
+- [x] Mail: Mailgun EU domain `mail.tracingboard.app` verified (SPF, DKIM, MX, tracking in Cloudflare; DMARC `p=none` on `tracingboard.app`), SMTP user `app@mail.tracingboard.app`, password single-quoted in `.env`, `MAIL_MAILER=smtp` (21 Nov 2026). Move DMARC to `p=quarantine` after a few clean weeks.
 
 Addresses:
 - `tracingboard.app`: the app (members, admin, `/site/{slug}`). `www` forwards to it.
