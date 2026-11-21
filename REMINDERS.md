@@ -63,7 +63,7 @@ Addresses:
 - `tracingboard.app`: the app (members, admin, `/site/{slug}`). `www` forwards to it.
 - `sites.tracingboard.app`: what lodges point their own domains at (`CLUB_DOMAIN_TARGET`). **DNS only (grey cloud)**, always.
 - `mail.tracingboard.app` (or the provider's suggested name): the sending domain's SPF/DKIM/bounce records.
-- Staging: `https://staging.tracingboard.app` (since 21 Nov 2026; A record DNS only, Forge domain + certificate on the staging site). The old `manager.` and `staging.manager.360fusionhosting.co.uk` addresses still serve it; drop them once nothing uses them.
+- Staging: `https://staging.tracingboard.app` (since 21 Nov 2026; A record DNS only, Forge domain + certificate on the staging site). The old `manager.` and `staging.manager.360fusionhosting.co.uk` addresses still serve it; drop them once nothing uses them. Staging is private: a browser password prompt (`STAGING_USER`/`STAGING_PASSWORD` in its `.env`, copy in the git-ignored `tests/journeys/accounts.local.json`; `RequireStagingPassword`), and its deploy script writes a `robots.txt` that disallows everything. Changing `APP_NAME` changes the cache prefix: restart the workers in Forge afterwards, or `/up` fails on the queue heartbeat.
 
 Cloudflare:
 - [ ] Add `tracingboard.app` to Cloudflare and switch the nameservers at the registrar.
