@@ -1,4 +1,4 @@
-// Runs the full end-to-end plan (full-run.mjs) against staging, staging.manager.360fusionhosting.co.uk.
+// Runs the full end-to-end plan (full-run.mjs) against staging, staging.tracingboard.app.
 // The local script is turned into a staging one on the fly, so the two never drift apart:
 //   - the database and artisan are reached over SSH (forge@167.99.193.125), never reset;
 //   - emails are read from Mailpit on the server (staging sends all mail there), waiting for the queue;
@@ -12,7 +12,7 @@ import path from 'path';
 import { execFileSync } from 'child_process';
 
 const HERE = path.dirname(new URL(import.meta.url).pathname);
-const HOST = 'staging.manager.360fusionhosting.co.uk';
+const HOST = 'staging.tracingboard.app';
 const SSH = ['-o', 'BatchMode=yes', '-o', 'ControlMaster=auto', '-o', 'ControlPath=/tmp/cm-journey-%r@%h-%p', '-o', 'ControlPersist=20m', 'forge@167.99.193.125'];
 const STAMP = Date.now().toString(36).slice(-5);
 const LODGE_NO = String(99000 + (Date.now() % 1000));
