@@ -146,13 +146,13 @@ class EventOrganiserBookingController extends Controller
         $member = null;
 
         if (! empty($validated['member_id'])) {
-            // A hall has no members: the service refuses anyone who has not booked there before.
+            // A hall has no members: only people who booked there before count, and a missing id gives the same answer as a non-booker.
             $member = $club->isHall()
-                ? User::find($validated['member_id'])
+                ? EventRegistrationService::hallBookers($club)->whereKey($validated['member_id'])->first()
                 : $club->users()->wherePivot('status', ClubMemberStatus::Active->value)->where('users.id', $validated['member_id'])->first();
 
             if (! $member) {
-                throw ValidationException::withMessages(['member_id' => 'That person is not an active member of this club.']);
+                throw ValidationException::withMessages(['member_id' => $club->isHall() ? 'That person has not booked an event at this hall before.' : 'That person is not an active member of this club.']);
             }
         }
 
