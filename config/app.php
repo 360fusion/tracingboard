@@ -82,6 +82,15 @@ return [
     'csp_enforce' => (bool) env('CSP_ENFORCE', env('APP_ENV') === 'production'),
 
     /*
+    | A shared password in front of a staging site, so neither people nor crawlers can open it. Off while the password
+    | is empty, and never applied in production (RequireStagingPassword).
+    */
+    'staging_password' => [
+        'user' => env('STAGING_USER', 'staging'),
+        'password' => env('STAGING_PASSWORD'),
+    ],
+
+    /*
     |--------------------------------------------------------------------------
     | Application Locale Configuration
     |--------------------------------------------------------------------------

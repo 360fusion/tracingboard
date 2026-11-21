@@ -145,5 +145,8 @@ const target = `${HERE}/out/staging-run.generated.mjs`;
 fs.mkdirSync(`${HERE}/out`, { recursive: true });
 fs.writeFileSync(target, src.replace("from './lib.mjs'", "from '../lib.mjs'"));
 process.env.DEMO_URL = `https://${HOST}`;
+// The password prompt in front of staging; kept in the git-ignored accounts file, never in the repo.
+const gate = JSON.parse(fs.readFileSync(`${HERE}/accounts.local.json`, 'utf8')).staging_password;
+if (gate) Object.assign(process.env, { STAGING_USER: gate.user, STAGING_PASSWORD: gate.password });
 console.log(`Staging run ${STAMP}: accounts run-<who>.${STAMP}@example.com, lodge Wealden Lodge No. ${LODGE_NO}`);
 await import(target);

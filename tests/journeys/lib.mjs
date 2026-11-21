@@ -14,7 +14,13 @@ fs.mkdirSync(OUT, { recursive: true });
 export const pause = (ms) => new Promise((r) => setTimeout(r, ms));
 
 export async function start() {
-    return puppeteer.launch({ headless: true, executablePath: process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', args: ['--hide-scrollbars'] });
+    const browser = await puppeteer.launch({ headless: true, executablePath: process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', args: ['--hide-scrollbars'] });
+    // Staging sits behind a browser password prompt (staging-run.mjs passes it in); every tab answers it.
+    if (process.env.STAGING_PASSWORD) {
+        const credentials = { username: process.env.STAGING_USER || 'staging', password: process.env.STAGING_PASSWORD };
+        browser.on('targetcreated', async (target) => (await target.page())?.authenticate(credentials));
+    }
+    return browser;
 }
 
 /** A phone for one person, signed in. */

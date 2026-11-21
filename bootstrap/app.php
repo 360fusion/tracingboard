@@ -5,6 +5,7 @@ use App\Http\Middleware\AuthenticateSession;
 use App\Http\Middleware\EnsureUserCanAdministerClub;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\IdentifyTenantByDomain;
+use App\Http\Middleware\RequireStagingPassword;
 use App\Http\Middleware\SecurityHeaders;
 use App\Support\OpsAlerts;
 use Illuminate\Foundation\Application;
@@ -30,6 +31,9 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // A lodge's own domain is mapped onto its /site/{club} routes before routing.
         $middleware->prepend(IdentifyTenantByDomain::class);
+
+        // Runs before everything else, so a password-protected staging site shows nothing without it.
+        $middleware->prepend(RequireStagingPassword::class);
 
         $middleware->web(append: [
             // Signs out every other session once the password changes (after a reset, or "sign out other devices").
