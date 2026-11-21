@@ -34,6 +34,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Runs before everything else, so a password-protected staging site shows nothing without it.
         $middleware->prepend(RequireStagingPassword::class);
+        $middleware->encryptCookies(except: [RequireStagingPassword::COOKIE]);
 
         $middleware->web(append: [
             // Signs out every other session once the password changes (after a reset, or "sign out other devices").

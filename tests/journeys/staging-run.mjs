@@ -145,8 +145,9 @@ const target = `${HERE}/out/staging-run.generated.mjs`;
 fs.mkdirSync(`${HERE}/out`, { recursive: true });
 fs.writeFileSync(target, src.replace("from './lib.mjs'", "from '../lib.mjs'"));
 process.env.DEMO_URL = `https://${HOST}`;
-// The password prompt in front of staging; kept in the git-ignored accounts file, never in the repo.
-const gate = JSON.parse(fs.readFileSync(`${HERE}/accounts.local.json`, 'utf8')).staging_password;
-if (gate) Object.assign(process.env, { STAGING_USER: gate.user, STAGING_PASSWORD: gate.password });
+// The cookie staging's password page sets, worked out on the server from its own password, so no password travels.
+process.env.STAGING_COOKIE = execFileSync('ssh', [...SSH, 'cd ~/staging.tracingboard.app/current && php artisan tinker --no-interaction'], {
+    input: "echo App\\Http\\Middleware\\RequireStagingPassword::cookieValue((string) config('app.staging_password.password'));",
+}).toString().trim();
 console.log(`Staging run ${STAMP}: accounts run-<who>.${STAMP}@example.com, lodge Wealden Lodge No. ${LODGE_NO}`);
 await import(target);
