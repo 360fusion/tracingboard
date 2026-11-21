@@ -10,14 +10,19 @@ const props = defineProps({
   metrics: Object,
   upcomingMeetings: Array,
   gettingStarted: { type: Object, default: null },
+  isHall: { type: Boolean, default: false },
 });
 
-// The first three things a newly set-up lodge needs, each ticked off once done.
-const firstSteps = computed(() => props.gettingStarted ? [
+// The first three things a newly set-up lodge (or hall) needs, each ticked off once done.
+const firstSteps = computed(() => !props.gettingStarted ? [] : props.isHall ? [
+  { done: props.gettingStarted.details, label: 'Complete the hall details', href: route('admin.hall.edit', { clubSlug: props.club.slug }) },
+  { done: props.gettingStarted.board, label: 'Invite your board', href: route('admin.board.index', { clubSlug: props.club.slug }) },
+  { done: props.gettingStarted.events, label: 'Put on your first event', href: route('admin.events.create', { clubSlug: props.club.slug }) },
+] : [
   { done: props.gettingStarted.members, label: 'Add your members and invite them to sign in', href: route('admin.club_acc.members.index', { clubSlug: props.club.slug }) },
   { done: props.gettingStarted.payments, label: 'Choose how people pay for dining and events', href: route('admin.payment_options.index', { clubSlug: props.club.slug }) },
   { done: props.gettingStarted.meetings, label: 'Add your first meeting and send the summons', href: route('admin.meetings.index', { clubSlug: props.club.slug }) },
-] : []);
+]);
 const stillToDo = computed(() => firstSteps.value.some((step) => !step.done));
 </script>
 
@@ -25,7 +30,7 @@ const stillToDo = computed(() => firstSteps.value.some((step) => !step.done));
   <AdminLayout title="Dashboard" :club="club" active-tab="dashboard">
 
     <section v-if="stillToDo" aria-labelledby="first-steps-heading" class="mb-4 rounded-2xl border border-blue-200 bg-blue-50 p-4 sm:mb-6 sm:p-6 dark:border-blue-900/60 dark:bg-blue-950/30">
-      <h2 id="first-steps-heading" class="text-base font-semibold text-slate-900 dark:text-white">Getting your lodge started</h2>
+      <h2 id="first-steps-heading" class="text-base font-semibold text-slate-900 dark:text-white">Getting your {{ isHall ? 'hall' : 'lodge' }} started</h2>
       <ol class="mt-3 space-y-2">
         <li v-for="step in firstSteps" :key="step.label" class="flex items-start gap-2 text-sm">
           <UiIcon v-if="step.done" name="check" class="mt-0.5 shrink-0 text-emerald-600 dark:text-emerald-400" />
@@ -93,8 +98,14 @@ const stillToDo = computed(() => firstSteps.value.some((step) => !step.done));
         <p v-if="!metrics.events_count" class="text-sm text-slate-500 dark:text-slate-400">No events yet. Add one from Events to take bookings and payments.</p>
       </div>
 
+      <!-- A hall has no meetings: the lodges that meet there instead. -->
+      <div v-if="isHall" class="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200/80 dark:border-slate-800/80 space-y-3">
+        <h2 class="text-xl font-bold text-slate-900 dark:text-white">Lodges</h2>
+        <Link :href="route('admin.hall.lodges', { clubSlug: club.slug })" class="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200">See the lodges that meet here →</Link>
+      </div>
+
       <!-- Right Panel: Meetings Summary -->
-      <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200/80 dark:border-slate-800/80 space-y-6">
+      <div v-else class="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200/80 dark:border-slate-800/80 space-y-6">
         <div class="flex items-center justify-between">
           <h2 class="text-xl font-bold text-slate-900 dark:text-white">Meetings</h2>
           <Link :href="route('admin.meetings.index', { clubSlug: club.slug })" class="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 flex items-center gap-1">

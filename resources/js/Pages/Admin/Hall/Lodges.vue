@@ -19,7 +19,7 @@ function pattern(s) {
 
 <template>
   <Head title="Lodges" />
-  <AdminLayout>
+  <AdminLayout title="Lodges">
     <div class="max-w-3xl mx-auto space-y-4">
       <h1 class="text-2xl font-bold">Lodges that meet here</h1>
       <Card v-if="!lodges.length" class="p-6 text-slate-500">No lodges or chapters are listed at this hall yet.</Card>

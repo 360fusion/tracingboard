@@ -49,12 +49,17 @@ const currentClubRole = computed(() => {
   return c?.role || 'admin';
 });
 
-const isHall = computed(() => !!userClubs.value.find(item => item.slug === clubSlug)?.is_hall);
+// Sent for the club in the URL, so a superadmin viewing a hall gets the hall menu too.
+const isHall = computed(() => !!page.props.clubIsHall);
+// A hall has no member area of its own: its board's portal is their all-lodges dashboard.
+const memberPortalHref = computed(() => (isHall.value ? route('members.dashboard') : route('member.dashboard', clubSlug)));
 
 const switchWorkspace = (targetClub) => {
   switcherOpen.value = false;
   if (['admin', 'owner'].includes(targetClub.role)) {
     router.visit(route('admin.analytics', { slug: targetClub.slug }));
+  } else if (targetClub.is_hall) {
+    router.visit(route('members.dashboard'));
   } else {
     router.visit(route('member.dashboard', { slug: targetClub.slug }));
   }
@@ -379,6 +384,7 @@ provide('layoutHasHeading', true);
 
           <!-- 10. Charity Steward & Provincial Festival Hub -->
           <Link
+            v-if="!isHall"
             :href="route('admin.club_acc.charity.index', { clubSlug })"
             :class="[
               'flex items-center gap-3 px-3.5 py-2 rounded-xl transition-all',
@@ -456,7 +462,7 @@ provide('layoutHasHeading', true);
 
         <!-- Quick Actions & User Profile Dropdown -->
         <div class="flex shrink-0 items-center gap-2 sm:gap-3">
-          <Link :href="route('member.dashboard', clubSlug)" class="hidden sm:flex px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-700 text-xs font-bold rounded-xl transition-all items-center gap-1.5 shadow-sm dark:bg-emerald-950/40 dark:hover:bg-emerald-950/70 dark:border-emerald-800/60 dark:text-emerald-300">
+          <Link :href="memberPortalHref" class="hidden sm:flex px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-700 text-xs font-bold rounded-xl transition-all items-center gap-1.5 shadow-sm dark:bg-emerald-950/40 dark:hover:bg-emerald-950/70 dark:border-emerald-800/60 dark:text-emerald-300">
             <svg class="w-4 h-4 text-emerald-700 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
             </svg>
@@ -571,7 +577,7 @@ provide('layoutHasHeading', true);
                 </Link>
 
                 <Link 
-                  :href="route('member.dashboard', clubSlug)" 
+                  :href="memberPortalHref" 
                   @click="userMenuOpen = false"
                   class="flex items-center gap-2.5 px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 rounded-xl transition-all dark:text-emerald-300 dark:hover:bg-slate-800"
                 >

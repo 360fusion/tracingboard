@@ -49,11 +49,10 @@ const removePhoto = (photo) => {
 
 <template>
   <Head title="Hall details" />
-  <AdminLayout>
+  <AdminLayout title="Hall details">
     <div class="max-w-3xl space-y-6">
       <div>
-        <h1 class="text-2xl font-semibold tracking-tight">Hall details</h1>
-        <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+        <p class="text-sm text-slate-600 dark:text-slate-400">
           What visitors see on the lodge directory.
           Changes are live as soon as you save.
           <a :href="`/lodges/halls/${hall.slug}`" target="_blank" rel="noopener" class="text-blue-600 hover:underline">View the public page</a>

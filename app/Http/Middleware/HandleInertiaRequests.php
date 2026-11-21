@@ -85,6 +85,8 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'currency' => fn () => $this->currencyFor($request),
+            // Whether the club named in the URL is a hall, so the admin menu is the hall's for anyone viewing it (superadmins too).
+            'clubIsHall' => fn () => (bool) $this->urlClub($request)?->isHall(),
             // The lodge site's links drop their /site/{club} prefix when it is served on the lodge's own domain.
             'onClubDomain' => $request->attributes->has('club_domain_uri'),
             // Set while a page is rendered for the club's static website (App\Services\StaticSite\StaticSiteBuilder).
@@ -145,12 +147,21 @@ class HandleInertiaRequests extends Middleware
      */
     private function currencyFor(Request $request): array
     {
+        return Currencies::describe($this->urlClub($request)?->currencyCode() ?? Currencies::DEFAULT);
+    }
+
+    /**
+     * The club named in the URL, loaded once per request (shared with Controller::findClub's cache).
+     */
+    private function urlClub(Request $request): ?Club
+    {
         $slug = $request->route('clubSlug') ?? $request->route('slug');
 
-        $club = is_string($slug) && $slug !== ''
-            ? Club::with('province.grandLodge')->where('slug', $slug)->first()
-            : null;
+        if (! is_string($slug) || $slug === '') {
+            return null;
+        }
 
-        return Currencies::describe($club?->currencyCode() ?? Currencies::DEFAULT);
+        return $request->attributes->get("club:{$slug}")
+            ?? tap(Club::where('slug', $slug)->first(), fn (?Club $club) => $club && $request->attributes->set("club:{$slug}", $club));
     }
 }

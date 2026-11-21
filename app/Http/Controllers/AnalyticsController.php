@@ -85,6 +85,8 @@ class AnalyticsController extends Controller
                 ];
             });
 
+        $isHall = $club->isHall();
+
         return Inertia::render('Admin/Analytics', [
             'club' => $club,
             'upcomingMeetings' => $upcomingMeetings,
@@ -100,8 +102,14 @@ class AnalyticsController extends Controller
                 'events_count' => $club->events_count,
                 'posts_count' => $club->posts_count,
             ],
-            // First steps for a lodge that has just been set up; the page hides the list once all three are done.
-            'gettingStarted' => [
+            // A hall has no members or meetings: its dashboard has its own first steps.
+            'isHall' => $isHall,
+            // First steps for a lodge (or hall) that has just been set up; the page hides the list once all are done.
+            'gettingStarted' => $isHall ? [
+                'details' => filled($club->hall?->telephone) || filled($club->hall?->email),
+                'board' => $club->users_count > 1,
+                'events' => $club->events_count > 0,
+            ] : [
                 'members' => Member::where('club_id', $club->id)->count() > 1,
                 'payments' => ClubPaymentMethod::where('club_id', $club->id)->where('is_active', true)->exists(),
                 'meetings' => Meeting::where('club_id', $club->id)->exists(),
