@@ -94,4 +94,12 @@ class HallSubscriptionsPageTest extends TestCase
         $this->assertNull($this->hallRow($board));
         $this->toggle($board)->assertNotFound();
     }
+
+    public function test_a_hall_with_no_channels_is_left_out_and_none_are_created(): void
+    {
+        $this->channel->delete();
+
+        $this->assertNull($this->hallRow($this->member));
+        $this->assertSame(0, NewsletterType::where('club_id', $this->hallClub->id)->count());
+    }
 }

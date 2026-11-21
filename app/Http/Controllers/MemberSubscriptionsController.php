@@ -38,7 +38,10 @@ class MemberSubscriptionsController extends Controller
         $hallIds = $user->hallAudienceClubIds()->all();
 
         $allClubIds = array_unique(array_merge($userClubIds, $subscribedClubIds, $hallIds));
-        $allClubs = Club::whereIn('id', $allClubIds)->with('newsletterTypes')->get();
+        // A hall with no channels yet has nothing to switch, so it is left out rather than shown empty.
+        $allClubs = Club::whereIn('id', $allClubIds)->with('newsletterTypes')->get()
+            ->reject(fn (Club $club) => in_array($club->id, $hallIds, true) && $club->newsletterTypes->isEmpty())
+            ->values();
 
         // User active subscriptions
         $userSubscriptions = NewsletterSubscription::where('user_id', $user->id)
