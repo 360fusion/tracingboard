@@ -220,7 +220,7 @@ provide('layoutHasHeading', true);
             :href="route('admin.hall.edit', { clubSlug })"
             :class="[
               'flex items-center gap-3 px-3.5 py-2 rounded-xl transition-all',
-              route().current('admin.hall.*')
+              route().current('admin.hall.edit')
                 ? 'tb-plumb bg-slate-800 text-white font-bold shadow-sm'
                 : 'hover:bg-slate-800 hover:text-white text-slate-300'
             ]"
@@ -229,6 +229,22 @@ provide('layoutHasHeading', true);
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0H5m14 0h2M5 21H3M9 7h1m4 0h1M9 11h1m4 0h1M9 15h1m4 0h1" />
             </svg>
             <span>Hall</span>
+          </Link>
+
+          <Link
+            v-if="isHall"
+            :href="route('admin.hall.lodges', { clubSlug })"
+            :class="[
+              'flex items-center gap-3 px-3.5 py-2 rounded-xl transition-all',
+              route().current('admin.hall.lodges')
+                ? 'tb-plumb bg-slate-800 text-white font-bold shadow-sm'
+                : 'hover:bg-slate-800 hover:text-white text-slate-300'
+            ]"
+          >
+            <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0H5m14 0h2M5 21H3M9 7h1m4 0h1M9 11h1m4 0h1M9 15h1m4 0h1" />
+            </svg>
+            <span>Lodges</span>
           </Link>
 
           <!-- 2. Meetings & Governance -->

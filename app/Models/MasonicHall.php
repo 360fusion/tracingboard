@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
@@ -127,6 +128,16 @@ class MasonicHall extends Model implements HasMedia
     public function clubs(): HasMany
     {
         return $this->hasMany(Club::class);
+    }
+
+    /**
+     * The ids of the platform clubs (never halls) that meet here.
+     *
+     * @return Collection<int, int>
+     */
+    public function memberClubIds(): Collection
+    {
+        return $this->clubs()->notHalls()->pluck('id');
     }
 
     /**

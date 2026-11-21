@@ -51,6 +51,7 @@ use App\Http\Controllers\EventQuoteController;
 use App\Http\Controllers\EventRegistrationAdminController;
 use App\Http\Controllers\EventTicketController;
 use App\Http\Controllers\HallDetailsController;
+use App\Http\Controllers\HallLodgesController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\LodgeClaimController;
 use App\Http\Controllers\LodgeCorrectionController;
@@ -131,6 +132,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/{clubSlug}/admin/hall', [HallDetailsController::class, 'update'])->name('admin.hall.update');
     Route::post('/{clubSlug}/admin/hall/photos', [HallDetailsController::class, 'storePhoto'])->name('admin.hall.photos.store');
     Route::delete('/{clubSlug}/admin/hall/photos/{mediaId}', [HallDetailsController::class, 'destroyPhoto'])->name('admin.hall.photos.destroy');
+    Route::get('/{clubSlug}/admin/lodges', [HallLodgesController::class, 'index'])->name('admin.hall.lodges');
     Route::get('/{clubSlug}/admin/settings', [ClubSettingsController::class, 'show'])->name('admin.settings.show');
     Route::put('/{clubSlug}/admin/settings', [ClubSettingsController::class, 'update'])->name('admin.settings.update');
     Route::post('/{clubSlug}/admin/settings/ranks/reset', [ClubSettingsController::class, 'resetRanks'])->name('admin.settings.ranks.reset');
