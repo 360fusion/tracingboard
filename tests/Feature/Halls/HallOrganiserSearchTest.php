@@ -65,6 +65,16 @@ class HallOrganiserSearchTest extends TestCase
         $this->assertNull($found[0]['member_number']);
     }
 
+    public function test_hall_search_does_not_find_someone_who_only_declined(): void
+    {
+        $user = User::factory()->create(['name' => 'Dee Decliner']);
+        $this->lodge->users()->attach($user->id, ['role' => 'member', 'status' => 'active']);
+        app(EventRegistrationService::class)->register($this->event, $user, ['status' => 'declined']);
+
+        $this->assertSame('declined', $this->event->registrations()->where('user_id', $user->id)->value('status'));
+        $this->assertSame([], $this->search('Dee'));
+    }
+
     public function test_hall_search_does_not_find_a_lodge_member_who_never_booked(): void
     {
         $user = User::factory()->create(['name' => 'Zed Lurker']);

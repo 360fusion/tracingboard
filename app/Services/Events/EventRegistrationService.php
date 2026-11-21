@@ -81,13 +81,14 @@ class EventRegistrationService
 
     /**
      * Users who have booked any event of this hall: the only people its organiser can pick by search.
-     * Attendee rows only carry the booker's own user id, so registrations are the whole set.
+     * Attendee rows only carry the booker's own user id, so registrations are the whole set. Someone who only said
+     * they were not coming (declined) never booked; a cancelled booking still counts.
      *
      * @return Builder<User>
      */
     public static function hallBookers(Club $hall): Builder
     {
-        return User::whereIn('id', EventRegistration::select('user_id')->whereNotNull('user_id')
+        return User::whereIn('id', EventRegistration::select('user_id')->whereNotNull('user_id')->where('status', '!=', 'declined')
             ->whereIn('event_id', Event::select('id')->where('club_id', $hall->id)));
     }
 

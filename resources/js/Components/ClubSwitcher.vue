@@ -20,7 +20,8 @@ const props = defineProps({
 const page = usePage();
 const open = ref(false);
 
-const clubs = computed(() => (page.props.auth?.clubs ?? []).filter((club) => club.status === 'active'));
+// A hall's board row is not membership: a hall has no member pages to switch to.
+const clubs = computed(() => (page.props.auth?.clubs ?? []).filter((club) => club.status === 'active' && !club.is_hall));
 const slug = computed(() => props.club?.slug ?? null);
 
 const SCOPED = ['calendar', 'events', 'meetings', 'news', 'dues'];

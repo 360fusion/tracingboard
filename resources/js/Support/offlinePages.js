@@ -53,7 +53,7 @@ async function presaveMainPages(initialPage) {
     }
 
     const registration = await navigator.serviceWorker.ready;
-    const clubs = (initialPage.props.auth?.clubs ?? []).filter((club) => club.status === 'active');
+    const clubs = (initialPage.props.auth?.clubs ?? []).filter((club) => club.status === 'active' && !club.is_hall);
     const urls = ['/members/dashboard', '/members/calendar', '/members/events', '/members/notifications', '/members/lodges', ...clubs.map((club) => `/members/${club.slug}`)];
 
     const channel = new MessageChannel();

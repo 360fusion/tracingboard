@@ -20,7 +20,7 @@ class MemberSubscriptionsController extends Controller
     public function index(Request $request): Response
     {
         $user = Auth::user();
-        $userClubs = $user->clubs()->get();
+        $userClubs = $user->clubs()->notHalls()->get();
 
         // Ensure default types exist for user clubs
         foreach ($userClubs as $club) {
@@ -50,7 +50,7 @@ class MemberSubscriptionsController extends Controller
             ->keyBy(fn ($item) => $item->club_id.'_'.$item->newsletter_type_id);
 
         $clubMatrix = $allClubs->map(function ($club) use ($user, $userSubscriptions, $optedOut) {
-            $isMember = $user->clubs()->where('clubs.id', $club->id)->exists();
+            $isMember = $user->clubs()->notHalls()->where('clubs.id', $club->id)->exists();
 
             $channels = $club->newsletterTypes->map(function ($type) use ($club, $isMember, $userSubscriptions, $optedOut) {
                 $key = $club->id.'_'.$type->id;
@@ -116,7 +116,7 @@ class MemberSubscriptionsController extends Controller
         $user = Auth::user();
         $club = $this->findClub($clubSlug);
         $type = NewsletterType::where('club_id', $club->id)->findOrFail($typeId);
-        $isMember = $user->clubs()->where('clubs.id', $club->id)->exists();
+        $isMember = $user->clubs()->notHalls()->where('clubs.id', $club->id)->exists();
 
         if ($isMember && $type->is_mandatory) {
             return redirect()->back()->withErrors(['channel' => 'Official notices cannot be switched off.']);

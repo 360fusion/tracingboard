@@ -17,14 +17,16 @@ const open = ref(false);
 const user = computed(() => (props.interactive ? page.props.auth?.user : null));
 
 // The user's place in this club, if they belong to it (an active member sees the club's own member pages).
-const membership = computed(() => (page.props.auth?.clubs ?? []).find((c) => c.slug === props.club.slug && c.status === 'active') || null);
-const isStaff = computed(() => !!membership.value && membership.value.role !== 'member');
+// A hall's board row is not membership (a hall has no member pages); it only gives the admin link.
+const row = computed(() => (page.props.auth?.clubs ?? []).find((c) => c.slug === props.club.slug && c.status === 'active') || null);
+const membership = computed(() => (row.value?.is_hall ? null : row.value));
+const isStaff = computed(() => !!row.value && row.value.role !== 'member');
 // A coach cannot open the dashboard, so they go to the area their role covers (as in AccountMenu).
-const adminHref = computed(() => (membership.value?.role === 'coach' ? `/${props.club.slug}/admin/events` : `/${props.club.slug}/admin/analytics`));
+const adminHref = computed(() => (row.value?.role === 'coach' ? `/${props.club.slug}/admin/events` : `/${props.club.slug}/admin/analytics`));
 
 const base = computed(() => `/members/${props.club.slug}`);
 
-const links = computed(() => (membership.value
+const links = computed(() => (row.value?.is_hall ? [] : membership.value
     ? [
         { label: 'Member dashboard', href: base.value },
         { label: 'Events', href: `${base.value}/events` },
