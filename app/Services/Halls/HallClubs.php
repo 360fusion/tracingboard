@@ -18,9 +18,11 @@ class HallClubs
     /**
      * Make the hall's own club (its board) and link it to the hall.
      *
+     * @param  User|null  $owner  made the active owner; none leaves the club without members (the superadmin invites one)
+     *
      * @throws DomainException when the hall already has one
      */
-    public function createFor(MasonicHall $hall, User $owner): Club
+    public function createFor(MasonicHall $hall, ?User $owner = null): Club
     {
         return DB::transaction(function () use ($hall, $owner) {
             $locked = MasonicHall::whereKey($hall->id)->lockForUpdate()->firstOrFail();
@@ -38,7 +40,9 @@ class HallClubs
                 'town_city' => $locked->town,
             ]);
 
-            $club->users()->attach($owner->id, ['role' => ClubRole::Owner->value, 'status' => ClubMemberStatus::Active->value]);
+            if ($owner) {
+                $club->users()->attach($owner->id, ['role' => ClubRole::Owner->value, 'status' => ClubMemberStatus::Active->value]);
+            }
 
             $locked->forceFill(['club_id' => $club->id])->save();
             $hall->club_id = $club->id;

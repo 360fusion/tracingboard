@@ -59,7 +59,7 @@ class HallBoard
                 ]);
 
             $sent = $this->invitations->invite($member, $club, $actor, $role);
-            $club->users()->updateExistingPivot($member->fresh()->user_id, ['role' => $role, 'committee_role' => $office]);
+            $club->users()->updateExistingPivot($member->fresh()->user_id, ['role' => $role, 'committee_role' => $office !== '' ? $office : null]);
 
             return $sent;
         });

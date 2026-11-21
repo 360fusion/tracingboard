@@ -82,6 +82,7 @@ Route::middleware(['auth', EnsureUserIsSuperAdmin::class, RecordSuperAdminAction
     Route::get('/superadmin/masonic-halls', [SuperAdminHallController::class, 'masonicHallsIndex'])->name('superadmin.masonic_halls.index');
     Route::post('/superadmin/masonic-halls', [SuperAdminHallController::class, 'storeMasonicHall'])->name('superadmin.masonic_halls.store');
     Route::put('/superadmin/masonic-halls/{id}', [SuperAdminHallController::class, 'updateMasonicHall'])->name('superadmin.masonic_halls.update');
+    Route::post('/superadmin/masonic-halls/{id}/board', [SuperAdminHallController::class, 'setUpBoard'])->name('superadmin.masonic_halls.board');
     Route::delete('/superadmin/masonic-halls/{id}', [SuperAdminHallController::class, 'destroyMasonicHall'])->name('superadmin.masonic_halls.destroy');
 
     Route::get('/superadmin/australian-grand-lodges', [SuperAdminGrandLodgeController::class, 'australianGrandLodges'])->name('superadmin.australian_grand_lodges');

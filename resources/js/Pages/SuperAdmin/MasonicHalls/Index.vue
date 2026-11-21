@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue';
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm } from '@inertiajs/vue3';
 import SuperAdminLayout from '@/Layouts/SuperAdminLayout.vue';
 import PageHeader from '@/Components/Ui/PageHeader.vue';
 import Card from '@/Components/Ui/Card.vue';
@@ -40,6 +40,24 @@ const emptyForm = () => ({
 });
 
 const form = useForm(emptyForm());
+
+const boardHall = ref(null);
+const boardForm = useForm({ name: '', email: '' });
+
+function openBoard(hall) {
+    boardHall.value = hall;
+    boardForm.reset();
+    boardForm.clearErrors();
+}
+
+function submitBoard() {
+    boardForm.post(route('superadmin.masonic_halls.board', boardHall.value.id), {
+        preserveScroll: true,
+        onSuccess: () => {
+            boardHall.value = null;
+        },
+    });
+}
 
 const filteredHalls = computed(() => {
     let result = props.halls;
@@ -157,6 +175,8 @@ const provinceOptions = computed(() => props.provinces.map((p) => ({ value: p.id
                                 <td class="py-3.5 px-3" :class="h.province ? 'text-slate-700 dark:text-slate-300' : 'text-amber-700 dark:text-amber-400'">{{ h.province?.name || 'No province' }}</td>
                                 <td class="py-3.5 px-3 text-slate-700 dark:text-slate-300">{{ h.clubs_count }}</td>
                                 <td class="py-3.5 px-4 text-right whitespace-nowrap space-x-2">
+                                    <Link v-if="h.club_slug" :href="`/${h.club_slug}/admin`" class="text-sm text-blue-600 hover:underline dark:text-blue-400">Board</Link>
+                                    <Button variant="secondary" size="sm" @click="openBoard(h)">{{ h.club_slug ? 'Invite to board' : 'Set up board' }}</Button>
                                     <Button variant="secondary" size="sm" @click="openEdit(h)">Edit</Button>
                                     <Button variant="danger" size="sm" @click="deleteHall(h)">Delete</Button>
                                 </td>
@@ -189,6 +209,18 @@ const provinceOptions = computed(() => props.provinces.map((p) => ({ value: p.id
                 <div class="flex justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
                     <Button variant="secondary" @click="showModal = false">Cancel</Button>
                     <Button type="submit" :loading="form.processing">{{ editingId ? 'Save' : 'Add hall' }}</Button>
+                </div>
+            </form>
+        </Modal>
+
+        <Modal :open="!!boardHall" :title="`Set up board for ${boardHall?.name ?? ''}`" @close="boardHall = null">
+            <form class="space-y-3" @submit.prevent="submitBoard">
+                <p class="text-sm text-slate-600 dark:text-slate-400">This person is invited by email as the board's owner. The board is created if the hall has none.</p>
+                <Input v-model="boardForm.name" label="Name" required :error="boardForm.errors.name" />
+                <Input v-model="boardForm.email" type="email" label="Email" required :error="boardForm.errors.email" />
+                <div class="flex justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
+                    <Button variant="secondary" @click="boardHall = null">Cancel</Button>
+                    <Button type="submit" :loading="boardForm.processing">Send invitation</Button>
                 </div>
             </form>
         </Modal>

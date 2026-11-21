@@ -2,11 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Domains\ClubAccounting\Services\MemberInvitationException;
 use App\Http\Requests\MasonicHallDetailsRequest;
 use App\Models\MasonicHall;
 use App\Models\Province;
+use App\Services\Halls\HallBoard;
+use App\Services\Halls\HallClubs;
+use DomainException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -22,7 +27,7 @@ class SuperAdminHallController extends Controller
     public function masonicHallsIndex(): Response
     {
         return Inertia::render('SuperAdmin/MasonicHalls/Index', [
-            'halls' => MasonicHall::with('province:id,name')->withCount('clubs')->orderBy('name')->get(),
+            'halls' => MasonicHall::with(['province:id,name', 'club:id,slug'])->withCount('clubs')->orderBy('name')->get()->each(fn (MasonicHall $h) => $h->setAttribute('club_slug', $h->club?->slug)),
             'provinces' => Province::orderBy('name')->get(['id', 'name']),
             'kinds' => MasonicHall::KINDS,
         ]);
@@ -50,6 +55,26 @@ class SuperAdminHallController extends Controller
         $hall->update($this->validateMasonicHall($request));
 
         return redirect()->route('superadmin.masonic_halls.index')->with('success', "'{$hall->name}' updated.");
+    }
+
+    /**
+     * Set up a hall's board: make its club if it has none, then invite the named person as its owner.
+     */
+    public function setUpBoard(Request $request, int $id, HallClubs $clubs, HallBoard $board): RedirectResponse
+    {
+        $hall = MasonicHall::findOrFail($id);
+        $data = $request->validate(['name' => 'required|string|max:255', 'email' => 'required|email|max:255']);
+
+        try {
+            DB::transaction(function () use ($hall, $data, $clubs, $board, $request) {
+                $club = $hall->club ?? $clubs->createFor($hall);
+                $board->invite($club, $data['name'], $data['email'], '', 'owner', $request->user());
+            });
+        } catch (DomainException|MemberInvitationException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return back()->with('success', "Invitation sent to {$data['email']}.");
     }
 
     /**
