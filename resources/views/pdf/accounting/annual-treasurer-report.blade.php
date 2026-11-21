@@ -124,6 +124,7 @@
     </table>
 
     @php($pd = $report['membership']['provincial_due'])
+    @if($pd)
     <div class="section-title">Due to Province</div>
     <table>
         <tbody>
@@ -134,6 +135,7 @@
         </tbody>
     </table>
     <p class="muted">Today's count of active members ({{ $pd['counted_on'] }}); lodges keep no leave date, so this is not a past-date snapshot.</p>
+    @endif
 
     @if($report['vat'] && $report['vat']['enabled'])
         <div class="section-title">VAT Summary (Q{{ \Carbon\Carbon::parse($report['vat']['quarter_start'])->quarter }})</div>

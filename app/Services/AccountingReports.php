@@ -89,7 +89,7 @@ class AccountingReports
     /**
      * Get detailed financial report breakdown for the 7 standard ERP reports
      *
-     * @return array{account_summary: Collection<int, array{code: string, name: string, type: string, total_debit: float, total_credit: float, net_balance: float}>, aged_payables: AgedBalances, aged_receivables: AgedBalances, balance_sheet: array{assets: Collection<int, BalanceRow>, liabilities: Collection<int, BalanceRow>, equity: Collection<int, BalanceRow>, total_assets: float, total_liabilities: float, total_equity: float}, cash_summary: array{total_cash_on_hand: float, accounts: Collection<int, BalanceRow>}, executive_summary: array{net_profit_margin_pct: float|int, operating_expense_ratio_pct: float|int, total_cash_reserves: float, outstanding_ar: float, outstanding_ap: float}, profit_and_loss: array{revenues: Collection<int, AmountRow>, expenses: Collection<int, AmountRow>, total_revenue: float, total_expenses: float, net_income: float}, comparative_income_expenditure: ComparativeStatement, vat_return: VatReturn, provincial_due: ProvincialDue}
+     * @return array{account_summary: Collection<int, array{code: string, name: string, type: string, total_debit: float, total_credit: float, net_balance: float}>, aged_payables: AgedBalances, aged_receivables: AgedBalances, balance_sheet: array{assets: Collection<int, BalanceRow>, liabilities: Collection<int, BalanceRow>, equity: Collection<int, BalanceRow>, total_assets: float, total_liabilities: float, total_equity: float}, cash_summary: array{total_cash_on_hand: float, accounts: Collection<int, BalanceRow>}, executive_summary: array{net_profit_margin_pct: float|int, operating_expense_ratio_pct: float|int, total_cash_reserves: float, outstanding_ar: float, outstanding_ap: float}, profit_and_loss: array{revenues: Collection<int, AmountRow>, expenses: Collection<int, AmountRow>, total_revenue: float, total_expenses: float, net_income: float}, comparative_income_expenditure: ComparativeStatement, vat_return: VatReturn, provincial_due: ProvincialDue|null}
      */
     public function getReportsData(Club $club): array
     {
@@ -267,12 +267,16 @@ class AccountingReports
      * each rate × active members. A rate the Province has not set stays null rather than
      * defaulting to zero, so the lodge is told to ask rather than led to think nothing is owed.
      * Member counts are always "current": members carry no leave date, so a true
-     * as-of-date snapshot is not possible.
+     * as-of-date snapshot is not possible. A hall owes its Province nothing, so it has no worksheet.
      *
-     * @return ProvincialDue
+     * @return ProvincialDue|null
      */
-    public function getProvincialDueWorksheet(Club $club): array
+    public function getProvincialDueWorksheet(Club $club): ?array
     {
+        if ($club->isHall()) {
+            return null;
+        }
+
         $province = $club->province;
         $count = Member::where('club_id', $club->id)->active()->count();
 
@@ -611,6 +615,10 @@ class AccountingReports
         $report = $reportKey === 'budget_vs_actual'
             ? app(BudgetService::class)->getBudgetVsActual($club, $budgetYear ?? $club->financialYearFor(now()))
             : $this->getReportsData($club)[$reportKey];
+
+        if ($report === null) {
+            throw new InvalidArgumentException("No such report for this club: {$reportKey}");
+        }
 
         return ['pdf.accounting.report', [
             'reportKey' => $reportKey,

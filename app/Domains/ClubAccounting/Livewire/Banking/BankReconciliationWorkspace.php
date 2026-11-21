@@ -84,7 +84,8 @@ class BankReconciliationWorkspace extends Component
         $tx = BankTransaction::where('club_id', $club->id)->findOrFail($transactionId);
 
         $this->selectedTransactionId = $tx->id;
-        $this->manualAllocationType = $tx->amount > 0 ? 'member_subscription' : 'supplier_bill';
+        // A hall has no member dues, so money in starts on a ledger account.
+        $this->manualAllocationType = $tx->amount > 0 ? ($club->isHall() ? 'ledger_account' : 'member_subscription') : 'supplier_bill';
         $this->manualSearch = '';
         $this->manualNominalCode = (string) $this->nominalAccountsFor($tx)->first()?->code;
         $this->showManualDrawer = true;

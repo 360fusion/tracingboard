@@ -1,10 +1,16 @@
 <script setup>
+import { computed } from 'vue';
+import { usePage } from '@inertiajs/vue3';
 import { formatMoney } from '@/Utils/currency';
 import Card from '@/Components/Ui/Card.vue';
 import Button from '@/Components/Ui/Button.vue';
 import Badge from '@/Components/Ui/Badge.vue';
 import StatCard from '@/Components/Ui/StatCard.vue';
 import UiIcon from '@/Components/Ui/UiIcon.vue';
+
+// A hall has no members, dues, Province or charity giving, so lodge-only parts are hidden or reworded.
+const isHall = computed(() => !!usePage().props.clubIsHall);
+
 
 // The Home tab of the accounting screen: set-up checklist, headline figures, balance sheet and profit & loss previews, and the Gift Aid summary.
 defineProps({
@@ -58,7 +64,7 @@ defineProps({
         <StatCard label="Total assets" :value="formatMoney(summary.total_assets)" caption="Bank and receivables" />
         <StatCard label="Liabilities" :value="formatMoney(summary.total_liabilities)" caption="Payables and prepayments" />
         <StatCard label="Club equity" :value="formatMoney(summary.total_equity)" caption="Retained reserves" />
-        <StatCard label="Total income" :value="formatMoney(summary.total_revenue)" caption="Dues and tickets" />
+        <StatCard label="Total income" :value="formatMoney(summary.total_revenue)" :caption="isHall ? 'Hire fees and tickets' : 'Dues and tickets'" />
         <StatCard label="Total expenses" :value="formatMoney(summary.total_expenses)" caption="Operational costs" />
 
         <!-- Net surplus / deficit, coloured by its sign and named in the caption -->
@@ -118,7 +124,7 @@ defineProps({
 
           <dl class="space-y-2 text-sm">
             <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
-              <dt class="text-slate-700 dark:text-slate-200">Operating income and dues</dt>
+              <dt class="text-slate-700 dark:text-slate-200">{{ isHall ? 'Operating income' : 'Operating income and dues' }}</dt>
               <dd class="font-semibold tabular-nums text-slate-900 dark:text-white">{{ formatMoney(summary.total_revenue) }}</dd>
             </div>
 
@@ -141,7 +147,7 @@ defineProps({
       </div>
 
       <!-- Donations and Gift Aid summary -->
-      <Card>
+      <Card v-if="!isHall">
         <template #header>
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div class="flex items-center gap-3">

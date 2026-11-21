@@ -1,7 +1,7 @@
 <script setup>
 // Creating an invoice and editing one: one page, so the two cannot drift apart. `invoice` is null when creating.
 import { computed, ref } from 'vue';
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, useForm, usePage } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import PageHeader from '@/Components/Ui/PageHeader.vue';
 import Card from '@/Components/Ui/Card.vue';
@@ -14,6 +14,9 @@ import Textarea from '@/Components/Ui/Textarea.vue';
 import AttachmentField from '@/Components/Accounting/AttachmentField.vue';
 import { currencySymbol, formatMoney } from '@/Utils/currency';
 import { localDate } from '@/Utils/localDateTime';
+
+// A hall has no members or dues, so its invoices are worded for hire fees.
+const isHall = computed(() => !!usePage().props.clubIsHall);
 
 const props = defineProps({
   club: { type: Object, required: true },
@@ -87,7 +90,7 @@ const title = computed(() => (isEdit.value ? `Edit invoice ${props.invoice.invoi
     <div class="mx-auto max-w-3xl space-y-6">
       <PageHeader
         :title="title"
-        :description="isEdit ? 'Change who it is for, what it is for, the amount or the status.' : 'Ask a member to pay dues, fees or another charge.'"
+        :description="isEdit ? 'Change who it is for, what it is for, the amount or the status.' : (isHall ? 'Ask someone to pay a hire fee or another charge.' : 'Ask a member to pay dues, fees or another charge.')"
         :breadcrumbs="[
           { label: 'Accounting', href: route('admin.accounting.index', club.slug) },
           { label: 'Sales', href: salesUrl },

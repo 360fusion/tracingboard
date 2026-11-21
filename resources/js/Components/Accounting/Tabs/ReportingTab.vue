@@ -1,4 +1,6 @@
 <script setup>
+import { computed } from 'vue';
+import { usePage } from '@inertiajs/vue3';
 import AccountSummaryReport from '@/Components/Accounting/Reports/AccountSummaryReport.vue';
 import AgedPayablesReport from '@/Components/Accounting/Reports/AgedPayablesReport.vue';
 import AgedReceivablesReport from '@/Components/Accounting/Reports/AgedReceivablesReport.vue';
@@ -22,6 +24,10 @@ import Modal from '@/Components/Ui/Modal.vue';
 import Textarea from '@/Components/Ui/Textarea.vue';
 import UiIcon from '@/Components/Ui/UiIcon.vue';
 import { formatMoney } from '@/Utils/currency';
+
+// A hall has no members, dues, Province or charity giving, so lodge-only parts are hidden or reworded.
+const isHall = computed(() => !!usePage().props.clubIsHall);
+
 
 // Shared looks for the report gallery: a card per report, the preset range buttons, and download links styled as kit buttons.
 const reportCardClass = 'group w-full space-y-3 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 text-left shadow-sm transition-colors hover:border-blue-300 hover:bg-blue-50/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-blue-700/60 dark:hover:bg-blue-950/30';
@@ -243,7 +249,7 @@ defineProps({
         </button>
 
         <!-- Due to Province -->
-        <button type="button" @click="navigateTo('reporting', 'provincial_due')" :class="reportCardClass">
+        <button v-if="!isHall" type="button" @click="navigateTo('reporting', 'provincial_due')" :class="reportCardClass">
           <div class="flex items-center justify-between">
             <span class="text-slate-500 dark:text-slate-400 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400"><UiIcon name="building" :size="20" /></span>
             <Badge>Province</Badge>
@@ -266,7 +272,7 @@ defineProps({
           </div>
           <div>
             <h4 class="text-sm font-semibold text-slate-900 dark:text-white group-hover:text-blue-700 dark:group-hover:text-blue-300">Aged receivables</h4>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Outstanding member dues & invoices grouped by aging buckets.</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">{{ isHall ? 'Outstanding invoices grouped by aging buckets.' : 'Outstanding member dues & invoices grouped by aging buckets.' }}</p>
           </div>
           <div class="pt-2 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2 text-xs font-medium">
             <span class="text-slate-600 dark:text-slate-300 tabular-nums">Total: {{ formatMoney(reports.aged_receivables ? reports.aged_receivables.total : 0) }}</span>
@@ -526,7 +532,7 @@ defineProps({
         </div>
 
         <!-- Report: Due to Province -->
-        <ProvincialDueReport v-if="selectedReport === 'provincial_due'" :members="members" :reports="reports" />
+        <ProvincialDueReport v-if="selectedReport === 'provincial_due' && !isHall" :members="members" :reports="reports" />
 
         <!-- Report: VAT Return -->
         <VatReturnReport v-if="selectedReport === 'vat_return'" :club="club" :reports="reports" />

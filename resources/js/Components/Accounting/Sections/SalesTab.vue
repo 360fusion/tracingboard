@@ -1,10 +1,15 @@
 <script setup>
+import { usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import Badge from '@/Components/Ui/Badge.vue';
 import Button from '@/Components/Ui/Button.vue';
 import Card from '@/Components/Ui/Card.vue';
 import Input from '@/Components/Ui/Input.vue';
 import UiIcon from '@/Components/Ui/UiIcon.vue';
+
+// A hall has no members, dues, Province or charity giving, so lodge-only parts are hidden or reworded.
+const isHall = computed(() => !!usePage().props.clubIsHall);
+
 
 // The sales section of Index.vue, in its own file so the page stays readable. State only this section uses lives here.
 const props = defineProps({
@@ -64,7 +69,7 @@ const filteredInvoices = computed(() => {
       <div class="flex flex-col gap-4 border-b border-slate-200 pb-4 sm:flex-row sm:items-center sm:justify-between dark:border-slate-800">
         <div>
           <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Sales invoices and receivables</h3>
-          <p class="text-sm text-slate-500 dark:text-slate-400">Track member dues, locker fees and ticket invoices.</p>
+          <p class="text-sm text-slate-500 dark:text-slate-400">{{ isHall ? 'Track hire fees and ticket invoices.' : 'Track member dues, locker fees and ticket invoices.' }}</p>
         </div>
         <Button v-if="canManageBilling" size="sm" :href="route('admin.accounting.invoices.create', club.slug)">
           <template #icon><UiIcon name="plus" /></template>

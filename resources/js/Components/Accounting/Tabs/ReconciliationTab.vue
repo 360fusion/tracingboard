@@ -1,4 +1,6 @@
 <script setup>
+import { computed } from 'vue';
+import { usePage } from '@inertiajs/vue3';
 import GiftAidPanel from '@/Components/Accounting/Reconciliation/GiftAidPanel.vue';
 import BankStatementsPanel from '@/Components/Accounting/Reconciliation/BankStatementsPanel.vue';
 import CashCodingPanel from '@/Components/Accounting/Reconciliation/CashCodingPanel.vue';
@@ -9,6 +11,10 @@ import Badge from '@/Components/Ui/Badge.vue';
 import Input from '@/Components/Ui/Input.vue';
 import Select from '@/Components/Ui/Select.vue';
 import UiIcon from '@/Components/Ui/UiIcon.vue';
+
+// A hall has no members, dues, Province or charity giving, so lodge-only parts are hidden or reworded.
+const isHall = computed(() => !!usePage().props.clubIsHall);
+
 
 const transactionTypeOptions = [
     { value: 'all', label: 'All lines (spent and received)' },
@@ -210,6 +216,7 @@ const statementLinesFilter = defineModel('statementLinesFilter', { type: [String
         </button>
 
         <button
+          v-if="!isHall"
           type="button"
           @click="reconSubTab = 'gift_aid'"
           :aria-current="reconSubTab === 'gift_aid' ? 'page' : undefined"

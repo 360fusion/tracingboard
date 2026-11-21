@@ -1,8 +1,13 @@
 <script setup>
-import { useId } from 'vue';
+import { usePage } from '@inertiajs/vue3';
+import { computed, useId } from 'vue';
 import Modal from '@/Components/Ui/Modal.vue';
 import Button from '@/Components/Ui/Button.vue';
 import Select from '@/Components/Ui/Select.vue';
+
+// A hall has no members, dues, Province or charity giving, so lodge-only parts are hidden or reworded.
+const isHall = computed(() => !!usePage().props.clubIsHall);
+
 
 // A dialog of the accounting screen, in its own file so the page stays readable.
 const manualMatchType = defineModel('manualMatchType', { type: [String, Number, Boolean, Array, Object], default: undefined });
@@ -18,12 +23,12 @@ defineProps({
     submitReconcile: { type: [Object, Array, Function, String, Number, Boolean], default: undefined }
 });
 
-const matchTypeOptions = [
+const matchTypeOptions = computed(() => [
     { value: 'member_subscription', label: 'Member subscription dues invoice' },
     { value: 'supplier_bill', label: 'Audited supplier bill' },
     { value: 'charity_relief', label: 'Charity Relief Chest / Provincial contribution' },
     { value: 'ledger_account', label: 'Nominal ledger account code' },
-];
+].filter((option) => !isHall.value || !['member_subscription', 'charity_relief'].includes(option.value)));
 
 const targetSelectId = useId();
 const fieldClass = 'w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500';

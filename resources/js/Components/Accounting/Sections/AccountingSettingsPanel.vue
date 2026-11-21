@@ -1,10 +1,16 @@
 <script setup>
+import { computed } from 'vue';
+import { usePage } from '@inertiajs/vue3';
 import Card from '@/Components/Ui/Card.vue';
 import Button from '@/Components/Ui/Button.vue';
 import Input from '@/Components/Ui/Input.vue';
 import Select from '@/Components/Ui/Select.vue';
 import Alert from '@/Components/Ui/Alert.vue';
 import UiIcon from '@/Components/Ui/UiIcon.vue';
+
+// A hall has no members, dues, Province or charity giving, so lodge-only parts are hidden or reworded.
+const isHall = computed(() => !!usePage().props.clubIsHall);
+
 
 // settings section of Index.vue, kept in its own file so the page stays readable. It only reads what it is given.
 defineProps({
@@ -147,7 +153,7 @@ const CHECKBOX = 'rounded border-slate-300 text-blue-600 accent-blue-600 focus:r
 
           <!-- Invoicing and dues -->
           <div :class="PANEL">
-            <h4 :class="PANEL_TITLE"><UiIcon name="receipt" class="text-slate-500 dark:text-slate-400" /> Invoicing and dues</h4>
+            <h4 :class="PANEL_TITLE"><UiIcon name="receipt" class="text-slate-500 dark:text-slate-400" /> {{ isHall ? 'Invoicing' : 'Invoicing and dues' }}</h4>
             <div class="space-y-2 text-slate-600 dark:text-slate-300">
               <div>
                 <span :class="LABEL">Invoices are created</span>
