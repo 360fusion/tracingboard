@@ -94,9 +94,9 @@ class HallBoardIsNotMembershipTest extends TestCase
             ->assertInertia(fn ($page) => $page->where('clubMatrix', fn ($matrix) => collect($matrix)->pluck('id')->all() === [$lodge->id]));
         $this->assertSame(0, NewsletterType::where('club_id', $hall->id)->where('id', '!=', $channel->id)->count());
 
-        // Their first switch signs them up, as for anyone who is not a member.
-        $this->post("/members/subscriptions/{$hall->slug}/{$channel->id}/toggle");
-        $this->assertSame('active', NewsletterSubscription::where('user_id', $user->id)->where('newsletter_type_id', $channel->id)->value('status'));
+        // The board row does not put them in the hall's audience, so the page will not switch its channel.
+        $this->post("/members/subscriptions/{$hall->slug}/{$channel->id}/toggle")->assertNotFound();
+        $this->assertNull(NewsletterSubscription::where('user_id', $user->id)->where('newsletter_type_id', $channel->id)->value('status'));
     }
 
     public function test_registering_through_a_halls_join_link_does_not_ask_to_join_the_hall(): void

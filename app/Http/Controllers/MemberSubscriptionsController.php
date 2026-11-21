@@ -34,7 +34,10 @@ class MemberSubscriptionsController extends Controller
             ->pluck('club_id')
             ->toArray();
 
-        $allClubIds = array_unique(array_merge($userClubIds, $subscribedClubIds));
+        // Halls where the user's lodges meet send to them unless they opt out, the same as their own lodges.
+        $hallIds = $user->hallAudienceClubIds()->all();
+
+        $allClubIds = array_unique(array_merge($userClubIds, $subscribedClubIds, $hallIds));
         $allClubs = Club::whereIn('id', $allClubIds)->with('newsletterTypes')->get();
 
         // User active subscriptions
@@ -49,15 +52,16 @@ class MemberSubscriptionsController extends Controller
             ->get()
             ->keyBy(fn ($item) => $item->club_id.'_'.$item->newsletter_type_id);
 
-        $clubMatrix = $allClubs->map(function ($club) use ($user, $userSubscriptions, $optedOut) {
-            $isMember = $user->clubs()->notHalls()->where('clubs.id', $club->id)->exists();
+        $clubMatrix = $allClubs->map(function ($club) use ($userClubIds, $hallIds, $userSubscriptions, $optedOut) {
+            $isHall = in_array($club->id, $hallIds, true);
+            $isMember = in_array($club->id, $userClubIds, true) || $isHall;
 
-            $channels = $club->newsletterTypes->map(function ($type) use ($club, $isMember, $userSubscriptions, $optedOut) {
+            $channels = $club->newsletterTypes->map(function ($type) use ($club, $isMember, $isHall, $userSubscriptions, $optedOut) {
                 $key = $club->id.'_'.$type->id;
                 $hasExplicitSub = isset($userSubscriptions[$key]);
 
                 // Active status: mandatory channels for internal members are active by default, or if explicitly subscribed
-                $isActive = $isMember ? ($type->is_mandatory || ! isset($optedOut[$key])) : $hasExplicitSub;
+                $isActive = $isMember ? (($type->is_mandatory && ! $isHall) || ! isset($optedOut[$key])) : $hasExplicitSub;
 
                 return [
                     'id' => $type->id,
@@ -65,7 +69,7 @@ class MemberSubscriptionsController extends Controller
                     'description' => $type->description,
                     'color' => $type->color,
                     'icon' => $type->icon,
-                    'is_mandatory' => $type->is_mandatory && $isMember,
+                    'is_mandatory' => $type->is_mandatory && $isMember && ! $isHall,
                     'is_active' => $isActive,
                 ];
             });
@@ -75,7 +79,8 @@ class MemberSubscriptionsController extends Controller
                 'name' => $club->name,
                 'slug' => $club->slug,
                 'lodge_number' => $club->lodge_number,
-                'is_member' => $isMember,
+                'is_member' => $isMember && ! $isHall,
+                'is_hall' => $isHall,
                 'channels' => $channels,
             ];
         });
@@ -116,16 +121,22 @@ class MemberSubscriptionsController extends Controller
         $user = Auth::user();
         $club = $this->findClub($clubSlug);
         $type = NewsletterType::where('club_id', $club->id)->findOrFail($typeId);
-        $isMember = $user->clubs()->notHalls()->where('clubs.id', $club->id)->exists();
-
-        if ($isMember && $type->is_mandatory) {
-            return redirect()->back()->withErrors(['channel' => 'Official notices cannot be switched off.']);
-        }
-
         $existing = NewsletterSubscription::where('club_id', $club->id)
             ->where('newsletter_type_id', $type->id)
             ->where('user_id', $user->id)
             ->first();
+
+        // A hall is only theirs to manage when one of their lodges meets there (or they already have a row on it).
+        if ($club->isHall()) {
+            $isMember = $user->hallAudienceClubIds()->contains($club->id);
+            abort_unless($isMember || $existing, 404);
+        } else {
+            $isMember = $user->clubs()->notHalls()->where('clubs.id', $club->id)->exists();
+        }
+
+        if ($isMember && $type->is_mandatory && ! $club->isHall()) {
+            return redirect()->back()->withErrors(['channel' => 'Official notices cannot be switched off.']);
+        }
 
         if ($existing) {
             $newStatus = $existing->status === 'active' ? 'unsubscribed' : 'active';
