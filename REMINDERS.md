@@ -56,7 +56,7 @@ Still to do for this setup:
 - [x] Web-push keys made; directory seeded (9,688 lodges, 945 halls); workers restarted; `/up` answers 200.
 - [ ] Sign up on https://tracingboard.app, then `php artisan superadmin:grant <your email>` in Forge's Commands tab.
 - [x] `SECURITY_CONTACT_EMAIL=security@tracingboard.app` (security.txt live); Cloudflare Email Routing forwards `security@` and `hello@` to ben@360fusion.co.uk (root MX/SPF are Cloudflare's; Mailgun stays on `mail.`). Alerts go to the superadmin while `OPS_ALERT_EMAILS` is empty.
-- [ ] Turn on two-factor for the superadmin account (`/superadmin` is locked until then). Its "Proxies trusted" failure is a false alarm from the command line: nothing sits in front of this server.
+- [x] Superadmin (bennyk20@gmail.com) has two-factor on (21 Nov 2026). Its "Proxies trusted" failure is a false alarm from the command line: nothing sits in front of this server.
 - [x] Mail: Mailgun EU domain `mail.tracingboard.app` verified (SPF, DKIM, MX, tracking in Cloudflare; DMARC `p=none` on `tracingboard.app`), SMTP user `app@mail.tracingboard.app`, password single-quoted in `.env`, `MAIL_MAILER=smtp` (21 Nov 2026). Move DMARC to `p=quarantine` after a few clean weeks.
 
 Addresses:
