@@ -17,6 +17,7 @@ use App\Services\MemberFeed;
 use App\Services\MemberInbox;
 use App\Support\Currencies;
 use App\Support\MemberScope;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Inertia\Inertia;
@@ -32,14 +33,19 @@ class MemberHomeController extends Controller
 
     public function __construct(private readonly MemberInbox $inbox) {}
 
-    public function __invoke(Request $request): Response
+    public function __invoke(Request $request): Response|RedirectResponse
     {
         /** @var User $user */
         $user = $request->user();
 
+        // Someone who is only on a hall's board has no member area: their home is the hall's admin.
+        if ($user->activeClubIds()->isEmpty() && $hallId = $user->boardHallClubIds()->first()) {
+            return redirect('/'.Club::findOrFail($hallId)->slug.'/admin');
+        }
+
         $scope = MemberScope::for($user);
         $clubs = $scope->memberClubs;
-        $pending = $user->clubs()->with('clubType')->wherePivot('status', ClubMemberStatus::Pending->value)->get();
+        $pending = $user->clubs()->notHalls()->with('clubType')->wherePivot('status', ClubMemberStatus::Pending->value)->get();
 
         return Inertia::render('Members/Dashboard', [
             'clubs' => $clubs->map(fn (Club $club) => $this->clubSummary($club))->all(),

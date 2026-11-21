@@ -49,6 +49,8 @@ const currentClubRole = computed(() => {
   return c?.role || 'admin';
 });
 
+const isHall = computed(() => !!userClubs.value.find(item => item.slug === clubSlug)?.is_hall);
+
 const switchWorkspace = (targetClub) => {
   switcherOpen.value = false;
   if (['admin', 'owner'].includes(targetClub.role)) {
@@ -215,6 +217,7 @@ provide('layoutHasHeading', true);
 
           <!-- 2. Meetings & Governance -->
           <Link 
+            v-if="!isHall"
             :href="route('admin.meetings.index', { clubSlug })" 
             :class="[
               'flex items-center gap-3 px-3.5 py-2 rounded-xl transition-all',
@@ -247,6 +250,7 @@ provide('layoutHasHeading', true);
 
           <!-- 4. Members Hub -->
           <a 
+            v-if="!isHall"
             :href="route('admin.club_acc.members.index', { clubSlug })" 
             :class="[
               'flex items-center gap-3 px-3.5 py-2 rounded-xl transition-all',

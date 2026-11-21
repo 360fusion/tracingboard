@@ -62,6 +62,7 @@ class AdminRouteSweepTest extends TestCase
         $type = ClubType::create(['name' => 'Masonic Lodge', 'code' => 'masonic', 'available_modules' => [], 'default_settings' => []]);
         $a = Club::create(['club_type_id' => $type->id, 'name' => 'Club A', 'slug' => 'club-a', 'status' => 'active']);
         $b = Club::create(['club_type_id' => $type->id, 'name' => 'Club B', 'slug' => 'club-b', 'status' => 'active']);
+        Club::factory()->hall()->create(['slug' => 'hall-h']);
 
         $member = User::factory()->create();
         $a->users()->attach($member->id, ['role' => 'member', 'status' => 'active']);
@@ -76,8 +77,9 @@ class AdminRouteSweepTest extends TestCase
         foreach ([$member, $otherAdmin] as $user) {
             foreach ($uris as $uri) {
                 $status = $this->actingAs($user)->get('/'.$this->fill($uri))->getStatusCode();
+                $hallStatus = $this->actingAs($user)->get('/'.str_replace('club-a', 'hall-h', $this->fill($uri)))->getStatusCode();
 
-                if ($status === 200) {
+                if ($status === 200 || $hallStatus === 200) {
                     $leaks[] = ($user->is($member) ? 'member ' : 'other-club admin ').$uri;
                 }
             }
@@ -146,6 +148,7 @@ class AdminRouteSweepTest extends TestCase
     {
         $type = ClubType::create(['name' => 'Masonic Lodge', 'code' => 'masonic', 'available_modules' => [], 'default_settings' => []]);
         $club = Club::create(['club_type_id' => $type->id, 'name' => 'Club A', 'slug' => 'club-a', 'status' => 'active']);
+        $hall = Club::factory()->hall()->create(['slug' => 'hall-h']);
 
         $unmapped = [];
         $leaks = [];
@@ -153,6 +156,17 @@ class AdminRouteSweepTest extends TestCase
         foreach (['treasurer', 'coach', 'admin'] as $role) {
             $user = User::factory()->create();
             $club->users()->attach($user->id, ['role' => $role, 'status' => 'active']);
+            $hall->users()->attach($user->id, ['role' => $role, 'status' => 'active']);
+
+            foreach ($this->adminGetUris() as $uri) {
+                $path = str_replace('club-a', 'hall-h', $this->fill($uri));
+                $capability = ClubPermissions::capabilityForPath($path);
+                $status = $capability === null ? 0 : $this->actingAs($user)->get('/'.$path)->getStatusCode();
+
+                if ($status === 200 && ! ClubPermissions::allows($hall, $role, $capability)) {
+                    $leaks[] = 'hall '.$role.' '.$uri.' ('.$capability.')';
+                }
+            }
 
             foreach ($this->adminGetUris() as $uri) {
                 $path = $this->fill($uri);

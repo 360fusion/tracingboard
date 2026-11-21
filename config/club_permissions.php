@@ -80,6 +80,16 @@ return [
             'description' => 'See who joined, left, or had their role or status changed, and when',
             'roles' => ['owner', 'admin'],
         ],
+        'manage_hall' => [
+            'label' => 'Hall details',
+            'description' => 'Edit the hall\'s address, contacts, facilities and the lodges that meet there',
+            'roles' => ['owner', 'admin', 'secretary'],
+        ],
+        'manage_board' => [
+            'label' => 'Hall board',
+            'description' => 'Invite and remove the people on the hall\'s board and set their offices',
+            'roles' => ['owner', 'admin'],
+        ],
         'manage_settings' => [
             'label' => 'Club Settings',
             'description' => 'Configure organization profile, branding, custom domain, and permission matrix',
@@ -129,7 +139,16 @@ return [
         'webhooks' => 'manage_webhooks',
 
         'settings' => 'manage_settings',
+
+        'hall' => 'manage_hall',
+        'board' => 'manage_board',
+        'lodges' => 'view_dashboard',
     ],
+
+    /**
+     * Sections of /{slug}/admin that a hall does not have: they answer 404 whoever asks.
+     */
+    'hall_hidden_sections' => ['members', 'users', 'candidates', 'meetings', 'officers', 'committee', 'visitors', 'subscriptions', 'dues-subscriptions', 'charity'],
 
     /**
      * Always permitted, regardless of the club's matrix. Without this a club

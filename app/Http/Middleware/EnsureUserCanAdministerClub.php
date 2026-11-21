@@ -53,14 +53,19 @@ class EnsureUserCanAdministerClub
             return $next($request);
         }
 
-        if ($user->actsAsSuperAdmin()) {
-            return $next($request);
-        }
-
         $club = Club::where('slug', $clubSlug)->first();
 
         if (! $club) {
             abort(404);
+        }
+
+        // A hall has no members, meetings or accounts of its own; this holds for superadmins too.
+        if ($club->isHall() && preg_match('#^[^/]+/admin/([^/?]+)#', $request->path(), $matches)) {
+            abort_if(in_array($matches[1], config('club_permissions.hall_hidden_sections'), true), 404);
+        }
+
+        if ($user->actsAsSuperAdmin()) {
+            return $next($request);
         }
 
         // Controllers read it from here (Controller::club()) instead of querying for it a second time.
