@@ -93,7 +93,7 @@ const steps = [
                 </div>
 
                 <!-- An illustration of a member's reply screen, built from the same pieces as the real one. -->
-                <div class="relative lg:mb-16" role="img" aria-label="Example of a meeting summons with reply buttons and the number of replies so far">
+                <div role="img" aria-label="Example of a meeting summons with reply buttons and the number of replies so far">
                     <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-900/5 dark:border-slate-800 dark:bg-slate-900" aria-hidden="true">
                         <div class="flex items-start gap-4">
                             <div class="flex h-16 w-16 shrink-0 flex-col items-center justify-center rounded-2xl bg-navy-900 text-white dark:bg-navy-800">
@@ -120,15 +120,14 @@ const steps = [
                             <span class="rounded-xl border border-slate-300 px-3 py-2 text-center text-sm font-medium text-slate-700 dark:border-slate-700 dark:text-slate-200">Not dining</span>
                             <span class="rounded-xl border border-slate-300 px-3 py-2 text-center text-sm font-medium text-slate-700 dark:border-slate-700 dark:text-slate-200">Apologies</span>
                         </div>
-                    </div>
-
-                    <div class="mt-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-lg shadow-slate-900/5 lg:absolute lg:-bottom-24 lg:-left-10 lg:mt-0 lg:w-72 dark:border-slate-800 dark:bg-slate-900" aria-hidden="true">
-                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Secretary's numbers</p>
-                        <dl class="mt-3 grid grid-cols-3 gap-2 text-center">
-                            <div><dt class="text-xs text-slate-500 dark:text-slate-400">Replied</dt><dd class="font-display text-2xl font-bold tabular-nums lining-nums text-slate-900 dark:text-white">38</dd></div>
-                            <div><dt class="text-xs text-slate-500 dark:text-slate-400">Dining</dt><dd class="font-display text-2xl font-bold tabular-nums lining-nums text-slate-900 dark:text-white">26</dd></div>
-                            <div><dt class="text-xs text-slate-500 dark:text-slate-400">Paid</dt><dd class="font-display text-2xl font-bold tabular-nums lining-nums text-slate-900 dark:text-white">19</dd></div>
-                        </dl>
+                        <div class="mt-6 flex items-center justify-between gap-4 border-t border-slate-200 pt-5 dark:border-slate-800">
+                            <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Secretary's<br>numbers</p>
+                            <dl class="grid grid-cols-3 gap-6 text-center">
+                                <div><dt class="text-xs text-slate-500 dark:text-slate-400">Replied</dt><dd class="font-display text-2xl font-bold tabular-nums lining-nums text-slate-900 dark:text-white">38</dd></div>
+                                <div><dt class="text-xs text-slate-500 dark:text-slate-400">Dining</dt><dd class="font-display text-2xl font-bold tabular-nums lining-nums text-slate-900 dark:text-white">26</dd></div>
+                                <div><dt class="text-xs text-slate-500 dark:text-slate-400">Paid</dt><dd class="font-display text-2xl font-bold tabular-nums lining-nums text-slate-900 dark:text-white">19</dd></div>
+                            </dl>
+                        </div>
                     </div>
                 </div>
             </section>
