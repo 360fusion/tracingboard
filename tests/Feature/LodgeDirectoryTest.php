@@ -26,6 +26,9 @@ class LodgeDirectoryTest extends TestCase
     {
         parent::setUp();
 
+        // These tests look at the directory itself, which is members-only while the platform is invitation-only.
+        config(['app.public_directory' => true]);
+
         $this->durham = Province::create(['name' => 'Province of Durham', 'code' => 'durham']);
         $this->hall = MasonicHall::factory()->create(['province_id' => $this->durham->id, 'name' => 'Gateshead Masonic Hall', 'town' => 'Gateshead', 'postcode' => 'NE8 1RB']);
 

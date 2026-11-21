@@ -6,12 +6,6 @@ import LevelRule from '@/Components/Ui/LevelRule.vue';
 import PublicHeader from '@/Components/PublicHeader.vue';
 import PublicFooter from '@/Components/PublicFooter.vue';
 
-const props = defineProps({
-    lodgeCount: { type: Number, default: 0 },
-});
-
-const lodgeCountLabel = props.lodgeCount.toLocaleString('en-GB');
-
 const roles = [
     {
         title: 'For the Secretary',
@@ -61,8 +55,8 @@ const features = [
 ];
 
 const steps = [
-    { title: 'Find your lodge', text: `Your lodge is probably already in our directory of ${lodgeCountLabel} lodges, with its meeting place and pattern.` },
-    { title: 'Claim it', text: 'An officer asks to manage the listing. We check the request before handing it over.' },
+    { title: 'Ask for access', text: 'Tell us about your lodge and your office in it, using the contact form.' },
+    { title: 'We check with your lodge', text: 'Before giving access we confirm who you are with your lodge or province, so a lodge is only ever run by its own officers.' },
     { title: 'Bring your members in', text: 'Import your members from a spreadsheet and invite them. They sign in with their own email.' },
 ];
 </script>
@@ -92,15 +86,10 @@ const steps = [
                         Summons and replies, dining numbers, dues, the accounts, events and your website. Tracing Board takes the paperwork off the Secretary and the Treasurer, and gives every member one place to see what is coming up.
                     </p>
                     <div class="mt-8 flex flex-col gap-3 sm:flex-row">
-                        <Button size="lg" :href="route('lodges.index')">
-                            <template #icon><UiIcon name="search" /></template>
-                            Find your lodge
-                        </Button>
+                        <Button size="lg" :href="route('contact', { topic: 'access' })">Request access for your lodge</Button>
                         <Button size="lg" variant="secondary" :href="route('login')">Sign in as a member</Button>
                     </div>
-                    <p class="mt-5 text-sm text-slate-500 dark:text-slate-400">
-                        <span class="font-semibold text-slate-700 dark:text-slate-200">{{ lodgeCountLabel }}</span> lodges are already listed in the directory.
-                    </p>
+                    <p class="mt-5 text-sm text-slate-500 dark:text-slate-400">Invitation only for now: we are opening Tracing Board one lodge at a time.</p>
                 </div>
 
                 <!-- An illustration of a member's reply screen, built from the same pieces as the real one. -->
@@ -232,11 +221,14 @@ const steps = [
                     <div class="flex items-start gap-5">
                         <img src="/icons/tracing-board-mark-gold.svg" alt="" class="hidden h-16 w-16 shrink-0 sm:block">
                         <div>
-                            <h2 class="font-display text-3xl font-bold tracking-tight text-white">Is your lodge listed?</h2>
-                            <p class="mt-2 max-w-xl text-slate-300">Search the directory by name, number or town, and claim your lodge to start using Tracing Board.</p>
+                            <h2 class="font-display text-3xl font-bold tracking-tight text-white">Bring Tracing Board to your lodge</h2>
+                            <p class="mt-2 max-w-xl text-slate-300">Tell us about your lodge and we will be in touch. Questions about anything else are welcome too.</p>
                         </div>
                     </div>
-                    <Button size="lg" :href="route('lodges.index')" class="shrink-0">Find your lodge</Button>
+                    <div class="flex shrink-0 flex-col gap-3 sm:flex-row">
+                        <Button size="lg" :href="route('contact', { topic: 'access' })">Request access</Button>
+                        <Button size="lg" variant="secondary" :href="route('contact', { topic: 'question' })">Ask a question</Button>
+                    </div>
                 </div>
             </section>
         </main>

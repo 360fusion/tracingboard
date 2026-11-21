@@ -227,8 +227,8 @@ class MemberAccountLifecycleTest extends TestCase
         $this->get('/register?club='.$this->club->slug)
             ->assertInertia(fn (Assert $page) => $page->component('Auth/Register')->where('club.slug', $this->club->slug));
 
-        $this->get('/register?club=no-such-lodge')
-            ->assertInertia(fn (Assert $page) => $page->where('club', null));
+        // Without a lodge there is no sign-up while the platform is invitation-only: it sends people to the contact form.
+        $this->get('/register?club=no-such-lodge')->assertRedirect(route('contact'));
     }
 
     public function test_open_clubs_still_take_join_requests(): void

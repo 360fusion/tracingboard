@@ -5,6 +5,7 @@ namespace App\Notifications;
 use App\Mail\LodgeClaimMail;
 use App\Models\Club;
 use App\Models\ClubVisitRequest;
+use App\Models\ContactMessage;
 use App\Models\Lodge;
 use App\Models\LodgeClaim;
 use Illuminate\Notifications\Notification;
@@ -12,7 +13,7 @@ use Illuminate\Notifications\Notification;
 /**
  * Something happened to a lodge claim: a new claim or a reply for the superadmins, a decision or
  * a question for the person who made it. It lands in the bell and in an email. Suggested fixes
- * to a listing use it too, and can leave out the email.
+ * to a listing (which can leave out the email) and messages from the public contact form use it too.
  */
 class LodgeClaimNotification extends Notification
 {
@@ -31,6 +32,29 @@ class LodgeClaimNotification extends Notification
         public readonly bool $important = false,
         public readonly bool $mail = true,
     ) {}
+
+    /** A message from the public contact form, for the superadmins. */
+    public static function contactMessage(ContactMessage $message): self
+    {
+        $lines = array_filter([
+            'From: '.$message->name.' <'.$message->email.'>',
+            $message->lodge ? 'Lodge: '.$message->lodge : null,
+            'About: '.(ContactMessage::TOPICS[$message->topic] ?? $message->topic),
+            '',
+            $message->message,
+        ], fn (?string $line) => $line !== null);
+
+        return new self(
+            ClubNotification::NOTICE,
+            'New message: '.$message->name,
+            implode("\n", $lines),
+            'Contact form',
+            'superadmin.contact_messages.index',
+            [],
+            'Open the messages',
+            true,
+        );
+    }
 
     public static function submitted(LodgeClaim $claim): self
     {

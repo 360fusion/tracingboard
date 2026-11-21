@@ -34,7 +34,7 @@ class RouteTableTest extends TestCase
 
     public function test_a_logged_out_visitor_is_not_given_the_admin_or_superadmin_routes(): void
     {
-        $html = $this->routeTable('/lodges');
+        $html = $this->routeTable('/contact');
 
         $this->assertStringContainsString('lodges.index', $html);
         $this->assertStringNotContainsString('superadmin.dashboard', $html);
@@ -80,7 +80,7 @@ class RouteTableTest extends TestCase
 
     public function test_signing_in_makes_the_next_page_a_full_load_so_the_route_table_is_replaced(): void
     {
-        preg_match('#<script data-page="app" type="application/json">(.*?)</script>#s', $this->get('/lodges')->assertOk()->getContent(), $found);
+        preg_match('#<script data-page="app" type="application/json">(.*?)</script>#s', $this->get('/contact')->assertOk()->getContent(), $found);
         $guestVersion = json_decode($found[1], true)['version'];
 
         $this->actingAs(User::factory()->create());

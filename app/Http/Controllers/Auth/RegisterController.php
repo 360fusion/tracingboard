@@ -18,9 +18,14 @@ class RegisterController extends Controller
     /**
      * The sign-up page; the lodge's join link (`/register?club=slug`) turns it into a request to join that lodge.
      */
-    public function create(Request $request): Response
+    public function create(Request $request): Response|RedirectResponse
     {
         $club = $request->filled('club') ? Club::where('slug', (string) $request->query('club'))->first(['name', 'slug']) : null;
+
+        // Invitation-only: an account comes through a lodge (its join link names it), otherwise ask us for access.
+        if (! $club && ! config('app.public_registration')) {
+            return redirect()->route('contact');
+        }
 
         return Inertia::render('Auth/Register', [
             'club' => $club?->only(['name', 'slug']),
@@ -34,6 +39,10 @@ class RegisterController extends Controller
 
         $clubSlug = $request->input('club') ?? $request->input('club_slug');
         $club = $clubSlug ? Club::where('slug', $clubSlug)->first() : null;
+
+        if (! $club && ! config('app.public_registration')) {
+            return redirect()->route('contact');
+        }
 
         if ($club && ($club->settings['registration_mode'] ?? 'open') === 'invite_only') {
             return back()->withInput($request->only('name', 'email'))->withErrors(['email' => 'This club only accepts members by invitation. Please ask the club secretary to invite you.']);

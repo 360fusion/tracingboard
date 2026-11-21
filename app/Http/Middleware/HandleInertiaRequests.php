@@ -7,6 +7,7 @@ use App\Domains\ClubAccounting\Models\Member;
 use App\Enums\ClubMemberStatus;
 use App\Enums\ClubRole;
 use App\Models\Club;
+use App\Models\ContactMessage;
 use App\Models\LodgeClaim;
 use App\Models\LodgeCorrection;
 use App\Support\Currencies;
@@ -125,6 +126,7 @@ class HandleInertiaRequests extends Middleware
             ] : null,
             // The superadmin menu shows how many lodge claims and suggested fixes are waiting for a decision.
             'pendingLodgeClaims' => fn () => $user?->is_super_admin ? LodgeClaim::open()->count() : 0,
+            'newContactMessages' => fn () => $user?->is_super_admin ? ContactMessage::whereNull('handled_at')->count() : 0,
             'pendingLodgeCorrections' => fn () => $user?->is_super_admin ? LodgeCorrection::open()->count() : 0,
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),

@@ -3,6 +3,7 @@
 use App\Http\Controllers\PlatformPaymentsAdminController;
 use App\Http\Controllers\SuperAdminAuditLogController;
 use App\Http\Controllers\SuperAdminClubTypeController;
+use App\Http\Controllers\SuperAdminContactMessageController;
 use App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\SuperAdminGrandLodgeController;
 use App\Http\Controllers\SuperAdminHallController;
@@ -65,6 +66,9 @@ Route::middleware(['auth', EnsureUserIsSuperAdmin::class, RecordSuperAdminAction
     Route::put('/superadmin/lodges/{id}', [SuperAdminLodgeController::class, 'update'])->name('superadmin.lodges.update');
     Route::post('/superadmin/lodges/{id}/link-club', [SuperAdminLodgeController::class, 'linkClub'])->name('superadmin.lodges.link_club');
     Route::delete('/superadmin/lodges/{id}/link-club', [SuperAdminLodgeController::class, 'unlinkClub'])->name('superadmin.lodges.unlink_club');
+    Route::get('/superadmin/contact-messages', [SuperAdminContactMessageController::class, 'index'])->name('superadmin.contact_messages.index');
+    Route::post('/superadmin/contact-messages/{id}/handle', [SuperAdminContactMessageController::class, 'handle'])->whereNumber('id')->name('superadmin.contact_messages.handle');
+    Route::post('/superadmin/contact-messages/{id}/reopen', [SuperAdminContactMessageController::class, 'reopen'])->whereNumber('id')->name('superadmin.contact_messages.reopen');
     Route::get('/superadmin/lodge-claims', [SuperAdminLodgeClaimController::class, 'index'])->name('superadmin.lodge_claims.index');
     Route::post('/superadmin/lodge-claims/{id}/approve', [SuperAdminLodgeClaimController::class, 'approve'])->name('superadmin.lodge_claims.approve');
     Route::post('/superadmin/lodge-claims/{id}/reject', [SuperAdminLodgeClaimController::class, 'reject'])->name('superadmin.lodge_claims.reject');

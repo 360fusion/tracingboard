@@ -454,6 +454,8 @@ class SecurityAuditTest extends TestCase
 
     public function test_registration_needs_a_confirmed_email_and_does_not_reveal_existing_accounts(): void
     {
+        config(['app.public_registration' => true]);
+
         config(['auth.require_email_verification' => true]);
         Notification::fake();
         $payload = ['name' => 'New Person', 'email' => 'new@example.test', 'password' => 'a-long-safe-passphrase', 'password_confirmation' => 'a-long-safe-passphrase'];
@@ -516,6 +518,8 @@ class SecurityAuditTest extends TestCase
 
     public function test_sign_up_stays_open_while_mail_is_not_configured(): void
     {
+        config(['app.public_registration' => true]);
+
         config(['mail.default' => 'log', 'auth.require_email_verification' => null]);
 
         $this->post('/register', ['name' => 'No Mail', 'email' => 'nomail@example.test', 'password' => 'a-long-safe-passphrase', 'password_confirmation' => 'a-long-safe-passphrase'])->assertRedirect(route('login'));

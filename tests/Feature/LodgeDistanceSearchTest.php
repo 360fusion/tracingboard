@@ -21,6 +21,9 @@ class LodgeDistanceSearchTest extends TestCase
     {
         parent::setUp();
 
+        // These tests look at the directory itself, which is members-only while the platform is invitation-only.
+        config(['app.public_directory' => true]);
+
         config(['services.nominatim.gap_ms' => 0]);
 
         $this->lodgeAt('Durham Lodge', ['latitude' => 54.7753, 'longitude' => -1.5849]);      // under a mile away

@@ -157,6 +157,8 @@ class WalkthroughFixesTest extends TestCase
 
     public function test_signing_up_fills_in_the_email_on_the_sign_in_page_whether_or_not_the_address_is_new(): void
     {
+        config(['app.public_registration' => true]);
+
         $payload = ['name' => 'New Person', 'password' => 'a-long-safe-passphrase', 'password_confirmation' => 'a-long-safe-passphrase'];
 
         foreach (['new@example.test', $this->admin->email] as $email) {

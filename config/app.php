@@ -92,6 +92,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Invitation-only
+    |--------------------------------------------------------------------------
+    |
+    | While Tracing Board is invitation-only, nobody can make an account except through a lodge (its invitation or
+    | its own join link, /register?club=...), and the lodge directory is for signed-in members. Lodges ask for access
+    | through the contact form. Turn these on to open sign-up or show the directory to everyone.
+    */
+    'public_registration' => (bool) env('PUBLIC_REGISTRATION', false),
+    'public_directory' => (bool) env('PUBLIC_DIRECTORY', false),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Locale Configuration
     |--------------------------------------------------------------------------
     |

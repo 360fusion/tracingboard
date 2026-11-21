@@ -10,6 +10,7 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\TwoFactorAuthController;
 use App\Http\Controllers\ClubController;
 use App\Http\Controllers\ClubDomainAllowedController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DeviceSignInController;
 use App\Http\Controllers\EventCalendarController;
 use App\Http\Controllers\EventOnlinePaymentController;
@@ -102,6 +103,10 @@ Route::post('/sign/{token}/decline', [SignatureController::class, 'decline'])->n
 
 // Multi-Tenant Public Admin & Workspace Landing Routes
 Route::get('/', [ClubController::class, 'index'])->name('home');
+
+// The public contact form, which is also how a lodge asks for access while sign-up is closed.
+Route::get('/contact', [ContactController::class, 'create'])->name('contact');
+Route::post('/contact', [ContactController::class, 'store'])->middleware('throttle:public-forms')->name('contact.store');
 
 // Legacy /clubs/... URLs, from before club slugs moved to the top level.
 Route::any('/clubs/{legacySlug}/{path?}', LegacyClubUrlController::class)

@@ -78,7 +78,7 @@ class MemberHomeTest extends TestCase
 
     public function test_landing_page_is_still_shown_to_guests(): void
     {
-        $this->get('/')->assertOk()->assertInertia(fn (Assert $page) => $page->component('Welcome')->has('lodgeCount')->missing('clubs'));
+        $this->get('/')->assertOk()->assertInertia(fn (Assert $page) => $page->component('Welcome')->missing('clubs'));
     }
 
     public function test_it_lists_only_the_users_own_clubs(): void

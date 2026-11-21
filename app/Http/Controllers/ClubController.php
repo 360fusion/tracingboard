@@ -6,7 +6,6 @@ use App\Domains\ClubAccounting\Services\MemberInvitationService;
 use App\Enums\ClubMemberStatus;
 use App\Http\Requests\Club\UpdateDomainRequest;
 use App\Models\Club;
-use App\Models\Lodge;
 use App\Models\User;
 use App\Notifications\ClubNotification;
 use App\Services\ClubNotifier;
@@ -22,7 +21,7 @@ use Inertia\Response;
 class ClubController extends Controller
 {
     /**
-     * The public homepage. It shows no club's details: only how many lodges the directory lists.
+     * The public homepage. It shows no club's details.
      */
     public function index(): Response|RedirectResponse
     {
@@ -30,9 +29,7 @@ class ClubController extends Controller
             return redirect()->route('members.dashboard');
         }
 
-        return Inertia::render('Welcome', [
-            'lodgeCount' => Lodge::listed()->count(),
-        ]);
+        return Inertia::render('Welcome');
     }
 
     /**

@@ -131,10 +131,10 @@ const submit = () => {
                 </form>
             </Card>
 
-            <p class="text-xs text-center text-slate-500 dark:text-slate-400">New to your lodge? Ask your secretary for an invitation.</p>
+            <p class="text-xs text-center text-slate-500 dark:text-slate-400">New to your lodge? Ask your Secretary for an invitation. Lodge not on Tracing Board yet? <Link :href="route('contact')" class="font-semibold text-blue-600 hover:underline dark:text-blue-400">Contact us</Link>.</p>
 
             <Link href="/" class="self-center inline-flex items-center gap-1.5 min-h-11 text-xs text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
-                <UiIcon name="arrow-left" /> Back to platform hub
+                <UiIcon name="arrow-left" /> Back to Tracing Board
             </Link>
         </div>
     </div>

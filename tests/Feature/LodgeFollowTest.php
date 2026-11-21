@@ -26,6 +26,9 @@ class LodgeFollowTest extends TestCase
     {
         parent::setUp();
 
+        // These tests look at the directory itself, which is members-only while the platform is invitation-only.
+        config(['app.public_directory' => true]);
+
         CarbonImmutable::setTestNow('2026-09-24 12:00:00');
 
         $hall = MasonicHall::factory()->create(['name' => 'Gateshead Masonic Hall', 'address_line_1' => 'Alexandra Road', 'town' => 'Gateshead', 'postcode' => 'NE8 1RB']);

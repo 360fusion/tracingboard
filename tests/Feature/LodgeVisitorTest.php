@@ -39,6 +39,9 @@ class LodgeVisitorTest extends TestCase
     {
         parent::setUp();
 
+        // These tests look at the directory itself, which is members-only while the platform is invitation-only.
+        config(['app.public_directory' => true]);
+
         CarbonImmutable::setTestNow('2026-09-24 12:00:00');
 
         $type = ClubType::create(['name' => 'Craft Lodge', 'code' => 'craft_lodge', 'available_modules' => [], 'default_settings' => []]);

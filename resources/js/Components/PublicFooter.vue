@@ -1,5 +1,5 @@
 <script setup>
-// The signed-out footer shared by the homepage and the lodge directory.
+// The signed-out footer shared by the homepage, the contact page and the lodge directory.
 import { Link } from '@inertiajs/vue3';
 </script>
 
@@ -10,9 +10,9 @@ import { Link } from '@inertiajs/vue3';
                 <img src="/icons/tracing-board-mark.svg" alt="" class="h-6 w-6">Tracing Board
             </div>
             <nav aria-label="Footer" class="flex flex-wrap gap-x-6 gap-y-2 text-slate-600 dark:text-slate-300">
-                <Link :href="route('lodges.index')" class="hover:text-slate-900 dark:hover:text-white">Find a lodge</Link>
+                <Link :href="route('contact', { topic: 'access' })" class="hover:text-slate-900 dark:hover:text-white">Request access</Link>
+                <Link :href="route('contact', { topic: 'question' })" class="hover:text-slate-900 dark:hover:text-white">Contact</Link>
                 <Link :href="route('login')" class="hover:text-slate-900 dark:hover:text-white">Sign in</Link>
-                <Link :href="route('register')" class="hover:text-slate-900 dark:hover:text-white">Create an account</Link>
             </nav>
             <p class="text-slate-500 dark:text-slate-400">tracingboard.app</p>
         </div>

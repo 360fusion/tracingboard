@@ -27,6 +27,9 @@ class LodgeNewsTest extends TestCase
     {
         parent::setUp();
 
+        // These tests look at the directory itself, which is members-only while the platform is invitation-only.
+        config(['app.public_directory' => true]);
+
         $type = ClubType::create(['name' => 'Craft Lodge', 'code' => 'craft_lodge', 'available_modules' => [], 'default_settings' => []]);
         $this->club = Club::create(['club_type_id' => $type->id, 'name' => 'Lodge of Industry', 'slug' => 'lodge-of-industry', 'status' => 'active']);
         $this->lodge = Lodge::factory()->create(['club_type_id' => $type->id, 'name' => 'Lodge of Industry', 'number' => '48', 'slug' => 'lodge-of-industry-48']);

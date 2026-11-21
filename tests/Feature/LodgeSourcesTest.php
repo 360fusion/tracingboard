@@ -121,6 +121,8 @@ class LodgeSourcesTest extends TestCase
 
     public function test_the_lodge_and_hall_pages_show_the_reference_links(): void
     {
+        config(['app.public_directory' => true]);
+
         $hall = MasonicHall::factory()->create(['postcode' => 'NE8 1RB', 'ugle_url' => 'https://www.ugle.org.uk/x/hall']);
         $lodge = $this->lodgeWithSources('industry', 'https://province.example/industry');
         $lodge->update(['masonic_hall_id' => $hall->id]);

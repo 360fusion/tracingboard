@@ -22,18 +22,31 @@ use App\Support\ClubAccess;
 use App\Support\LodgeReferenceLinks;
 use App\Support\VisitorSummons;
 use Carbon\CarbonImmutable;
+use Closure;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
 /**
- * The public directory: find a lodge or chapter, see where and when it meets, and visit.
+ * The directory: find a lodge or chapter, see where and when it meets, and visit. Members only while the platform is
+ * invitation-only (`app.public_directory` off); a lodge's feed and calendar stay open for calendar apps.
  */
-class LodgeDirectoryController extends Controller
+class LodgeDirectoryController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new Middleware(fn (Request $request, Closure $next) => $request->user() || config('app.public_directory')
+                ? $next($request)
+                : redirect()->guest(route('login')), only: ['index', 'show', 'hall']),
+        ];
+    }
+
     public function index(IndexLodgeDirectoryRequest $request, Geocoder $geocoder, LodgeLinks $links): Response
     {
         $filters = $request->validated();

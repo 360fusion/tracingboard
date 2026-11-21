@@ -1,5 +1,5 @@
 <script setup>
-// The signed-out header shared by the homepage and the lodge directory.
+// The signed-out header shared by the homepage, the contact page and the lodge directory.
 import { Link } from '@inertiajs/vue3';
 import Button from '@/Components/Ui/Button.vue';
 </script>
@@ -13,7 +13,7 @@ import Button from '@/Components/Ui/Button.vue';
             <nav aria-label="Main" class="flex items-center gap-1 text-sm font-medium sm:gap-2">
                 <!-- A plain link, so on the homepage it only scrolls. -->
                 <a :href="`${route('home')}#features`" class="hidden whitespace-nowrap rounded-xl px-3 py-2 text-slate-600 hover:text-slate-900 sm:inline-block dark:text-slate-300 dark:hover:text-white">What it does</a>
-                <Link :href="route('lodges.index')" class="hidden whitespace-nowrap rounded-xl px-3 py-2 text-slate-600 hover:text-slate-900 sm:inline-block dark:text-slate-300 dark:hover:text-white">Find a lodge</Link>
+                <Link :href="route('contact')" class="hidden whitespace-nowrap rounded-xl px-3 py-2 text-slate-600 hover:text-slate-900 sm:inline-block dark:text-slate-300 dark:hover:text-white">Contact</Link>
                 <Button size="sm" :href="route('login')">Sign in</Button>
             </nav>
         </div>
