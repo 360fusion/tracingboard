@@ -143,7 +143,8 @@ return [
 
         'hall' => 'manage_hall',
         'board' => 'manage_board',
-        'lodges' => 'manage_hall',
+        // Every board role can see which lodges meet at the hall; manage_events is held by all four by default.
+        'lodges' => 'manage_events',
     ],
 
     /**

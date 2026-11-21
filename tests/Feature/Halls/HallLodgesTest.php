@@ -100,4 +100,23 @@ class HallLodgesTest extends TestCase
 
         $this->assertSame($before, $count());
     }
+
+    public function test_every_board_role_can_open_the_lodges_list(): void
+    {
+        foreach (['owner', 'admin', 'coach', 'treasurer'] as $role) {
+            $user = User::factory()->create();
+            $this->hallClub->users()->attach($user->id, ['role' => $role, 'status' => 'active']);
+
+            $this->actingAs($user)->get("/{$this->hallClub->slug}/admin/lodges")->assertOk();
+        }
+    }
+
+    public function test_the_lodges_list_is_still_404_for_a_lodge(): void
+    {
+        $lodge = Club::factory()->create();
+        $treasurer = User::factory()->create();
+        $lodge->users()->attach($treasurer->id, ['role' => 'treasurer', 'status' => 'active']);
+
+        $this->actingAs($treasurer)->get("/{$lodge->slug}/admin/lodges")->assertNotFound();
+    }
 }
