@@ -259,8 +259,11 @@ class MemberPortalController extends Controller
 
         $memberPivot = $user ? $user->clubs()->where('clubs.id', $club->id)->first()?->pivot : null;
 
+        // A hall's events are open to the members of the lodges that meet there (the middleware has checked).
+        $isHallAudience = $club->isHall();
+
         // Summonses and bookings are for active members only, like the other member pages.
-        if (($memberPivot === null || $memberPivot->status !== 'active') && ! $user?->actsAsSuperAdmin()) {
+        if (! $isHallAudience && ($memberPivot === null || $memberPivot->status !== 'active') && ! $user?->actsAsSuperAdmin()) {
             return redirect()->route('public.site', ['clubSlug' => $club->slug]);
         }
 

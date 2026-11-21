@@ -166,7 +166,7 @@ class MemberHomeController extends Controller
                 'said_paid' => $booking?->said_paid_at !== null,
                 'pay_ahead' => $booking?->paymentMethod?->type !== ClubPaymentMethod::DOOR,
                 'closed' => (bool) $event->is_booking_closed,
-                'url' => $club->isHall() ? route('public.event', ['clubSlug' => $club->slug, 'eventSlug' => $event->slug], false) : route('member.events', ['slug' => $club->slug], false),
+                'url' => route('member.events', ['slug' => $club->slug], false),
             ];
         }))
             ->sortBy('at')

@@ -49,6 +49,23 @@ final class MemberScope
     }
 
     /**
+     * Scope for the member event pages: the same as for(), except that a hall's events are open to the members of
+     * the lodges that meet there. The hall is the scope's club only; it never joins memberClubs.
+     */
+    public static function forEvents(User $user, string $slug): self
+    {
+        $club = Club::where('slug', $slug)->with('clubType')->first();
+
+        if (! $club?->isHall()) {
+            return self::for($user, $slug);
+        }
+
+        abort_unless($user->hallAudienceClubIds()->contains($club->id), 404);
+
+        return new self($user, self::for($user)->memberClubs, $club);
+    }
+
+    /**
      * Scope for a member page. A club in the URL (/members/{club}/...) is strict and
      * a 404 for anyone who is not an active member; the optional ?club= filter on the
      * all-clubs pages is lenient, and an unknown club is ignored.

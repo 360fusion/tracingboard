@@ -121,24 +121,6 @@ class HallEventAudienceTest extends TestCase
             ->assertOk()->assertSee('Hall open evening', false);
     }
 
-    public function test_lodge_member_books_a_hall_event_as_themselves_through_the_public_page(): void
-    {
-        $url = "/site/{$this->hallClub->slug}/events/open-evening/member-register";
-        $payload = ['attendance_status' => 'attending', 'attendees' => [['name' => 'Me', 'attending_dining' => false]]];
-
-        $this->actingAs($this->member)->get("/site/{$this->hallClub->slug}/events/open-evening")
-            ->assertInertia(fn (Assert $page) => $page->where('canBookAsMember', true));
-
-        $this->actingAs($this->member)->post($url, $payload)->assertRedirect();
-        $this->assertDatabaseHas('event_registrations', ['event_id' => $this->event->id, 'user_id' => $this->member->id]);
-
-        $other = Club::factory()->create(['masonic_hall_id' => MasonicHall::factory()->create()->id]);
-        $outsider = User::factory()->create();
-        $other->users()->attach($outsider->id, ['role' => 'member', 'status' => 'active']);
-        $this->actingAs($outsider)->post($url, $payload)->assertNotFound();
-        $this->assertDatabaseMissing('event_registrations', ['user_id' => $outsider->id]);
-    }
-
     private function priceHallEventWithCard(): EventPaymentMethod
     {
         config(['events.online_payments' => true]);
@@ -148,17 +130,37 @@ class HallEventAudienceTest extends TestCase
         return EventPaymentMethod::create(['event_id' => $this->event->id, 'payment_method_id' => $card->id, 'is_enabled' => true]);
     }
 
-    public function test_member_gets_the_price_quote_on_the_public_hall_event_page(): void
+    private function hallEventsUrl(): string
+    {
+        return "/members/{$this->hallClub->slug}/events";
+    }
+
+    public function test_lodge_member_sees_and_books_the_hall_event_in_the_member_area(): void
+    {
+        $this->actingAs($this->member)->get($this->hallEventsUrl())
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->where('events', fn ($events) => collect($events)->pluck('title')->contains('Hall open evening')));
+
+        $this->actingAs($this->member)->post("{$this->hallEventsUrl()}/{$this->event->id}/rsvp", [
+            'attendance_status' => 'attending', 'attendees' => [['name' => 'Me', 'attending_dining' => false]],
+        ])->assertRedirect();
+
+        $this->assertDatabaseHas('event_registrations', ['event_id' => $this->event->id, 'user_id' => $this->member->id]);
+
+        $this->actingAs($this->member)->get("{$this->hallEventsUrl()}/{$this->event->id}/ticket")->assertOk();
+    }
+
+    public function test_member_gets_the_price_quote_for_a_hall_event(): void
     {
         $this->priceHallEventWithCard();
 
         $this->actingAs($this->member)
-            ->postJson("/site/{$this->hallClub->slug}/events/open-evening/member-quote", ['attendees' => [['is_guest' => false], ['is_guest' => true]]])
+            ->postJson("{$this->hallEventsUrl()}/{$this->event->id}/quote", ['attendees' => [['is_guest' => false], ['is_guest' => true]]])
             ->assertOk()
             ->assertJsonPath('options.0.total', 80);
     }
 
-    public function test_online_payment_for_a_hall_booking_returns_to_the_public_event_page(): void
+    public function test_online_payment_for_a_hall_booking_returns_to_the_member_events_page(): void
     {
         $option = $this->priceHallEventWithCard();
         $captured = null;
@@ -170,12 +172,29 @@ class HallEventAudienceTest extends TestCase
             });
         });
 
-        $this->actingAs($this->member)->post("/site/{$this->hallClub->slug}/events/open-evening/member-register", [
+        $this->actingAs($this->member)->post("{$this->hallEventsUrl()}/{$this->event->id}/rsvp", [
             'attendance_status' => 'attending', 'payment_method' => $option->id, 'attendees' => [['name' => 'Me']],
         ], ['X-Inertia' => 'true'])->assertStatus(409);
 
-        $page = "/site/{$this->hallClub->slug}/events/open-evening";
-        $this->assertStringEndsWith($page.'?payment=success', $captured['success_url']);
-        $this->assertStringEndsWith($page.'?payment=cancelled', $captured['cancel_url']);
+        $this->assertStringEndsWith($this->hallEventsUrl().'?payment=success', $captured['success_url']);
+        $this->assertStringEndsWith($this->hallEventsUrl().'?payment=cancelled', $captured['cancel_url']);
+    }
+
+    public function test_only_a_lodge_member_at_the_hall_reaches_the_hall_events_page(): void
+    {
+        $other = Club::factory()->create(['masonic_hall_id' => MasonicHall::factory()->create()->id]);
+        $outsider = User::factory()->create();
+        $other->users()->attach($outsider->id, ['role' => 'member', 'status' => 'active']);
+        $this->actingAs($outsider)->get($this->hallEventsUrl())->assertNotFound();
+
+        $board = User::factory()->create();
+        $this->hallClub->users()->attach($board->id, ['role' => 'admin', 'status' => 'active']);
+        $this->actingAs($board)->get($this->hallEventsUrl())->assertNotFound();
+        $this->actingAs($board)->get("/members/{$this->hallClub->slug}")->assertNotFound();
+    }
+
+    public function test_the_rest_of_the_hall_member_area_stays_closed_to_lodge_members(): void
+    {
+        $this->actingAs($this->member)->get("/members/{$this->hallClub->slug}/news")->assertNotFound();
     }
 }

@@ -82,19 +82,6 @@ class EventOnlinePaymentController extends Controller
         return redirect($back.'?payment='.($this->capture($online, $registration, (string) $request->query('token')) ? 'success' : 'cancelled'));
     }
 
-    /**
-     * PayPal's return for a hall event booked through the public event page (a hall has no member area).
-     */
-    public function hallPayPalReturn(Request $request, string $clubSlug, string $eventSlug, EventOnlinePayment $online): RedirectResponse
-    {
-        $club = $this->findClub($clubSlug);
-        $event = Event::where('club_id', $club->id)->published()->where('slug', $eventSlug)->firstOrFail();
-        $registration = EventRegistration::where('event_id', $event->id)->where('user_id', Auth::id())->firstOrFail();
-        $back = route('public.event', ['clubSlug' => $club->slug, 'eventSlug' => $event->slug]);
-
-        return redirect($back.'?payment='.($this->capture($online, $registration, (string) $request->query('token')) ? 'success' : 'cancelled'));
-    }
-
     private function capture(EventOnlinePayment $online, EventRegistration $registration, string $orderId): bool
     {
         try {

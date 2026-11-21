@@ -16,7 +16,6 @@ const props = defineProps({
   footerNavigation: { type: Array, default: () => [] },
   event: Object,
   canBookAsGuest: Boolean,
-  canBookAsMember: Boolean,
   isSignedIn: Boolean,
 });
 
@@ -44,14 +43,14 @@ const form = useForm({
 // Live price from the server, so what is shown is what is charged.
 const showPromo = ref(false);
 const { quote, error: quoteError, refresh } = useEventQuote(
-  route(props.canBookAsMember ? 'public.event.member_quote' : 'public.event.quote', { clubSlug: props.club.slug, eventSlug: props.event.slug }),
+  route('public.event.quote', { clubSlug: props.club.slug, eventSlug: props.event.slug }),
   () => ({
     promo_code: form.promo_code || null,
     attendees: form.attendees.map((a, index) => ({ is_guest: index > 0, ticket_tier_id: a.ticket_tier_id, attending_dining: a.attending_dining })),
   }),
 );
 
-watch(() => [form.attendees, form.promo_code], () => { if ((props.canBookAsGuest || props.canBookAsMember) && props.event.requires_payment) refresh(); }, { deep: true, immediate: true });
+watch(() => [form.attendees, form.promo_code], () => { if (props.canBookAsGuest && props.event.requires_payment) refresh(); }, { deep: true, immediate: true });
 
 watch(quote, (value) => {
   const options = value?.options ?? [];
@@ -61,7 +60,7 @@ watch(quote, (value) => {
 const hasMenu = computed(() => props.event.has_dining && COURSES.some((c) => (props.event.menu?.[c.key] ?? []).length));
 const tiers = computed(() => (props.event.ticket_tiers ?? []).filter((t) => ['all', 'public', 'guest'].includes(t.audience)));
 const full = computed(() => props.event.places_left === 0);
-const bookingOpen = computed(() => (props.canBookAsGuest || props.canBookAsMember) && !props.event.is_booking_closed && (!full.value || props.event.waitlist_enabled));
+const bookingOpen = computed(() => props.canBookAsGuest && !props.event.is_booking_closed && (!full.value || props.event.waitlist_enabled));
 const canAddGuest = computed(() => form.attendees.length - 1 < (props.event.max_guests ?? 0));
 
 const addGuest = () => { if (canAddGuest.value) form.attendees.push(blankPerson()); };
@@ -76,11 +75,7 @@ const err = (index, field) => form.errors[`attendees.${index}.${field}`];
 const dishNote = (dish) => [dish.is_vegan ? 'Vegan' : (dish.is_vegetarian ? 'Vegetarian' : null), dish.is_gf ? 'Gluten free' : null, dish.allergens ? `Contains ${dish.allergens}` : null].filter(Boolean).join(' · ');
 
 const submit = () => {
-  // A signed-in member books as themselves (the members-area rules); anyone else books as a guest.
-  const target = props.canBookAsMember ? 'public.event.member_register' : 'public.event.register';
-  form.transform((data) => (props.canBookAsMember
-    ? { attendance_status: 'attending', payment_method: data.payment_method, promo_code: data.promo_code, attendees: data.attendees.map((a, index) => ({ ...a, is_guest: index > 0 })) }
-    : data)).post(route(target, { clubSlug: props.club.slug, eventSlug: props.event.slug }), {
+  form.post(route('public.event.register', { clubSlug: props.club.slug, eventSlug: props.event.slug }), {
     preserveScroll: true,
     onSuccess: () => form.reset(),
   });
@@ -156,7 +151,7 @@ const errorText = 'text-xs text-rose-600 dark:text-rose-400';
           <label>Leave this empty <input v-model="form.website" type="text" tabindex="-1" autocomplete="off" /></label>
         </div>
 
-        <div v-if="!canBookAsMember" class="grid gap-3 sm:grid-cols-3">
+        <div class="grid gap-3 sm:grid-cols-3">
           <div class="sm:col-span-1">
             <label :class="label">Your name</label>
             <input v-model="form.contact_name" type="text" required maxlength="150" :class="field" />

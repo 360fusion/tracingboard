@@ -66,9 +66,7 @@ class MemberFeed
                 'excerpt' => trim($event->starts_at->format('j M Y, H:i').' · '.$event->location, ' ·'),
                 'at' => $event->created_at->toIso8601String(),
                 'important' => false,
-                'link' => $hallClubs->contains('id', $event->club_id)
-                    ? ['name' => 'public.event', 'params' => ['clubSlug' => $club($event->club_id)['slug'], 'eventSlug' => $event->slug]]
-                    : ['name' => 'member.events', 'params' => ['slug' => $club($event->club_id)['slug']]],
+                'link' => ['name' => 'member.events', 'params' => ['slug' => $club($event->club_id)['slug']]],
             ]);
 
         $updates = ClubUpdate::whereIn('club_id', $clubIds)->where('status', 'sent')

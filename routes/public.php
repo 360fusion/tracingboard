@@ -143,9 +143,6 @@ Route::get('/site/oxford-boating', function () {
 Route::get('/site/{clubSlug}/events/{eventSlug}', [PublicEventController::class, 'show'])->name('public.event');
 Route::get('/site/{clubSlug}/news/{postSlug}', [PublicSiteController::class, 'showPost'])->name('public.site.post');
 Route::post('/site/{clubSlug}/events/{eventSlug}/quote', [EventQuoteController::class, 'guest'])->name('public.event.quote')->middleware('throttle:public-forms');
-Route::post('/site/{clubSlug}/events/{eventSlug}/member-register', [PublicEventController::class, 'registerAsMember'])->name('public.event.member_register')->middleware(['auth', 'throttle:public-forms']);
-Route::get('/site/{clubSlug}/events/{eventSlug}/paypal-return', [EventOnlinePaymentController::class, 'hallPayPalReturn'])->name('public.event.member_paypal_return')->middleware('auth');
-Route::post('/site/{clubSlug}/events/{eventSlug}/member-quote', [EventQuoteController::class, 'publicMember'])->name('public.event.member_quote')->middleware(['auth', 'throttle:public-forms']);
 Route::post('/site/{clubSlug}/events/{eventSlug}/register', [PublicEventController::class, 'register'])->name('public.event.register')->middleware('throttle:public-forms');
 Route::get('/site/{clubSlug}/booking/{token}', [PublicEventController::class, 'booking'])->name('public.event.booking')->middleware('throttle:auth-forms');
 // Face ID or fingerprint sign-in from the iOS and Android app (DeviceSignInController).

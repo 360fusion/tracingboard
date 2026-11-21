@@ -55,7 +55,7 @@ class QuickRsvpController extends Controller
     {
         $validated = $request->validated();
 
-        $scope = MemberScope::for($request->user(), $slug);
+        $scope = MemberScope::forEvents($request->user(), $slug);
         $event = Event::where('club_id', $scope->club->id)->published()->visibleTo($request->user())->findOrFail($id);
 
         abort_unless($event->canBeRsvpedBy($request->user()), 403, 'This event is not open to your account.');

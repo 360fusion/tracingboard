@@ -102,7 +102,7 @@ class MemberCalendar
                 'said_paid' => $registration?->said_paid_at !== null,
                 'closed' => (bool) $event->is_booking_closed,
                 'simple' => $event->allowsQuickReply(),
-                'url' => $club->isHall() ? route('public.event', ['clubSlug' => $club->slug, 'eventSlug' => $event->slug], false) : route('member.events', ['slug' => $club->slug], false),
+                'url' => route('member.events', ['slug' => $club->slug], false),
             ];
         }));
 
