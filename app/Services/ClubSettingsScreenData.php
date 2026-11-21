@@ -179,9 +179,8 @@ class ClubSettingsScreenData
             $club->settings['permission_matrix'] ?? []
         );
 
-        if ($club->isHall()) {
-            $settings['permission_matrix'] = array_diff_key($settings['permission_matrix'], array_flip(config('club_permissions.hall_hidden_capabilities')));
-        }
+        $hiddenCapabilities = config($club->isHall() ? 'club_permissions.hall_hidden_capabilities' : 'club_permissions.lodge_hidden_capabilities');
+        $settings['permission_matrix'] = array_diff_key($settings['permission_matrix'], array_flip($hiddenCapabilities));
 
         $domainMembers = Member::where('club_id', $club->id)
             ->orderBy('last_name')

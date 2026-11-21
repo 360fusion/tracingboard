@@ -68,4 +68,21 @@ class HallSettingsTest extends TestCase
         $this->assertSame(['roles' => ['owner', 'admin', 'treasurer']], $settings['permission_matrix']['manage_events']);
         $this->assertSame('The Hall', $hall->fresh()->name);
     }
+
+    public function test_a_lodge_screen_leaves_out_hall_capabilities_and_a_save_keeps_their_stored_values(): void
+    {
+        $lodge = Club::factory()->create(['settings' => ['permission_matrix' => ['manage_hall' => ['roles' => ['admin']]]]]);
+        $owner = $this->ownerOf($lodge);
+
+        $this->actingAs($owner)->get(route('admin.settings.show', ['clubSlug' => $lodge->slug]))
+            ->assertInertia(fn (Assert $page) => $page->missing('settings.permission_matrix.manage_hall')->missing('settings.permission_matrix.manage_board'));
+
+        $this->put(route('admin.settings.update', ['clubSlug' => $lodge->slug]), [
+            'permission_matrix' => ['manage_events' => ['roles' => ['owner', 'admin']]],
+        ])->assertSessionHasNoErrors();
+
+        $matrix = $lodge->fresh()->settings['permission_matrix'];
+        $this->assertSame(['roles' => ['admin']], $matrix['manage_hall']);
+        $this->assertSame(['roles' => ['owner', 'admin']], $matrix['manage_events']);
+    }
 }

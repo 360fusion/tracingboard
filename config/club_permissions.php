@@ -159,6 +159,11 @@ return [
     'hall_hidden_capabilities' => ['manage_meetings', 'manage_members', 'manage_subscriptions', 'pass_on_communications'],
 
     /**
+     * Capabilities that only guard hall sections, so a lodge's Roles and permissions screen leaves them out.
+     */
+    'lodge_hidden_capabilities' => ['manage_hall', 'manage_board'],
+
+    /**
      * Always permitted, regardless of the club's matrix. Without this a club
      * could edit its own matrix in a way that locked its owner out for good.
      */
