@@ -74,7 +74,7 @@ Cloudflare:
 
 Own server (later):
 - [ ] New server on DigitalOcean, London, Ubuntu 24.04, **4 GB RAM / 2 vCPU** at least (website builds run headless Chrome). PHP 8.4, database **PostgreSQL** (a new server can pick it in Forge, unlike staging), Node 24. Turn on DigitalOcean weekly backups.
-- [ ] New site `tracingboard.app` (alias `www.tracingboard.app`), repository 360fusion/club-manager, branch `main`, **zero-downtime deploys**. Turn on "Optimize OPcache for production".
+- [ ] New site `tracingboard.app` (alias `www.tracingboard.app`), repository 360fusion/tracingboard, branch `main`, **zero-downtime deploys**. Turn on "Optimize OPcache for production".
 - [ ] Deploy script: copy staging's (it runs `artisan optimize`), and make sure it runs `migrate --force`, `npm ci && npm run build`, `storage:link` (once) and `queue:restart`.
 - [ ] Install Chrome for Browsershot (`npx puppeteer browsers install chrome` as the site user, plus Chrome's system libraries as root). Without it builds still work, Vue draws the pages.
 - [ ] SSL: Let's Encrypt for `tracingboard.app` and `www`.
