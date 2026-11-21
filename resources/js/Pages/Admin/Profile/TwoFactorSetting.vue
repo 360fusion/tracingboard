@@ -173,7 +173,8 @@ const generateNewRecoveryCodes = () => {
         <!-- Setup step 2: pending confirmation (QR code) -->
         <div v-if="twoFactorPending" class="space-y-6">
           <div class="p-4 sm:p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 flex flex-col md:flex-row items-center gap-6">
-            <SanitizedHtml v-if="qrCodeSvg" :html="qrCodeSvg" class="p-3 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex-shrink-0" />
+            <!-- Fortify draws the code with no margin; scanners need a light border about 4 squares wide, so this stays white in dark mode. -->
+            <SanitizedHtml v-if="qrCodeSvg" :html="qrCodeSvg" class="p-7 bg-white rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex-shrink-0" />
 
             <div class="space-y-3">
               <h4 class="font-semibold text-slate-900 dark:text-white text-sm">Scan with your authenticator app</h4>
