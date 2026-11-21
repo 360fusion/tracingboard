@@ -10,8 +10,10 @@ use App\Models\Club;
 use App\Models\ClubPaymentMethod;
 use App\Models\EventRegistration;
 use App\Models\Invoice;
+use App\Models\Lodge;
 use App\Models\Meeting;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -86,6 +88,8 @@ class AnalyticsController extends Controller
             });
 
         $isHall = $club->isHall();
+        $hall = $isHall ? $club->hall : null;
+        $activeBoard = $isHall ? DB::table('club_user')->where('club_id', $club->id)->where('status', 'active') : null;
 
         return Inertia::render('Admin/Analytics', [
             'club' => $club,
@@ -102,12 +106,17 @@ class AnalyticsController extends Controller
                 'events_count' => $club->events_count,
                 'posts_count' => $club->posts_count,
             ],
+            // A hall's headline tiles: the lodges that meet there (as its Lodges screen lists them) and its active board.
+            'hallMetrics' => $isHall ? [
+                'lodges_count' => $hall ? $hall->clubs()->notHalls()->count() + Lodge::where('masonic_hall_id', $hall->id)->whereNull('club_id')->count() : 0,
+                'board_count' => (clone $activeBoard)->count(),
+            ] : null,
             // A hall has no members or meetings: its dashboard has its own first steps.
             'isHall' => $isHall,
             // First steps for a lodge (or hall) that has just been set up; the page hides the list once all are done.
             'gettingStarted' => $isHall ? [
-                'details' => filled($club->hall?->telephone) || filled($club->hall?->email),
-                'board' => $club->users_count > 1,
+                'details' => filled($hall?->telephone) || filled($hall?->email),
+                'board' => (clone $activeBoard)->where('user_id', '!=', Auth::id())->exists(),
                 'events' => $club->events_count > 0,
             ] : [
                 'members' => Member::where('club_id', $club->id)->count() > 1,

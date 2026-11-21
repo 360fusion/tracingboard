@@ -11,6 +11,7 @@ const props = defineProps({
   upcomingMeetings: Array,
   gettingStarted: { type: Object, default: null },
   isHall: { type: Boolean, default: false },
+  hallMetrics: { type: Object, default: null },
 });
 
 // The first three things a newly set-up lodge (or hall) needs, each ticked off once done.
@@ -43,13 +44,28 @@ const stillToDo = computed(() => firstSteps.value.some((step) => !step.done));
 
     <!-- The headline numbers, two to a row even on a phone: members, then money. -->
     <div class="grid grid-cols-2 gap-3 sm:gap-6">
-      <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200/80 dark:border-slate-800/80 flex flex-col gap-2">
+      <!-- A hall has no members of its own: the lodges that meet there and its board instead. -->
+      <template v-if="isHall">
+        <Link :href="route('admin.hall.lodges', { clubSlug: club.slug })" class="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200/80 dark:border-slate-800/80 flex flex-col gap-2 hover:border-blue-300 dark:hover:border-blue-700 transition-colors">
+          <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Lodges meeting here</div>
+          <div class="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white font-sans tracking-tight">{{ hallMetrics?.lodges_count || 0 }}</div>
+          <div class="text-xs text-slate-500 dark:text-slate-400">Lodges and chapters at the hall</div>
+        </Link>
+
+        <Link :href="route('admin.board.index', { clubSlug: club.slug })" class="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200/80 dark:border-slate-800/80 flex flex-col gap-2 hover:border-blue-300 dark:hover:border-blue-700 transition-colors">
+          <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Board</div>
+          <div class="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white font-sans tracking-tight">{{ hallMetrics?.board_count || 0 }}</div>
+          <div class="text-xs text-slate-500 dark:text-slate-400">Active on the hall's board</div>
+        </Link>
+      </template>
+
+      <div v-if="!isHall" class="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200/80 dark:border-slate-800/80 flex flex-col gap-2">
         <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Active members</div>
         <div class="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white font-sans tracking-tight">{{ metrics.total_members || 0 }}</div>
         <div class="text-xs text-slate-500 dark:text-slate-400">On the roster or with an account</div>
       </div>
 
-      <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200/80 dark:border-slate-800/80 flex flex-col gap-2">
+      <div v-if="!isHall" class="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200/80 dark:border-slate-800/80 flex flex-col gap-2">
         <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Pending</div>
         <div class="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white font-sans tracking-tight">{{ metrics.pending_users_count || 0 }}</div>
         <div class="text-xs text-slate-500 dark:text-slate-400">Asking to join or visit</div>
@@ -58,7 +74,7 @@ const stillToDo = computed(() => firstSteps.value.some((step) => !step.done));
       <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200/80 dark:border-slate-800/80 flex flex-col gap-2">
         <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Money received</div>
         <div class="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white font-sans tracking-tight">{{ $cs }}{{ metrics.monthly_dues_est }}</div>
-        <div class="text-xs text-slate-500 dark:text-slate-400">Invoices, dues and events, all time</div>
+        <div class="text-xs text-slate-500 dark:text-slate-400">{{ isHall ? 'Invoices and events, all time' : 'Invoices, dues and events, all time' }}</div>
       </div>
 
       <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200/80 dark:border-slate-800/80 flex flex-col gap-2">

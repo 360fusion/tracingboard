@@ -3,6 +3,7 @@
 namespace Tests\Feature\Halls;
 
 use App\Models\Club;
+use App\Models\Lodge;
 use App\Models\MasonicHall;
 use App\Models\User;
 use App\Services\Halls\HallClubs;
@@ -78,7 +79,7 @@ class HallAdminSectionsTest extends TestCase
 
     public function test_the_hall_dashboard_has_hall_first_steps_and_the_hall_menu_for_a_superadmin(): void
     {
-        $hall = app(HallClubs::class)->createFor(MasonicHall::factory()->create(['telephone' => null, 'email' => null]), User::factory()->create());
+        $hall = app(HallClubs::class)->createFor(MasonicHall::factory()->create(['telephone' => null, 'email' => null]));
 
         $this->actingAs(User::factory()->create(['is_super_admin' => true]))->get(route('admin.analytics', ['slug' => $hall->slug]))
             ->assertInertia(fn ($page) => $page->where('isHall', true)->where('clubIsHall', true)
@@ -87,5 +88,27 @@ class HallAdminSectionsTest extends TestCase
         $lodge = Club::factory()->create();
         $this->get(route('admin.analytics', ['slug' => $lodge->slug]))
             ->assertInertia(fn ($page) => $page->where('isHall', false)->where('clubIsHall', false)->has('gettingStarted.meetings'));
+    }
+
+    public function test_the_hall_dashboard_counts_lodges_and_the_active_board(): void
+    {
+        $hallClub = Club::factory()->hall()->create();
+        $hall = MasonicHall::factory()->create(['club_id' => $hallClub->id]);
+        Club::factory()->create(['masonic_hall_id' => $hall->id]);
+        Lodge::factory()->create(['masonic_hall_id' => $hall->id]);
+        $owner = User::factory()->create();
+        $hallClub->users()->attach($owner->id, ['role' => 'owner', 'status' => 'active']);
+        $hallClub->users()->attach(User::factory()->create()->id, ['role' => 'admin', 'status' => 'pending']);
+        $hallClub->users()->attach(User::factory()->create()->id, ['role' => 'admin', 'status' => 'past']);
+
+        $open = fn () => $this->actingAs($owner)->get(route('admin.analytics', ['slug' => $hallClub->slug]));
+
+        $open()->assertInertia(fn ($page) => $page->where('hallMetrics', ['lodges_count' => 2, 'board_count' => 1])->where('gettingStarted.board', false));
+
+        $hallClub->users()->attach(User::factory()->create()->id, ['role' => 'treasurer', 'status' => 'active']);
+        $open()->assertInertia(fn ($page) => $page->where('hallMetrics.board_count', 2)->where('gettingStarted.board', true));
+
+        $lodge = Club::factory()->create();
+        $this->actingAs(User::factory()->create(['is_super_admin' => true]))->get(route('admin.analytics', ['slug' => $lodge->slug]))->assertInertia(fn ($page) => $page->where('hallMetrics', null));
     }
 }
