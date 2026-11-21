@@ -29,7 +29,10 @@ class HallBoardIsNotMembershipTest extends TestCase
         $this->assertSame([$hall->id], $user->boardHallClubIds()->all());
         $this->assertTrue(MemberScope::for($user)->memberClubs->isEmpty());
 
-        $this->actingAs($user)->get('/members/'.$hall->slug.'/news')->assertNotFound();
+        foreach (['', '/news', '/events', '/profile'] as $path) {
+            $this->actingAs($user)->get('/members/'.$hall->slug.$path)->assertNotFound();
+        }
+        $this->actingAs(User::factory()->create(['is_super_admin' => true]))->get('/members/'.$hall->slug)->assertNotFound();
     }
 
     public function test_board_member_of_a_hall_who_is_in_a_lodge_keeps_only_the_lodge(): void
