@@ -82,6 +82,10 @@ class ClubSettingsController extends Controller
             $club->province_id = $validated['province_id'];
         }
 
+        if (array_key_exists('masonic_hall_id', $validated) && $club->isHall()) {
+            unset($validated['masonic_hall_id']);
+        }
+
         if (array_key_exists('masonic_hall_id', $validated)) {
             $hall = $validated['masonic_hall_id'] ? MasonicHall::find($validated['masonic_hall_id']) : null;
 

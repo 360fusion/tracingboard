@@ -12,6 +12,8 @@ class ClubType extends Model
     /** @use HasFactory<ClubTypeFactory> */
     use HasFactory;
 
+    public const HALL = 'hall';
+
     protected $fillable = [
         'name',
         'code',
@@ -23,6 +25,17 @@ class ClubType extends Model
         'terminology',
         'rulers_schema',
     ];
+
+    /** The club type of a hall's own club (its board); made on first use if the migration has not run. */
+    public static function hall(): self
+    {
+        return static::firstOrCreate(['code' => self::HALL], [
+            'name' => 'Masonic hall',
+            'available_modules' => ['accounting', 'communications', 'events', 'newsletters', 'website_builder'],
+            'default_settings' => [],
+            'terminology' => ['club' => 'Hall', 'members' => 'Board', 'master' => 'Chairman'],
+        ]);
+    }
 
     protected function casts(): array
     {

@@ -105,6 +105,16 @@ class MasonicHall extends Model
     }
 
     /**
+     * The hall's own club (its board), when it has one.
+     *
+     * @return BelongsTo<Club, $this>
+     */
+    public function club(): BelongsTo
+    {
+        return $this->belongsTo(Club::class);
+    }
+
+    /**
      * The lodges, chapters and other bodies that meet here.
      *
      * @return HasMany<Club, $this>

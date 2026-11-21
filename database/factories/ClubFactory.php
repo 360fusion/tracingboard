@@ -26,4 +26,9 @@ class ClubFactory extends Factory
             'status' => 'active',
         ];
     }
+
+    public function hall(): static
+    {
+        return $this->state(fn () => ['club_type_id' => ClubType::hall()->id]);
+    }
 }

@@ -14,6 +14,7 @@ use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Database\Factories\ClubFactory;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -125,6 +126,30 @@ class Club extends Model implements HasMedia
     public function clubType(): BelongsTo
     {
         return $this->belongsTo(ClubType::class);
+    }
+
+    public function isHall(): bool
+    {
+        return $this->clubType?->code === ClubType::HALL;
+    }
+
+    /**
+     * @param  Builder<Club>  $query
+     * @return Builder<Club>
+     */
+    public function scopeNotHalls(Builder $query): Builder
+    {
+        return $query->whereDoesntHave('clubType', fn ($type) => $type->where('code', ClubType::HALL));
+    }
+
+    /**
+     * The hall this club is the board of.
+     *
+     * @return HasOne<MasonicHall, $this>
+     */
+    public function hall(): HasOne
+    {
+        return $this->hasOne(MasonicHall::class);
     }
 
     /**

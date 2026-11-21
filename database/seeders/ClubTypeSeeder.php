@@ -36,6 +36,8 @@ class ClubTypeSeeder extends Seeder
             return $clubType;
         };
 
+        ClubType::hall();
+
         // 1. Craft Lodge
         $seedOrder([
             'code' => 'craft_lodge',
