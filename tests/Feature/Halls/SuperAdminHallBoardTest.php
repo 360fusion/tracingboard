@@ -6,6 +6,8 @@ use App\Mail\MemberInvitationMail;
 use App\Models\Club;
 use App\Models\MasonicHall;
 use App\Models\User;
+use App\Services\Halls\HallBoard;
+use App\Services\Halls\HallClubs;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -74,5 +76,26 @@ class SuperAdminHallBoardTest extends TestCase
         $this->assertNull($hall->fresh()->club_id);
         $this->postBoard(User::factory()->create(['is_super_admin' => true]), $hall, ['name' => '', 'email' => 'nope'])->assertSessionHasErrors(['name', 'email']);
         $this->assertNull($hall->fresh()->club_id);
+    }
+
+    public function test_failed_invite_leaves_no_ownerless_club_behind(): void
+    {
+        $this->mock(HallBoard::class)->shouldReceive('invite')->andThrow(new \DomainException('Nope.'));
+        $hall = MasonicHall::factory()->create();
+        $clubs = Club::count();
+
+        $this->postBoard(User::factory()->create(['is_super_admin' => true]), $hall)->assertSessionHas('error');
+
+        $this->assertNull($hall->fresh()->club_id);
+        $this->assertSame($clubs, Club::count());
+    }
+
+    public function test_index_rows_carry_club_slug_without_the_club_relation(): void
+    {
+        $hall = MasonicHall::factory()->create();
+        app(HallClubs::class)->createFor($hall);
+
+        $this->actingAs(User::factory()->create(['is_super_admin' => true]))->get(route('superadmin.masonic_halls.index'))
+            ->assertInertia(fn ($page) => $page->has('halls.0.club_slug')->missing('halls.0.club'));
     }
 }

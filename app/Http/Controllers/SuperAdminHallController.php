@@ -27,7 +27,7 @@ class SuperAdminHallController extends Controller
     public function masonicHallsIndex(): Response
     {
         return Inertia::render('SuperAdmin/MasonicHalls/Index', [
-            'halls' => MasonicHall::with(['province:id,name', 'club:id,slug'])->withCount('clubs')->orderBy('name')->get()->each(fn (MasonicHall $h) => $h->setAttribute('club_slug', $h->club?->slug)),
+            'halls' => MasonicHall::with(['province:id,name', 'club:id,slug'])->withCount('clubs')->orderBy('name')->get()->each(fn (MasonicHall $h) => $h->setAttribute('club_slug', $h->club?->slug)->unsetRelation('club')),
             'provinces' => Province::orderBy('name')->get(['id', 'name']),
             'kinds' => MasonicHall::KINDS,
         ]);
