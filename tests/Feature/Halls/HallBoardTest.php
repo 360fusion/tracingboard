@@ -101,4 +101,60 @@ class HallBoardTest extends TestCase
         $this->actingAs($treasurer)->get("/{$this->club->slug}/admin/hall")->assertForbidden();
         $this->assertNotSame(403, $this->actingAs($treasurer)->get("/{$this->club->slug}/admin/accounting")->getStatusCode());
     }
+
+    public function test_a_removed_person_can_be_invited_again_with_one_pivot_and_one_carrier(): void
+    {
+        $invite = ['name' => 'Tom Reasurer', 'email' => 'tom@example.com', 'office' => 'Treasurer', 'role' => 'treasurer'];
+        $this->actingAs($this->owner)->post($this->url(), $invite);
+        $user = User::where('email', 'tom@example.com')->firstOrFail();
+        $this->delete($this->url("/{$user->id}"))->assertSessionHas('success');
+
+        $this->post($this->url(), $invite)->assertSessionMissing('error');
+
+        $this->assertSame(1, $this->club->users()->where('users.id', $user->id)->count());
+        $pivot = $this->club->users()->where('users.id', $user->id)->first()->pivot;
+        $this->assertContains($pivot->status, ['pending', 'active']);
+        $this->assertSame('treasurer', $pivot->role);
+        $this->assertSame(1, Member::where('club_id', $this->club->id)->where('email', 'tom@example.com')->count());
+    }
+
+    public function test_removal_clears_the_invitation_token_and_a_past_person_is_not_found(): void
+    {
+        $sec = $this->staff('secretary');
+        $this->club->users()->updateExistingPivot($sec->id, ['invitation_token' => 'abc']);
+
+        $this->actingAs($this->owner)->delete($this->url("/{$sec->id}"));
+
+        $this->assertNull($this->club->users()->where('users.id', $sec->id)->first()->pivot->invitation_token);
+        $this->put($this->url("/{$sec->id}"), ['office' => 'X', 'role' => 'admin'])->assertNotFound();
+        $this->delete($this->url("/{$sec->id}"))->assertNotFound();
+    }
+
+    public function test_inviting_a_lodge_member_leaves_their_account_and_lodge_pivot_alone(): void
+    {
+        $lodge = Club::factory()->create();
+        $existing = User::factory()->create(['name' => 'Original Name', 'email' => 'bro@example.com']);
+        $lodge->users()->attach($existing->id, ['role' => 'member', 'status' => 'active']);
+        $password = $existing->password;
+
+        $this->actingAs($this->owner)->post($this->url(), ['name' => 'Other Name', 'email' => 'bro@example.com', 'office' => 'Secretary', 'role' => 'secretary'])->assertSessionMissing('error');
+
+        $existing->refresh();
+        $this->assertSame(['Original Name', $password], [$existing->name, $existing->password]);
+        $this->assertSame('member', $lodge->users()->where('users.id', $existing->id)->first()->pivot->role);
+        $this->assertSame('secretary', $this->club->users()->where('users.id', $existing->id)->first()->pivot->role);
+    }
+
+    public function test_a_duplicate_invite_returns_the_error(): void
+    {
+        $sec = $this->staff('secretary');
+
+        $this->actingAs($this->owner)->post($this->url(), ['name' => 'X Y', 'email' => $sec->email, 'office' => 'Secretary', 'role' => 'secretary'])
+            ->assertSessionHas('error', 'That person is already on the board.');
+    }
+
+    public function test_admin_cannot_remove_an_owner(): void
+    {
+        $this->actingAs($this->staff('admin'))->delete($this->url("/{$this->owner->id}"))->assertForbidden();
+    }
 }

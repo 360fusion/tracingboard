@@ -44,7 +44,11 @@ class HallBoard
         return DB::transaction(function () use ($club, $name, $email, $office, $role, $actor) {
             $parts = explode(' ', trim($name), 2);
 
-            $member = Member::where('club_id', $club->id)->whereNull('user_id')->whereRaw('lower(email) = ?', [$email])->first()
+            $userId = User::whereRaw('lower(email) = ?', [$email])->value('id');
+            // A removed person's carrier keeps its user_id, so reuse it rather than make a second one.
+            $member = Member::where('club_id', $club->id)
+                ->where(fn ($q) => $q->whereRaw('lower(email) = ?', [$email])->when($userId, fn ($q) => $q->orWhere('user_id', $userId)))
+                ->first()
                 ?? Member::create([
                     'club_id' => $club->id,
                     'email' => $email,

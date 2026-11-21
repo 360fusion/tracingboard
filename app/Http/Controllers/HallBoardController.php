@@ -13,6 +13,7 @@ use App\Support\ClubAccess;
 use DomainException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -81,17 +82,24 @@ class HallBoardController extends Controller
             'office' => ['required', 'string', 'max:100'],
             'role' => ['required', Rule::in(self::ROLES)],
         ]);
-        $user = $club->users()->where('users.id', $userId)->firstOrFail();
-        $current = $user->pivot->role;
+        $user = $this->boardMember($club, $userId);
 
-        abort_unless(ClubAccess::canAssignRole($request->user(), $club, $data['role'], $current, $userId), 403, 'Your role cannot change this person.');
-        if ($current === ClubRole::Owner->value && $data['role'] !== $current && $this->isLastOwner($club, $userId)) {
-            return back()->with('error', 'A hall needs at least one owner.');
-        }
+        // Owners are locked while the last-owner check and the write happen, so two owners cannot demote each other at once.
+        $error = DB::transaction(function () use ($request, $club, $userId, $data) {
+            $this->lockOwners($club);
+            $current = $club->users()->where('users.id', $userId)->first()->pivot->role;
 
-        $club->users()->updateExistingPivot($userId, ['committee_role' => $data['office'], 'role' => $data['role']]);
+            abort_unless(ClubAccess::canAssignRole($request->user(), $club, $data['role'], $current, $userId), 403, 'Your role cannot change this person.');
+            if ($current === ClubRole::Owner->value && $data['role'] !== $current && $this->isLastOwner($club, $userId)) {
+                return 'A hall needs at least one owner.';
+            }
 
-        return back()->with('success', "{$user->name} updated.");
+            $club->users()->updateExistingPivot($userId, ['committee_role' => $data['office'], 'role' => $data['role']]);
+
+            return null;
+        });
+
+        return $error ? back()->with('error', $error) : back()->with('success', "{$user->name} updated.");
     }
 
     public function destroy(Request $request, string $clubSlug, int $userId, MemberInvitationService $invitations): RedirectResponse
@@ -99,19 +107,35 @@ class HallBoardController extends Controller
         $club = $this->findClub($clubSlug);
         abort_unless($club->isHall(), 404);
 
-        $user = $club->users()->where('users.id', $userId)->firstOrFail();
-        $role = $user->pivot->role;
+        $user = $this->boardMember($club, $userId);
 
-        abort_if($role === ClubRole::Owner->value && ! $request->user()->actsAsSuperAdmin() && ClubAccess::role($request->user(), $club) !== ClubRole::Owner->value, 403, 'Only an owner can remove another owner.');
-        if ($role === ClubRole::Owner->value && $this->isLastOwner($club, $userId)) {
-            return back()->with('error', 'A hall needs at least one owner.');
-        }
+        $error = DB::transaction(function () use ($request, $club, $userId, $user, $invitations) {
+            $this->lockOwners($club);
+            $role = $club->users()->where('users.id', $userId)->first()->pivot->role;
 
-        // Someone who never signed in is taken off again; anyone else keeps their history as a past board member.
-        $invitations->revoke($club, $user);
-        $club->users()->updateExistingPivot($userId, ['status' => ClubMemberStatus::Past->value]);
+            abort_if($role === ClubRole::Owner->value && ! $request->user()->actsAsSuperAdmin() && ClubAccess::role($request->user(), $club) !== ClubRole::Owner->value, 403, 'Only an owner can remove another owner.');
+            if ($role === ClubRole::Owner->value && $this->isLastOwner($club, $userId)) {
+                return 'A hall needs at least one owner.';
+            }
 
-        return back()->with('success', "{$user->name} removed from the board.");
+            // Someone who never signed in is taken off again; anyone else keeps their history as a past board member.
+            $invitations->revoke($club, $user);
+            $club->users()->updateExistingPivot($userId, ['status' => ClubMemberStatus::Past->value, 'invitation_token' => null]);
+
+            return null;
+        });
+
+        return $error ? back()->with('error', $error) : back()->with('success', "{$user->name} removed from the board.");
+    }
+
+    private function boardMember(Club $club, int $userId): User
+    {
+        return $club->users()->wherePivotIn('status', [ClubMemberStatus::Active->value, ClubMemberStatus::Pending->value])->where('users.id', $userId)->firstOrFail();
+    }
+
+    private function lockOwners(Club $club): void
+    {
+        DB::table('club_user')->where('club_id', $club->id)->where('role', ClubRole::Owner->value)->where('status', ClubMemberStatus::Active->value)->lockForUpdate()->get();
     }
 
     private function isLastOwner(Club $club, int $userId): bool
