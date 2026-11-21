@@ -14,6 +14,7 @@ import Pagination from '@/Components/Ui/Pagination.vue';
 import UiIcon from '@/Components/Ui/UiIcon.vue';
 
 defineProps({
+    hallClaims: { type: Array, default: () => [] },
     claims: { type: Object, required: true },
     status: { type: String, default: 'open' },
     counts: { type: Object, required: true },
@@ -73,6 +74,31 @@ function send(claim) {
     });
 }
 
+// Hall claims are always the waiting ones; one action open at a time, as above.
+const hallActing = ref(null);
+const hallForm = reactive({ text: '' });
+const hallErrors = ref({});
+
+function openHall(claim, kind) {
+    hallActing.value = { id: claim.id, kind };
+    hallForm.text = '';
+    hallErrors.value = {};
+}
+
+function sendHall(claim) {
+    const kinds = {
+        approve: ['superadmin.hall_claims.approve', { note: hallForm.text }],
+        reject: ['superadmin.hall_claims.reject', { reason: hallForm.text }],
+        info: ['superadmin.hall_claims.request_info', { question: hallForm.text }],
+    };
+    const [name, payload] = kinds[hallActing.value.kind];
+
+    router.post(route(name, claim.id), payload, {
+        preserveScroll: true,
+        onSuccess: () => { hallActing.value = null; },
+        onError: (e) => { hallErrors.value = e; },
+    });
+}
 </script>
 
 <template>
@@ -82,6 +108,59 @@ function send(claim) {
         <div class="space-y-6">
             <PageHeader title="Lodge claims" description="People asking to manage a lodge. Check that they belong to it before you approve: the province's own page for the lodge is linked on each claim." />
 
+            <section v-if="hallClaims.length" class="space-y-3">
+                <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Hall claims ({{ hallClaims.length }})</h2>
+                <ul class="space-y-4">
+                    <li v-for="claim in hallClaims" :key="claim.id">
+                        <Card class="space-y-3">
+                            <div class="flex flex-wrap items-start justify-between gap-3">
+                                <div>
+                                    <h3 class="font-semibold text-slate-900 dark:text-white">{{ claim.hall.name }}</h3>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400">
+                                        <span v-if="claim.hall.province">{{ claim.hall.province }} · </span><Link :href="route('lodges.hall', claim.hall.slug)" class="text-blue-600 hover:underline dark:text-blue-400">Public page</Link>
+                                    </p>
+                                </div>
+                                <Badge :variant="STATUS[claim.status === 'info_requested' ? 'more_info' : claim.status]" class="capitalize">{{ claim.status.replace('_', ' ') }}</Badge>
+                            </div>
+                            <div class="space-y-1 text-sm">
+                                <p class="font-semibold text-slate-900 dark:text-white">{{ claim.claimant.name }} <span class="font-normal text-slate-500 dark:text-slate-400">({{ claim.claimant_role }})</span></p>
+                                <p><a :href="`mailto:${claim.claimant.email}`" class="text-blue-600 hover:underline dark:text-blue-400">{{ claim.claimant.email }}</a>
+                                    <span :class="claim.claimant.email_verified ? 'text-emerald-700 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'"> · {{ claim.claimant.email_verified ? 'verified' : 'not verified' }}</span></p>
+                                <p v-if="claim.phone">Phone: {{ claim.phone }}</p>
+                                <p class="whitespace-pre-wrap">{{ claim.message }}</p>
+                                <p v-if="claim.question" class="text-xs"><strong>We asked:</strong> {{ claim.question }}</p>
+                                <p v-if="claim.reply" class="text-xs"><strong>They replied:</strong> {{ claim.reply }}</p>
+                            </div>
+                            <Alert v-if="claim.hall.has_board" variant="warning">This hall already has a board, so this claim cannot be approved. Refuse it or ask a question.</Alert>
+
+                            <div class="space-y-3 border-t border-slate-200 pt-4 dark:border-slate-800">
+                                <div v-if="!hallActing || hallActing.id !== claim.id" class="flex flex-wrap gap-2">
+                                    <Button v-if="!claim.hall.has_board" size="sm" @click="openHall(claim, 'approve')">Approve…</Button>
+                                    <Button v-if="claim.status === 'pending'" variant="secondary" size="sm" @click="openHall(claim, 'info')">Ask a question…</Button>
+                                    <Button variant="secondary" size="sm" @click="openHall(claim, 'reject')">Refuse…</Button>
+                                </div>
+                                <form v-else class="space-y-3" @submit.prevent="sendHall(claim)">
+                                    <Textarea
+                                        v-model="hallForm.text"
+                                        :rows="3"
+                                        :required="hallActing.kind !== 'approve'"
+                                        aria-label="Message"
+                                        :placeholder="{ approve: 'A note for the record (optional)', reject: 'Why the claim was not approved. The person will see this.', info: 'What you need to know. The person will see this and can reply.' }[hallActing.kind]"
+                                        :error="hallErrors.reason || hallErrors.question || hallErrors.note"
+                                    />
+                                    <p v-if="hallErrors.claim" class="text-xs text-rose-600 dark:text-rose-400">{{ hallErrors.claim }}</p>
+                                    <div class="flex gap-2">
+                                        <Button type="submit" size="sm">Confirm</Button>
+                                        <Button variant="ghost" size="sm" @click="hallActing = null">Cancel</Button>
+                                    </div>
+                                </form>
+                            </div>
+                        </Card>
+                    </li>
+                </ul>
+            </section>
+
+            <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Lodge claims</h2>
             <Tabs
                 label="Claims"
                 :active="status"

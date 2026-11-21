@@ -6,6 +6,7 @@ use App\Http\Requests\SuperAdminLodgeClaim\ApproveRequest;
 use App\Http\Requests\SuperAdminLodgeClaim\RejectRequest;
 use App\Http\Requests\SuperAdminLodgeClaim\RequestInfoRequest;
 use App\Models\Club;
+use App\Models\HallClaim;
 use App\Models\Lodge;
 use App\Models\LodgeClaim;
 use App\Services\Lodges\LodgeClaimService;
@@ -42,6 +43,7 @@ class SuperAdminLodgeClaimController extends Controller
                 'open' => LodgeClaim::open()->count(),
                 'approved' => LodgeClaim::where('status', LodgeClaim::APPROVED)->count(),
             ],
+            'hallClaims' => HallClaim::open()->with(['hall.province:id,name', 'user'])->latest('id')->limit(100)->get()->map(fn (HallClaim $claim) => $this->presentHall($claim))->all(),
             'clubs' => Club::whereDoesntHave('lodge')->orderBy('name')->limit(500)->get(['id', 'name', 'slug']),
         ]);
     }
@@ -129,6 +131,37 @@ class SuperAdminLodgeClaimController extends Controller
                 'actor' => $event->actor?->name,
                 'at' => $event->created_at->toDateTimeString(),
             ])->all(),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function presentHall(HallClaim $claim): array
+    {
+        $user = $claim->user;
+
+        return [
+            'id' => $claim->id,
+            'status' => $claim->status,
+            'claimant_role' => HallClaim::ROLES[$claim->claimant_role] ?? $claim->claimant_role,
+            'message' => $claim->message,
+            'phone' => $claim->phone,
+            'question' => $claim->question,
+            'reply' => $claim->reply,
+            'created_at' => $claim->created_at->toDateTimeString(),
+            'hall' => [
+                'name' => $claim->hall->name,
+                'slug' => $claim->hall->slug,
+                'province' => $claim->hall->province?->name,
+                'has_board' => $claim->hall->club_id !== null,
+            ],
+            'claimant' => [
+                'name' => $user->name,
+                'email' => $user->email,
+                'email_verified' => $user->email_verified_at !== null,
+                'joined' => $user->created_at->format('j M Y'),
+            ],
         ];
     }
 }

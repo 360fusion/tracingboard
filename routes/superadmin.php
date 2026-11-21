@@ -6,6 +6,7 @@ use App\Http\Controllers\SuperAdminClubTypeController;
 use App\Http\Controllers\SuperAdminContactMessageController;
 use App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\SuperAdminGrandLodgeController;
+use App\Http\Controllers\SuperAdminHallClaimController;
 use App\Http\Controllers\SuperAdminHallController;
 use App\Http\Controllers\SuperAdminLodgeClaimController;
 use App\Http\Controllers\SuperAdminLodgeController;
@@ -73,6 +74,9 @@ Route::middleware(['auth', EnsureUserIsSuperAdmin::class, RecordSuperAdminAction
     Route::post('/superadmin/lodge-claims/{id}/approve', [SuperAdminLodgeClaimController::class, 'approve'])->name('superadmin.lodge_claims.approve');
     Route::post('/superadmin/lodge-claims/{id}/reject', [SuperAdminLodgeClaimController::class, 'reject'])->name('superadmin.lodge_claims.reject');
     Route::post('/superadmin/lodge-claims/{id}/request-info', [SuperAdminLodgeClaimController::class, 'requestInfo'])->name('superadmin.lodge_claims.request_info');
+    Route::post('/superadmin/hall-claims/{id}/approve', [SuperAdminHallClaimController::class, 'approve'])->name('superadmin.hall_claims.approve');
+    Route::post('/superadmin/hall-claims/{id}/reject', [SuperAdminHallClaimController::class, 'reject'])->name('superadmin.hall_claims.reject');
+    Route::post('/superadmin/hall-claims/{id}/request-info', [SuperAdminHallClaimController::class, 'requestInfo'])->name('superadmin.hall_claims.request_info');
     Route::get('/superadmin/lodge-corrections', [SuperAdminLodgeCorrectionController::class, 'index'])->name('superadmin.lodge_corrections.index');
     Route::post('/superadmin/lodge-corrections/{id}/apply', [SuperAdminLodgeCorrectionController::class, 'apply'])->name('superadmin.lodge_corrections.apply');
     Route::post('/superadmin/lodge-corrections/{id}/reject', [SuperAdminLodgeCorrectionController::class, 'reject'])->name('superadmin.lodge_corrections.reject');

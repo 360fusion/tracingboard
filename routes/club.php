@@ -51,6 +51,7 @@ use App\Http\Controllers\EventQuoteController;
 use App\Http\Controllers\EventRegistrationAdminController;
 use App\Http\Controllers\EventTicketController;
 use App\Http\Controllers\HallBoardController;
+use App\Http\Controllers\HallClaimController;
 use App\Http\Controllers\HallDetailsController;
 use App\Http\Controllers\HallLodgesController;
 use App\Http\Controllers\InvoiceController;
@@ -354,6 +355,10 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/lodges/{slug}/visitor-access', [LodgeVisitorController::class, 'destroy'])->middleware('throttle:20,1')->name('lodges.visitor_access.withdraw');
     Route::post('/lodges/{slug}/visits', [LodgeVisitorController::class, 'storeVisit'])->middleware('throttle:10,1')->name('lodges.visits.store');
     Route::delete('/lodges/{slug}/visits/{id}', [LodgeVisitorController::class, 'destroyVisit'])->middleware('throttle:20,1')->name('lodges.visits.withdraw');
+    Route::get('/lodges/halls/{slug}/claim', [HallClaimController::class, 'create'])->name('lodges.hall.claim');
+    Route::post('/lodges/halls/{slug}/claim', [HallClaimController::class, 'store'])->middleware('throttle:6,1')->name('lodges.hall.claim.store');
+    Route::post('/lodges/halls/{slug}/claim/{id}/respond', [HallClaimController::class, 'respond'])->middleware('throttle:20,1')->name('lodges.hall.claim.respond');
+    Route::delete('/lodges/halls/{slug}/claim/{id}', [HallClaimController::class, 'destroy'])->middleware('throttle:20,1')->name('lodges.hall.claim.withdraw');
     Route::get('/lodges/{slug}/claim', [LodgeClaimController::class, 'create'])->name('lodges.claim');
     Route::post('/lodges/{slug}/claim', [LodgeClaimController::class, 'store'])->middleware('throttle:6,1')->name('lodges.claim.store');
     Route::post('/members/lodges/claims/{id}/respond', [LodgeClaimController::class, 'respond'])->middleware('throttle:20,1')->name('lodges.claim.respond');

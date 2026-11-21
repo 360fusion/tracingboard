@@ -1,5 +1,6 @@
 <script setup>
-import { Link } from '@inertiajs/vue3';
+import { computed } from 'vue';
+import { Link, usePage } from '@inertiajs/vue3';
 import ReferenceLinks from '@/Components/ReferenceLinks.vue';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
 
@@ -7,6 +8,8 @@ defineProps({
     hall: { type: Object, required: true },
     lodges: { type: Array, default: () => [] },
 });
+
+const signedIn = computed(() => Boolean(usePage().props.auth?.user));
 </script>
 
 <template>
@@ -27,6 +30,12 @@ defineProps({
                     <a v-if="hall.email" :href="`mailto:${hall.email}`" class="text-blue-600 hover:underline dark:text-blue-400">{{ hall.email }}</a>
                 </p>
             </div>
+
+            <p v-if="hall.can_claim" class="text-sm text-slate-600 dark:text-slate-400">
+                Run this hall?
+                <Link v-if="signedIn" :href="route('lodges.hall.claim', hall.slug)" class="font-medium text-blue-600 hover:underline dark:text-blue-400">Ask to manage it here</Link>
+                <Link v-else :href="route('login')" class="font-medium text-blue-600 hover:underline dark:text-blue-400">Sign in to ask to manage it here</Link>
+            </p>
 
             <div v-if="hall.photos?.length" class="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 <img v-for="photo in hall.photos" :key="photo.url" :src="photo.url" :alt="photo.name" loading="lazy" class="aspect-[4/3] w-full rounded-xl object-cover" />

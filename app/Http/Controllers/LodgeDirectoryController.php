@@ -374,6 +374,7 @@ class LodgeDirectoryController extends Controller implements HasMiddleware
             'map_url' => $address ? 'https://www.google.com/maps/search/?api=1&query='.rawurlencode($hall->name.', '.$address) : null,
             'telephone' => $hall->telephone,
             'email' => $hall->email,
+            'can_claim' => $hall->club_id === null,
             'photos' => $hall->getMedia('photos')->map(fn ($media) => ['url' => $media->getUrl(), 'name' => $hall->name])->values()->all(),
         ];
     }
