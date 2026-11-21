@@ -91,7 +91,6 @@ class HandleInertiaRequests extends Middleware
             // The Android app crashes asking for push without Firebase, which is only set up alongside the server's FCM key.
             'androidPush' => NativeApp::isApp($request) && filled(config('services.fcm.credentials_path')),
             // The public half of the website's notification keys, for a browser turning notifications on (Support/webPush.js).
-            'stagingPassword' => RequireStagingPassword::isOn(),
             'webPushKey' => $user && ! NativeApp::isApp($request) ? (config('services.webpush.public_key') ?: null) : null,
             'auth' => [
                 'user' => $user ? [

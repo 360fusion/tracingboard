@@ -18,21 +18,12 @@ class RequireStagingPassword
      */
     private const OPEN_PATHS = ['webhooks/*', 'up', 'internal/*', 'api/*', 'site/*/contact-form'];
 
-    /**
-     * Whether this site asks for the password. The page is told too, so the service worker leaves page loads to the
-     * browser: Chrome cannot ask for a password on a load the worker makes, and fails it instead.
-     */
-    public static function isOn(): bool
-    {
-        return (string) config('app.staging_password.password') !== '' && ! app()->isProduction();
-    }
-
     public function handle(Request $request, Closure $next): Response
     {
         $password = (string) config('app.staging_password.password');
 
         // A signed address is already unguessable; the website builder's headless Chrome opens pages that way.
-        if (! self::isOn() || $request->is(...self::OPEN_PATHS) || $request->hasValidSignature()) {
+        if ($password === '' || app()->isProduction() || $request->is(...self::OPEN_PATHS) || $request->hasValidSignature()) {
             return $next($request);
         }
 
