@@ -31,7 +31,7 @@ const tabs = computed(() => [
 function isActive(tab) {
     if (tab.key === 'inbox') return onInbox.value;
     if (onInbox.value) return false;
-    if (tab.key === 'lodge') return props.activeTab === 'lodges' || (Boolean(props.club) && props.activeTab === 'dashboard');
+    if (tab.key === 'lodge') return ['lodges', 'directory'].includes(props.activeTab) || (Boolean(props.club) && props.activeTab === 'dashboard');
     if (tab.key === 'dashboard') return !props.club && props.activeTab === 'dashboard';
     return props.activeTab === tab.key;
 }

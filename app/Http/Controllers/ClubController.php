@@ -6,7 +6,7 @@ use App\Domains\ClubAccounting\Services\MemberInvitationService;
 use App\Enums\ClubMemberStatus;
 use App\Http\Requests\Club\UpdateDomainRequest;
 use App\Models\Club;
-use App\Models\ClubType;
+use App\Models\Lodge;
 use App\Models\User;
 use App\Notifications\ClubNotification;
 use App\Services\ClubNotifier;
@@ -22,7 +22,7 @@ use Inertia\Response;
 class ClubController extends Controller
 {
     /**
-     * Display a listing of all registered clubs and their configurations.
+     * The public homepage. It shows no club's details: only how many lodges the directory lists.
      */
     public function index(): Response|RedirectResponse
     {
@@ -30,39 +30,8 @@ class ClubController extends Controller
             return redirect()->route('members.dashboard');
         }
 
-        $clubs = Club::with(['clubType', 'membershipPlans'])
-            ->withCount([
-                'users',
-                'events' => fn ($events) => $events->visibleTo(null),
-                'posts' => fn ($posts) => $posts->visibleTo(null),
-            ])
-            ->get()
-            ->map(function ($club) {
-                return [
-                    'id' => $club->id,
-                    'name' => $club->name,
-                    'slug' => $club->slug,
-                    'custom_domain' => $club->custom_domain,
-                    'domain_status' => $club->domain_status,
-                    'status' => $club->status,
-                    'type_name' => $club->clubType->name,
-                    'type_code' => $club->clubType->code,
-                    'available_modules' => $club->clubType->available_modules,
-                    'enabled_modules' => $club->settings['enabled_modules'] ?? $club->clubType->available_modules,
-                    'tagline' => $club->settings['tagline'] ?? '',
-                    'primary_color' => $club->settings['primary_color'] ?? '#3b82f6',
-                    'members_count' => $club->users_count,
-                    'events_count' => $club->events_count,
-                    'posts_count' => $club->posts_count,
-                    'plans_count' => $club->membershipPlans->count(),
-                ];
-            });
-
-        $clubTypes = ClubType::all();
-
         return Inertia::render('Welcome', [
-            'clubs' => $clubs,
-            'clubTypes' => $clubTypes,
+            'lodgeCount' => Lodge::listed()->count(),
         ]);
     }
 
