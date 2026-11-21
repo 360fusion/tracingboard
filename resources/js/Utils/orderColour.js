@@ -4,7 +4,7 @@
  *
  * The keys must match App\Support\OrderColours::KEYS. Class names are written out in
  * full so Tailwind can see them. `header` is the lodge header in the members area (MembersLayout): a deep shade,
- * so white text reads on it.
+ * so white text reads on it. Black uses neutral, because .cm-nav (app.css) tints slate navy inside the header.
  */
 const PALETTE = {
     red: { label: 'Red', tile: 'bg-red-600 text-white', soft: 'bg-red-50 text-red-700 dark:bg-red-950/50 dark:text-red-300', dot: 'bg-red-500', header: 'bg-red-800 dark:bg-red-900' },
@@ -25,7 +25,7 @@ const PALETTE = {
     fuchsia: { label: 'Magenta', tile: 'bg-fuchsia-600 text-white', soft: 'bg-fuchsia-50 text-fuchsia-700 dark:bg-fuchsia-950/50 dark:text-fuchsia-300', dot: 'bg-fuchsia-500', header: 'bg-fuchsia-800 dark:bg-fuchsia-900' },
     pink: { label: 'Pink', tile: 'bg-pink-500 text-white', soft: 'bg-pink-50 text-pink-700 dark:bg-pink-950/50 dark:text-pink-300', dot: 'bg-pink-400', header: 'bg-pink-800 dark:bg-pink-900' },
     rose: { label: 'Rose', tile: 'bg-rose-600 text-white', soft: 'bg-rose-50 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300', dot: 'bg-rose-500', header: 'bg-rose-800 dark:bg-rose-900' },
-    slate: { label: 'Black', tile: 'bg-slate-700 text-white dark:bg-slate-600', soft: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300', dot: 'bg-slate-700 dark:bg-slate-400', header: 'bg-slate-800 dark:bg-slate-900' },
+    slate: { label: 'Black', tile: 'bg-slate-700 text-white dark:bg-slate-600', soft: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300', dot: 'bg-slate-700 dark:bg-slate-400', header: 'bg-neutral-800 dark:bg-neutral-900' },
     stone: { label: 'Stone', tile: 'bg-stone-500 text-white', soft: 'bg-stone-100 text-stone-700 dark:bg-stone-800 dark:text-stone-300', dot: 'bg-stone-500', header: 'bg-stone-700 dark:bg-stone-800' },
 };
 

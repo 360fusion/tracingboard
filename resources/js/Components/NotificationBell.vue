@@ -11,7 +11,7 @@ const page = usePage();
 const open = ref(false);
 
 const buttonClasses = computed(() => (props.tone === 'onDark'
-    ? 'border-slate-600 text-slate-200 hover:bg-slate-700'
+    ? 'border-white/25 bg-white/10 text-white hover:bg-white/20'
     : 'border-slate-200 text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800'));
 
 const unread = computed(() => page.props.bell?.unread ?? 0);
@@ -61,7 +61,7 @@ const markAllRead = () => {
             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 00-4-5.7V5a2 2 0 10-4 0v.3A6 6 0 006 11v3.2a2 2 0 01-.6 1.4L4 17h5m6 0a3 3 0 11-6 0" />
             </svg>
-            <span v-if="unread" class="absolute -right-1 -top-1 flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-rose-600 px-1 text-[10px] font-bold text-white">
+            <span v-if="unread" class="absolute -right-1 -top-1 flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-rose-600 px-1 text-[10px] font-bold text-white" :class="tone === 'onDark' ? 'ring-2 ring-white' : ''">
                 {{ unread > 99 ? '99+' : unread }}
             </span>
         </button>

@@ -68,8 +68,8 @@ const account = computed(() => [
 ].filter((item) => !item.hide));
 
 const buttonClasses = computed(() => (props.tone === 'onDark'
-    ? 'border-slate-600 text-slate-100 hover:bg-slate-700'
-    : 'border-slate-200 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800'));
+    ? 'text-white hover:bg-white/15'
+    : 'text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800'));
 
 const panelClasses = computed(() => (isPhone.value
     ? 'fixed inset-x-0 bottom-0 z-[90] max-h-[92dvh] rounded-t-3xl border-t px-3 pt-2 pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)]'
@@ -84,13 +84,13 @@ const iconSize = computed(() => (isPhone.value ? 20 : 16));
     <div class="relative">
         <button
             type="button"
-            :class="['relative z-50 flex items-center gap-2 rounded-xl border p-1.5 pr-3 transition-colors', buttonClasses]"
+            :class="['relative z-50 flex items-center gap-2 rounded-full p-1 transition-colors sm:pr-3', buttonClasses]"
             :aria-expanded="open"
             aria-haspopup="menu"
             aria-label="Your account"
             @click="open = !open"
         >
-            <span class="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-blue-600 text-xs font-bold text-white">
+            <span :class="['flex h-8 w-8 items-center justify-center overflow-hidden rounded-full text-xs font-bold text-white', tone === 'onDark' ? 'bg-white/20' : 'bg-blue-600']">
                 <img v-if="user?.avatar_url" :src="user.avatar_url" alt="" class="h-full w-full object-cover" />
                 <span v-else>{{ initials }}</span>
             </span>
