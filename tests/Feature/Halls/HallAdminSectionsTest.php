@@ -8,6 +8,7 @@ use App\Models\MasonicHall;
 use App\Models\User;
 use App\Services\Halls\HallClubs;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class HallAdminSectionsTest extends TestCase
@@ -110,5 +111,34 @@ class HallAdminSectionsTest extends TestCase
 
         $lodge = Club::factory()->create();
         $this->actingAs(User::factory()->create(['is_super_admin' => true]))->get(route('admin.analytics', ['slug' => $lodge->slug]))->assertInertia(fn ($page) => $page->where('hallMetrics', null));
+    }
+
+    public function test_shared_clubs_give_each_hall_its_landing_page_without_a_query_per_club(): void
+    {
+        $lodge = Club::factory()->create();
+        $user = User::factory()->create();
+        $lodge->users()->attach($user->id, ['role' => 'coach', 'status' => 'active']);
+        $byTreasurer = Club::factory()->hall()->create();
+        $byTreasurer->users()->attach($user->id, ['role' => 'treasurer', 'status' => 'active']);
+        $bySecretary = Club::factory()->hall()->create();
+        $bySecretary->users()->attach($user->id, ['role' => 'coach', 'status' => 'active']);
+
+        $clubs = fn () => collect($this->actingAs($user)->get('/members/dashboard')->assertOk()->viewData('page')['props']['auth']['clubs'])->keyBy('slug');
+
+        $clubs();
+        DB::enableQueryLog();
+        $shared = $clubs();
+        $queries = count(DB::getQueryLog());
+
+        $this->assertNull($shared[$lodge->slug]['landing_url']);
+        $this->assertSame(route('admin.analytics', ['slug' => $byTreasurer->slug]), $shared[$byTreasurer->slug]['landing_url']);
+        $this->assertSame(route('admin.hall.edit', ['clubSlug' => $bySecretary->slug]), $shared[$bySecretary->slug]['landing_url']);
+
+        foreach (range(1, 3) as $i) {
+            Club::factory()->hall()->create()->users()->attach($user->id, ['role' => 'coach', 'status' => 'active']);
+        }
+        DB::flushQueryLog();
+        $clubs();
+        $this->assertSame($queries, count(DB::getQueryLog()));
     }
 }

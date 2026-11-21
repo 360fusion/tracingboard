@@ -10,6 +10,7 @@ use App\Models\Club;
 use App\Models\ContactMessage;
 use App\Models\LodgeClaim;
 use App\Models\LodgeCorrection;
+use App\Services\Halls\HallClubs;
 use App\Support\Currencies;
 use App\Support\NativeApp;
 use Illuminate\Contracts\Auth\Authenticatable;
@@ -112,6 +113,8 @@ class HandleInertiaRequests extends Middleware
                     'number' => $c->lodge_number,
                     'type_name' => $c->clubType?->name,
                     'is_hall' => $c->isHall(),
+                    // A hall has no member area: switching to it opens its admin where this person starts.
+                    'landing_url' => $c->isHall() ? HallClubs::landingUrlFromPivot($c, $user) : null,
                     'role' => $c->pivot->role ?? 'member',
                     'member_number' => $c->pivot->member_number ?? '',
                     'status' => $c->pivot->status ?? 'active',

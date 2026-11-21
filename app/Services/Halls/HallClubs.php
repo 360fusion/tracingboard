@@ -9,6 +9,7 @@ use App\Models\ClubType;
 use App\Models\MasonicHall;
 use App\Models\User;
 use App\Support\ClubAccess;
+use App\Support\ClubPermissions;
 use App\Support\ReservedClubSlugs;
 use DomainException;
 use Illuminate\Support\Facades\DB;
@@ -58,7 +59,22 @@ class HallClubs
      */
     public static function landingUrl(Club $club, ?User $user, bool $absolute = true): string
     {
-        return ClubAccess::can($user, $club, 'manage_hall')
+        return self::landingUrlFor($club, ClubAccess::can($user, $club, 'manage_hall'), $absolute);
+    }
+
+    /**
+     * The same for a hall loaded through `$user->clubs()`, read from its pivot so a list of clubs needs no query each.
+     */
+    public static function landingUrlFromPivot(Club $club, User $user): string
+    {
+        $role = ($club->pivot->status ?? null) === ClubMemberStatus::Active->value ? $club->pivot->role : null;
+
+        return self::landingUrlFor($club, $user->actsAsSuperAdmin() || ClubPermissions::allows($club, $role, 'manage_hall'));
+    }
+
+    private static function landingUrlFor(Club $club, bool $mayEditHall, bool $absolute = true): string
+    {
+        return $mayEditHall
             ? route('admin.hall.edit', ['clubSlug' => $club->slug], $absolute)
             : route('admin.analytics', ['slug' => $club->slug], $absolute);
     }

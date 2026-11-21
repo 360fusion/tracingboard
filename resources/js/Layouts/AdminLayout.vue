@@ -56,10 +56,11 @@ const memberPortalHref = computed(() => (isHall.value ? route('members.dashboard
 
 const switchWorkspace = (targetClub) => {
   switcherOpen.value = false;
-  if (['admin', 'owner'].includes(targetClub.role)) {
+  // A hall has no member area, so the server says where on its admin this person starts.
+  if (targetClub.landing_url) {
+    router.visit(targetClub.landing_url);
+  } else if (['admin', 'owner'].includes(targetClub.role)) {
     router.visit(route('admin.analytics', { slug: targetClub.slug }));
-  } else if (targetClub.is_hall) {
-    router.visit(route('members.dashboard'));
   } else {
     router.visit(route('member.dashboard', { slug: targetClub.slug }));
   }
