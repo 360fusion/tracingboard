@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use Illuminate\Support\Facades\URL;
+use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
 class StagingPasswordTest extends TestCase
@@ -64,5 +65,15 @@ class StagingPasswordTest extends TestCase
         $this->app['env'] = 'production';
 
         $this->get('/login')->assertOk();
+    }
+
+    public function test_pages_say_when_the_password_is_on_so_the_service_worker_leaves_page_loads_alone(): void
+    {
+        $this->get('/login', $this->basicAuth('staging', self::PASSWORD))
+            ->assertInertia(fn (Assert $page) => $page->where('stagingPassword', true));
+
+        config(['app.staging_password.password' => null]);
+
+        $this->get('/login')->assertInertia(fn (Assert $page) => $page->where('stagingPassword', false));
     }
 }

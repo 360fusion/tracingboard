@@ -14,6 +14,9 @@ const OFFLINE = '/offline.html';
 const KEPT = [/^\/members(\/|$)/, /^\/lodges(\/|$)/];
 const NOT_KEPT = /\.(pdf|csv|ics|xlsx|zip)$|\/(download|export|pdf|feed|ics)(\/|$)/;
 const isKept = (pathname) => KEPT.some((pattern) => pattern.test(pathname)) && !NOT_KEPT.test(pathname);
+// Registered as /sw.js?password=1 on a staging site behind its password: full page loads go straight to the browser,
+// because Chrome cannot ask for the password on a load the worker makes and shows an error instead.
+const BEHIND_PASSWORD = new URL(self.location.href).searchParams.has('password');
 // On a weak signal the saved copy is shown after this long instead of a page that never arrives.
 const WEAK_SIGNAL_MS = 4000;
 
@@ -83,6 +86,10 @@ self.addEventListener('fetch', (event) => {
             if (response.ok) cache.put(request, response.clone());
             return response;
         }))));
+        return;
+    }
+
+    if (BEHIND_PASSWORD && request.mode === 'navigate') {
         return;
     }
 

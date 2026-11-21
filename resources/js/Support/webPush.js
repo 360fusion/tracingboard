@@ -29,16 +29,21 @@ export async function promptInstall() {
     return (await prompt.userChoice).outcome === 'accepted';
 }
 
+// Behind the staging password the worker is told to leave full page loads to the browser, which can ask for the
+// password (public/sw.js). A different address replaces the worker already installed.
+let workerUrl = '/sw.js';
+
 /** Called once at start-up: a signed-in member gets the service worker, and the icon badge follows the inbox. */
 export function startWebApp(initialPage) {
     if (!canUseWorker() || !initialPage?.props?.auth?.user || initialPage.props.staticSite) return;
+    if (initialPage.props.stagingPassword) workerUrl = '/sw.js?password=1';
 
     window.addEventListener('beforeinstallprompt', (event) => {
         event.preventDefault();
         installPrompt = event;
     });
 
-    navigator.serviceWorker.register('/sw.js').then(() => reclaimSubscription(initialPage.props.webPushKey)).catch(() => {});
+    navigator.serviceWorker.register(workerUrl).then(() => reclaimSubscription(initialPage.props.webPushKey)).catch(() => {});
     startOfflinePages(initialPage);
     setBadge(initialPage.props.bell?.unread ?? 0);
     router.on('navigate', (event) => setBadge(event.detail.page.props.bell?.unread ?? 0));
@@ -85,7 +90,7 @@ async function send(method, body) {
 export async function turnOnWebPush(publicKey) {
     if ((await Notification.requestPermission()) !== 'granted') return false;
 
-    const registration = await navigator.serviceWorker.register('/sw.js');
+    const registration = await navigator.serviceWorker.register(workerUrl);
     await navigator.serviceWorker.ready;
     const subscription = (await registration.pushManager.getSubscription())
         ?? await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(publicKey) });
