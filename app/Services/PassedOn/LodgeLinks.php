@@ -104,7 +104,7 @@ class LodgeLinks
             ->replace($sister->mapWithKeys(fn (int $id) => [$id => ClubLodgeLink::SISTER]))
             ->except([$lodge->club_id]);
 
-        return Club::whereIn('id', $relations->keys())->get()
+        return Club::whereIn('id', $relations->keys())->orderBy('id')->get()
             ->map(fn (Club $club) => ['club' => $club, 'relation' => $relations->get($club->id, ClubLodgeLink::SISTER)])
             ->values();
     }
