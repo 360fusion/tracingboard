@@ -21,6 +21,15 @@ defineProps({
                     <a v-if="hall.map_url" :href="hall.map_url" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline dark:text-blue-400">Open in maps ↗</a>
                     <a v-if="hall.website_url" :href="hall.website_url" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline dark:text-blue-400">Website ↗</a>
                 </div>
+                <p v-if="hall.telephone || hall.email" class="mt-2 text-sm">
+                    <a v-if="hall.telephone" :href="`tel:${hall.telephone}`" class="text-blue-600 hover:underline dark:text-blue-400">{{ hall.telephone }}</a>
+                    <span v-if="hall.telephone && hall.email"> · </span>
+                    <a v-if="hall.email" :href="`mailto:${hall.email}`" class="text-blue-600 hover:underline dark:text-blue-400">{{ hall.email }}</a>
+                </p>
+            </div>
+
+            <div v-if="hall.photos?.length" class="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                <img v-for="photo in hall.photos" :key="photo.url" :src="photo.url" :alt="photo.name" loading="lazy" class="aspect-[4/3] w-full rounded-xl object-cover" />
             </div>
 
             <section class="rounded-xl border border-slate-200 bg-white p-4 sm:p-5 dark:border-slate-800 dark:bg-slate-900">

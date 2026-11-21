@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Club;
 use App\Models\ClubType;
+use App\Models\MasonicHall;
 use App\Models\User;
 use App\Support\ClubPermissions;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -62,7 +63,7 @@ class AdminRouteSweepTest extends TestCase
         $type = ClubType::create(['name' => 'Masonic Lodge', 'code' => 'masonic', 'available_modules' => [], 'default_settings' => []]);
         $a = Club::create(['club_type_id' => $type->id, 'name' => 'Club A', 'slug' => 'club-a', 'status' => 'active']);
         $b = Club::create(['club_type_id' => $type->id, 'name' => 'Club B', 'slug' => 'club-b', 'status' => 'active']);
-        Club::factory()->hall()->create(['slug' => 'hall-h']);
+        MasonicHall::factory()->create(['club_id' => Club::factory()->hall()->create(['slug' => 'hall-h'])->id]);
 
         $member = User::factory()->create();
         $a->users()->attach($member->id, ['role' => 'member', 'status' => 'active']);
@@ -149,6 +150,7 @@ class AdminRouteSweepTest extends TestCase
         $type = ClubType::create(['name' => 'Masonic Lodge', 'code' => 'masonic', 'available_modules' => [], 'default_settings' => []]);
         $club = Club::create(['club_type_id' => $type->id, 'name' => 'Club A', 'slug' => 'club-a', 'status' => 'active']);
         $hall = Club::factory()->hall()->create(['slug' => 'hall-h']);
+        MasonicHall::factory()->create(['club_id' => $hall->id]);
 
         $unmapped = [];
         $leaks = [];

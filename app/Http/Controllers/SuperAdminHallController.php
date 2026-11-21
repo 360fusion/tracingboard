@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\MasonicHallDetailsRequest;
 use App\Models\MasonicHall;
 use App\Models\Province;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -69,20 +69,7 @@ class SuperAdminHallController extends Controller
      */
     private function validateMasonicHall(Request $request): array
     {
-        return $request->validate([
-            'province_id' => 'nullable|exists:provinces,id',
-            'name' => 'required|string|max:255',
-            'kind' => ['sometimes', Rule::in(array_keys(MasonicHall::KINDS))],
-            'address_line_1' => 'nullable|string|max:255',
-            'address_line_2' => 'nullable|string|max:255',
-            'town' => 'nullable|string|max:100',
-            'county' => 'nullable|string|max:100',
-            'postcode' => 'nullable|string|max:30',
-            'country' => 'nullable|string|max:100',
-            'telephone' => 'nullable|string|max:50',
-            'email' => 'nullable|email|max:255',
-            'website_url' => ['nullable', 'url', 'max:255', 'regex:#^https?://#i'],
-        ]);
+        return $request->validate(['province_id' => 'nullable|exists:provinces,id'] + MasonicHallDetailsRequest::detailRules());
     }
 
     private function uniqueMasonicHallSlug(string $name): string
