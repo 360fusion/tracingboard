@@ -107,6 +107,7 @@
         </tbody>
     </table>
 
+    @if($report['membership'])
     <div class="section-title">Membership — Arrears (Rule 181)</div>
     <table>
         <thead><tr><th>Member</th><th>Invoice Reference</th><th class="num">Balance Due</th></tr></thead>
@@ -135,6 +136,7 @@
         </tbody>
     </table>
     <p class="muted">Today's count of active members ({{ $pd['counted_on'] }}); lodges keep no leave date, so this is not a past-date snapshot.</p>
+    @endif
     @endif
 
     @if($report['vat'] && $report['vat']['enabled'])

@@ -83,7 +83,8 @@ class AnnualTreasurerReportService
                 'closing_ledger_balance' => $b->ledger_balance,
                 'closing_statement_balance' => $b->statement_balance,
             ])->values()->all(),
-            'membership' => [
+            // A hall has no members, so no arrears or Province section.
+            'membership' => $club->isHall() ? null : [
                 'in_arrears_count' => $arrears->count(),
                 'in_arrears' => $arrears->map(fn ($sub) => [
                     'member_name' => $sub->member?->full_name,
@@ -255,10 +256,12 @@ class AnnualTreasurerReportService
         }
         $csv .= Csv::line([]);
 
-        $csv .= Csv::line(['MEMBERS IN ARREARS (Rule 181)']);
-        $csv .= Csv::line(['Member', 'Invoice Reference', 'Balance Due']);
-        foreach ($report['membership']['in_arrears'] as $m) {
-            $csv .= Csv::line([$m['member_name'], $m['invoice_reference'], $m['balance_due']]);
+        if ($report['membership']) {
+            $csv .= Csv::line(['MEMBERS IN ARREARS (Rule 181)']);
+            $csv .= Csv::line(['Member', 'Invoice Reference', 'Balance Due']);
+            foreach ($report['membership']['in_arrears'] as $m) {
+                $csv .= Csv::line([$m['member_name'], $m['invoice_reference'], $m['balance_due']]);
+            }
         }
 
         return $csv;

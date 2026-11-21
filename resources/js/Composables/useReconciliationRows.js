@@ -1,3 +1,5 @@
+import { usePage } from '@inertiajs/vue3';
+
 /**
  * Reconciling a bank line from the reconciliation screen: the per-row working state (which tab is open, who, what,
  * why), the "who" suggestions from the contacts, the quick reconcile from a row, and the manual match dialog.
@@ -5,9 +7,13 @@
  * `contacts` is a function returning the contacts on offer (declared further down the page).
  */
 export function useReconciliationRows(props, { rowStates, selectedTx, reconcileForm, showManualModal, manualMatchType, manualTargetId, manualNominalCode, contacts }) {
+    const page = usePage();
+
     const openManualMatchModal = () => {
       if (!selectedTx.value) return;
-      manualMatchType.value = selectedTx.value.amount > 0 ? 'member_subscription' : 'supplier_bill';
+      // A hall has no member dues, so money in starts on a ledger account.
+      const moneyIn = page.props.clubIsHall ? 'ledger_account' : 'member_subscription';
+      manualMatchType.value = selectedTx.value.amount > 0 ? moneyIn : 'supplier_bill';
       manualTargetId.value = '';
       manualNominalCode.value = '4000';
       showManualModal.value = true;
