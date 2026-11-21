@@ -23,7 +23,7 @@ class NewsletterOptOut
 
         $isMember = $delivery->user_id !== null && $delivery->newsletter->club->users()->wherePivot('status', ClubMemberStatus::Active->value)->where('users.id', $delivery->user_id)->exists();
 
-        return ! ($isMember && $type->is_mandatory);
+        return ! ($isMember && $type->is_mandatory && ! $delivery->newsletter->club->isHall());
     }
 
     /**

@@ -29,6 +29,11 @@ class NewsletterAudience
         $roles = Newsletter::rolesReached($newsletter->target_roles ?: ['member']);
         $mandatory = ! $club->isHall() && ($type === null || $type->is_mandatory);
 
+        // A hall newsletter needs a channel, or its lodge members would have no way to opt out.
+        if ($club->isHall() && $type === null) {
+            return collect();
+        }
+
         $rows = NewsletterSubscription::where('club_id', $club->id)
             ->when($type, fn ($q) => $q->where('newsletter_type_id', $type->id), fn ($q) => $q->whereRaw('1 = 0'))
             ->get();

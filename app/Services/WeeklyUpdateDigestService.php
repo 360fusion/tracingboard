@@ -291,7 +291,7 @@ class WeeklyUpdateDigestService
                 'color' => '#4f46e5',
                 'icon' => '📰',
                 'is_external_subscribable' => true,
-                'is_mandatory' => true,
+                'is_mandatory' => ! $club->isHall(),
                 'is_automated_digest' => true,
                 'digest_frequency' => 'weekly',
                 'digest_send_day' => 'friday',

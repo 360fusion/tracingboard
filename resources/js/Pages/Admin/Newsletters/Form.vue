@@ -20,6 +20,7 @@ const props = defineProps({
   club: Object,
   newsletter: Object,
   types: Array,
+  isHall: { type: Boolean, default: false },
   posts: Array,
   pickerApprovedUpdates: { type: Array, default: () => [] },
   pickerMeetings: { type: Array, default: () => [] },
@@ -377,7 +378,7 @@ const sectionTitle = 'text-sm font-semibold text-slate-900 dark:text-white';
           <Input v-model="form.subject" class="md:col-span-2" label="Subject line" required placeholder="Summer regatta schedule and summons" :error="form.errors.subject" />
         </div>
 
-        <fieldset>
+        <fieldset v-if="!isHall">
           <legend class="mb-1.5 block text-xs font-medium text-slate-700 dark:text-slate-300">Member roles to send to</legend>
           <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <label v-for="role in availableRoles" :key="role.id" :class="[rowBox, 'flex cursor-pointer items-center gap-2 p-3 text-sm font-medium text-slate-900 dark:text-white']">

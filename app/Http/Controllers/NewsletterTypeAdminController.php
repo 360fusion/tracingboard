@@ -221,7 +221,9 @@ class NewsletterTypeAdminController extends Controller
     public function updateSubscriberStatus(UpdateSubscriberStatusRequest $request, string $clubSlug, int $id): RedirectResponse
     {
         $club = $this->findClub($clubSlug);
-        $subscription = NewsletterSubscription::where('club_id', $club->id)->findOrFail($id);
+        $subscription = NewsletterSubscription::where('club_id', $club->id)
+            ->when($club->isHall(), fn ($q) => $q->whereNull('user_id'))
+            ->findOrFail($id);
 
         $validated = $request->validated();
 
