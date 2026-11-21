@@ -2,6 +2,7 @@
 
 namespace App\Enums;
 
+use App\Models\Club;
 use App\Models\User;
 
 /**
@@ -70,7 +71,7 @@ enum Visibility: string
 
         return match ($this) {
             self::Network => $viewer->activeClubIds()->isNotEmpty(),
-            self::Club => $viewer->activeClubIds()->contains($clubId),
+            self::Club => $viewer->activeClubIds()->contains($clubId) || $viewer->hallAudienceClubIds()->contains($clubId),
         };
     }
 
@@ -79,11 +80,11 @@ enum Visibility: string
      *
      * @return list<array{value: string, label: string, description: string}>
      */
-    public static function options(): array
+    public static function options(?Club $club = null): array
     {
         return array_map(fn (self $case): array => [
             'value' => $case->value,
-            'label' => $case->label(),
+            'label' => $case === self::Club && $club?->isHall() ? 'Members of lodges that meet here' : $case->label(),
             'description' => $case->description(),
         ], self::cases());
     }

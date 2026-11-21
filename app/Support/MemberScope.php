@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Enums\ClubMemberStatus;
 use App\Enums\ClubRole;
 use App\Models\Club;
+use App\Models\MasonicHall;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -16,6 +17,9 @@ use Illuminate\Support\Collection;
  */
 final class MemberScope
 {
+    /** @var Collection<int, Club>|null */
+    private ?Collection $hallClubs = null;
+
     /**
      * @param  Collection<int, Club>  $memberClubs  every club the user is an active member of
      */
@@ -87,6 +91,24 @@ final class MemberScope
     public function clubIds(): Collection
     {
         return $this->clubs()->pluck('id');
+    }
+
+    /**
+     * Hall clubs whose "club" events reach this scope's clubs (events only: a hall has no meetings or posts for members).
+     *
+     * @return Collection<int, Club>
+     */
+    public function hallClubs(): Collection
+    {
+        return $this->hallClubs ??= MasonicHall::hallClubsFor($this->clubs());
+    }
+
+    /**
+     * @return Collection<int, int>
+     */
+    public function hallClubIds(): Collection
+    {
+        return $this->hallClubs()->pluck('id');
     }
 
     public function clubFor(int $clubId): ?Club

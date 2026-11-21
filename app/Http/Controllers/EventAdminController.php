@@ -78,7 +78,7 @@ class EventAdminController extends Controller
         return Inertia::render('Admin/Events/Form', [
             'club' => $club,
             'event' => $event,
-            'visibilityOptions' => Visibility::options(),
+            'visibilityOptions' => Visibility::options($club),
             // Ticket types and dishes in use cannot be removed without losing people's choices.
             'tiersInUse' => $id ? EventAttendee::whereIn('ticket_tier_id', $event->ticketTiers->pluck('id'))->pluck('ticket_tier_id')->unique()->values() : [],
             'dishesInUse' => $id ? $details->dishesInUse($event) : [],

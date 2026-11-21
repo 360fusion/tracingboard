@@ -6,6 +6,7 @@ use App\Enums\EventStatus;
 use App\Models\Club;
 use App\Models\ClubUpdate;
 use App\Models\Event;
+use App\Models\MasonicHall;
 use App\Models\Newsletter;
 use App\Models\Post;
 use App\Models\User;
@@ -31,7 +32,12 @@ class MemberFeed
         }
 
         $clubIds = $clubs->pluck('id');
-        $club = fn (int $id): array => ['name' => $clubs->firstWhere('id', $id)->name, 'slug' => $clubs->firstWhere('id', $id)->slug, 'colour' => $clubs->firstWhere('id', $id)->colourKey()];
+        $hallClubs = MasonicHall::hallClubsFor($clubs);
+        $club = function (int $id) use ($clubs, $hallClubs): array {
+            $found = $clubs->firstWhere('id', $id) ?? $hallClubs->firstWhere('id', $id);
+
+            return ['name' => $found->name, 'slug' => $found->slug, 'colour' => $found->colourKey()];
+        };
         $roles = $clubs->mapWithKeys(fn (Club $c) => [$c->id => $c->pivot->role ?? 'member']);
 
         $posts = Post::whereIn('club_id', $clubIds)->published()->visibleTo($user)
@@ -48,7 +54,7 @@ class MemberFeed
                 'link' => ['name' => 'member.posts.show', 'params' => ['slug' => $club($post->club_id)['slug'], 'id' => $post->id]],
             ]);
 
-        $events = Event::whereIn('club_id', $clubIds)->visibleTo($user)
+        $events = Event::whereIn('club_id', $clubIds->merge($hallClubs->pluck('id')))->visibleTo($user)
             ->where('status', EventStatus::Upcoming->value)
             ->where('starts_at', '>=', now())
             ->latest()->limit($limit)->get()
@@ -60,7 +66,9 @@ class MemberFeed
                 'excerpt' => trim($event->starts_at->format('j M Y, H:i').' · '.$event->location, ' ·'),
                 'at' => $event->created_at->toIso8601String(),
                 'important' => false,
-                'link' => ['name' => 'member.events', 'params' => ['slug' => $club($event->club_id)['slug']]],
+                'link' => $hallClubs->contains('id', $event->club_id)
+                    ? ['name' => 'public.event', 'params' => ['clubSlug' => $club($event->club_id)['slug'], 'eventSlug' => $event->slug]]
+                    : ['name' => 'member.events', 'params' => ['slug' => $club($event->club_id)['slug']]],
             ]);
 
         $updates = ClubUpdate::whereIn('club_id', $clubIds)->where('status', 'sent')

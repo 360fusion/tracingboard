@@ -31,6 +31,9 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
 
+    /** @var Collection<int, int>|null */
+    private ?Collection $hallAudienceClubIds = null;
+
     /**
      * Get the attributes that should be cast.
      *
@@ -127,6 +130,19 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
     public function activeClubIds(): Collection
     {
         return $this->clubs()->notHalls()->wherePivot('status', ClubMemberStatus::Active->value)->pluck('clubs.id');
+    }
+
+    /**
+     * IDs of the hall clubs of the halls where this user's clubs meet: a hall's "club" audience reaches them.
+     * Kept on the instance, so a loop over events does not query per event.
+     *
+     * @return Collection<int, int>
+     */
+    public function hallAudienceClubIds(): Collection
+    {
+        return $this->hallAudienceClubIds ??= MasonicHall::hallClubsFor(
+            $this->clubs()->notHalls()->wherePivot('status', ClubMemberStatus::Active->value)->get(['clubs.id', 'clubs.masonic_hall_id'])
+        )->pluck('id');
     }
 
     /**

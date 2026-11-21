@@ -35,8 +35,9 @@ trait HasVisibility
         $visibility = $model->qualifyColumn('visibility');
         $clubId = $model->qualifyColumn('club_id');
         $memberClubIds = $viewer?->activeClubIds() ?? collect();
+        $audienceClubIds = $memberClubIds->merge($viewer?->hallAudienceClubIds() ?? [])->unique();
 
-        return $query->where(function (Builder $audience) use ($visibility, $clubId, $memberClubIds): void {
+        return $query->where(function (Builder $audience) use ($visibility, $clubId, $memberClubIds, $audienceClubIds): void {
             $audience->where($visibility, Visibility::Public->value);
 
             if ($memberClubIds->isEmpty()) {
@@ -46,7 +47,7 @@ trait HasVisibility
             $audience->orWhere($visibility, Visibility::Network->value)
                 ->orWhere(fn (Builder $own) => $own
                     ->where($visibility, Visibility::Club->value)
-                    ->whereIn($clubId, $memberClubIds->all()));
+                    ->whereIn($clubId, $audienceClubIds->all()));
         });
     }
 
