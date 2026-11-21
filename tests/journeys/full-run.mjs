@@ -1008,6 +1008,8 @@ if (reach('F') && S.slug) {
         await form(page, { 'Title': 'Change of venue', 'Message': 'Next month we meet at the Ashford hall annexe.' });
         await press(page, 'Send to');
         expect(sql(`select count(*) from club_notices where club_id=${S.clubId} and title='Change of venue'`) === '1', 'notice not recorded');
+        // The notice goes out on the queue (SendClubNotice), so give the worker a moment before looking.
+        for (let i = 0; i < 20 && notes('member', 'Change of venue') < 1; i++) await pause(500);
         expect(notes('member', 'Change of venue') >= 1, 'member did not get the notice');
     });
     await check('F7', 'Member inbox shows summonses, news, events, newsletters and notices, and filters by kind', pages.member, async () => {
