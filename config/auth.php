@@ -126,4 +126,11 @@ return [
 
     'require_email_verification' => env('REQUIRE_EMAIL_VERIFICATION'),
 
+    /*
+    | Superadmins must turn on two-factor sign-in before using platform-wide access. A staging server can switch this
+    | off (SUPERADMIN_TWO_FACTOR=false); production ignores it and always requires two-factor.
+    */
+
+    'superadmin_two_factor' => (bool) env('SUPERADMIN_TWO_FACTOR', true),
+
 ];

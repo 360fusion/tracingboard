@@ -18,7 +18,7 @@ export async function start() {
 }
 
 /** A phone for one person, signed in. */
-export async function phone(browser, email) {
+export async function phone(browser, email, password = 'password') {
     const context = await browser.createBrowserContext();
     const page = await context.newPage();
     await page.setUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1');
@@ -28,12 +28,14 @@ export async function phone(browser, email) {
         try { localStorage.setItem('superadmin-theme', 'light'); localStorage.setItem('cm-install-tip-dismissed', '1'); } catch {}
     });
     page.on('pageerror', (e) => console.log('pageerror:', e.message.slice(0, 200)));
+    // A native confirm() or prompt() would block the page; accept it, as a person would.
+    page.on('dialog', (d) => { console.log('dialog:', d.message().slice(0, 120)); d.accept().catch(() => {}); });
     if (email) {
         await page.goto(BASE + '/login', { waitUntil: 'networkidle0' });
         await page.$eval('input[type=email]', (e) => { e.value = ''; });
         await page.$eval('input[type=password]', (e) => { e.value = ''; });
         await page.type('input[type=email]', email);
-        await page.type('input[type=password]', 'password');
+        await page.type('input[type=password]', password);
         await page.click('button[type=submit]');
         await page.waitForFunction(() => !location.pathname.startsWith('/login'), { timeout: 15000 });
         await settle(page);

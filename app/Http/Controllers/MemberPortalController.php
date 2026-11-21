@@ -97,11 +97,7 @@ class MemberPortalController extends Controller
             ->when($isPending, fn ($query) => $query->whereRaw('1 = 0'))
             ->orderByDesc('sent_at')
             ->get()
-            ->filter(function ($n) use ($role) {
-                $target = $n->target_roles ?? [];
-
-                return empty($target) || in_array($role, $target);
-            })
+            ->filter(fn (Newsletter $n) => $n->reachesRole($role))
             ->map(fn ($n) => [
                 'id' => $n->id,
                 'subject' => $n->subject,

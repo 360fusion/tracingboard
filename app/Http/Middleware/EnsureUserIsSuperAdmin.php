@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -25,8 +26,8 @@ class EnsureUserIsSuperAdmin
             return redirect()->route('home')->with('error', 'Unauthorized. Superadmin access required.');
         }
 
-        // Platform-wide access needs a second factor on every real server; local, test and e2e databases are exempt.
-        if (! app()->environment(['local', 'testing', 'e2e']) && ! $request->user()->two_factor_confirmed_at) {
+        // Platform-wide access needs a second factor on every real server (see User::superAdminNeedsTwoFactor).
+        if (User::superAdminNeedsTwoFactor() && ! $request->user()->two_factor_confirmed_at) {
             if ($request->expectsJson()) {
                 return response()->json(['message' => 'Turn on two-factor authentication to use the superadmin area.'], 403);
             }

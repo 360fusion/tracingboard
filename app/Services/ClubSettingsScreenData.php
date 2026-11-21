@@ -37,7 +37,7 @@ class ClubSettingsScreenData
 
         $settings = array_merge([
             // General & Access
-            'tagline' => 'Excellence in Club Management',
+            'tagline' => '',
             'lodge_number' => $club->lodge_number ?? '',
             'lodge_status' => 'Normal',
             'installed_masters' => 'No',
@@ -53,7 +53,8 @@ class ClubSettingsScreenData
             'currency' => $club->currencyCode(),
             'timezone' => 'Europe/London',
             'storage_quota_mb' => null,
-            'contact_email' => 'admin@'.$club->slug.'.org',
+            // Empty until the lodge gives one: a made-up address would be saved with the form and used for replies.
+            'contact_email' => '',
             'phone' => '',
             'address' => '',
             'address_line_1' => '',
@@ -146,7 +147,7 @@ class ClubSettingsScreenData
 
             // Newsletters & Communications
             'email_from_name' => $club->name,
-            'email_reply_to' => 'admin@'.$club->slug.'.org',
+            'email_reply_to' => '',
             'email_footer_address' => '',
             'notify_dues_overdue' => true,
 

@@ -1,4 +1,5 @@
 <script setup>
+import { computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import MembersLayout from '@/Layouts/MembersLayout.vue';
 import Badge from '@/Components/Ui/Badge.vue';
@@ -6,13 +7,16 @@ import Card from '@/Components/Ui/Card.vue';
 import ClubChips from '@/Components/ClubChips.vue';
 import Button from '@/Components/Ui/Button.vue';
 
-defineProps({
+const props = defineProps({
     subscriptions: { type: Array, default: () => [] },
     invoices: { type: Array, default: () => [] },
+    plans: { type: Array, default: () => [] },
     scopeClub: { type: Object, default: null },
     clubOptions: { type: Array, default: () => [] },
 });
 
+// /members/{slug}/dues is the lodge's own Dues tab: the lodge header, and no lodge chips.
+const urlScoped = computed(() => Boolean(route().params.slug));
 const day = (date) => (date ? new Date(`${date}T00:00:00`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '');
 // Where the member stands (DuesTracker::pace).
 function saidPaid(item) {
@@ -22,10 +26,10 @@ const PACE = { paid: ['Paid', 'success'], on_track: ['On track', 'success'], due
 </script>
 
 <template>
-    <MembersLayout title="Dues" active-tab="dues">
+    <MembersLayout title="Dues" :club="urlScoped ? props.scopeClub : null" active-tab="dues">
         <div class="space-y-6">
             <h2 class="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">Dues and payments</h2>
-            <ClubChips :options="clubOptions" :current="scopeClub?.slug ?? null" route-name="members.dues" />
+            <ClubChips v-if="!urlScoped" :options="clubOptions" :current="scopeClub?.slug ?? null" route-name="members.dues" />
 
             <section aria-labelledby="subs-heading" class="space-y-2">
                 <h2 id="subs-heading" class="text-sm font-medium text-slate-500 dark:text-slate-400">Subscriptions</h2>
@@ -72,6 +76,17 @@ const PACE = { paid: ['Paid', 'success'], on_track: ['On track', 'success'], due
                     <Button v-else-if="item.outstanding && item.pace.state !== 'on_track'" variant="secondary" size="sm" @click="saidPaid(item)">I've paid or set up a standing order</Button>
                 </Card>
                 <Card v-if="!subscriptions.length"><p class="py-4 text-center text-sm text-slate-500 dark:text-slate-400">No subscription records yet.</p></Card>
+            </section>
+
+            <section v-if="plans.length" aria-labelledby="plans-heading" class="space-y-2">
+                <h2 id="plans-heading" class="text-sm font-medium text-slate-500 dark:text-slate-400">Membership plans</h2>
+                <Card v-for="plan in plans" :key="plan.id" class="flex flex-wrap items-start justify-between gap-2">
+                    <div>
+                        <p class="text-sm font-semibold text-slate-900 dark:text-white">{{ plan.name }}</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">{{ plan.description }}</p>
+                    </div>
+                    <p class="text-sm font-semibold text-slate-900 dark:text-white">{{ $cs }}{{ plan.price }} <span class="font-normal text-slate-500 dark:text-slate-400">{{ plan.billing_period }}</span></p>
+                </Card>
             </section>
 
             <section aria-labelledby="inv-heading" class="space-y-2">

@@ -27,6 +27,20 @@ class AccountSecurityTest extends TestCase
         return $user;
     }
 
+    public function test_a_staging_server_can_drop_the_superadmin_two_factor_rule_but_production_cannot(): void
+    {
+        $superadmin = User::factory()->create(['is_super_admin' => true]);
+        config(['auth.superadmin_two_factor' => false]);
+
+        $this->app['env'] = 'development';
+        $this->actingAs($superadmin)->get('/superadmin')->assertOk();
+        $this->assertTrue($superadmin->actsAsSuperAdmin());
+
+        $this->app['env'] = 'production';
+        $this->actingAs($superadmin)->get('/superadmin')->assertRedirect(route('admin.profile.two-factor'));
+        $this->assertFalse($superadmin->actsAsSuperAdmin());
+    }
+
     public function test_a_superadmin_needs_two_factor_on_a_real_server(): void
     {
         $superadmin = User::factory()->create(['is_super_admin' => true]);

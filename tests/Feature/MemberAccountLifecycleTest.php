@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
+use Inertia\Testing\AssertableInertia as Assert;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -219,6 +220,15 @@ class MemberAccountLifecycleTest extends TestCase
         ])->assertSessionHasErrors('email');
 
         $this->assertNull(User::where('email', 'walkin@example.com')->first());
+    }
+
+    public function test_the_join_link_puts_the_lodge_on_the_sign_up_form(): void
+    {
+        $this->get('/register?club='.$this->club->slug)
+            ->assertInertia(fn (Assert $page) => $page->component('Auth/Register')->where('club.slug', $this->club->slug));
+
+        $this->get('/register?club=no-such-lodge')
+            ->assertInertia(fn (Assert $page) => $page->where('club', null));
     }
 
     public function test_open_clubs_still_take_join_requests(): void

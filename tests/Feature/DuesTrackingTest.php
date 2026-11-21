@@ -54,6 +54,17 @@ class DuesTrackingTest extends TestCase
         return $this->actingAs($this->tom)->get('/members/dues');
     }
 
+    public function test_the_lodges_own_dues_tab_shows_its_dues_and_refuses_other_lodges(): void
+    {
+        $this->actingAs($this->tom)->get(route('member.dues', ['slug' => $this->club->slug]))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->component('Members/AllDues')
+                ->where('scopeClub.slug', $this->club->slug)
+                ->where('subscriptions.0.reference', 'SUB-2027-014'));
+
+        $this->actingAs($this->tom)->get(route('member.dues', ['slug' => Club::factory()->create()->slug]))->assertNotFound();
+    }
+
     public function test_each_payment_is_kept_and_a_monthly_payer_sees_paid_left_and_that_they_are_on_track(): void
     {
         $billing = app(SubscriptionBillingService::class);

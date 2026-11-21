@@ -216,7 +216,7 @@ defineProps({
             label="Default role for new members"
             :options="[
               { value: 'member', label: 'Member' },
-              { value: 'coach', label: 'Coach' },
+              { value: 'coach', label: 'Secretary' },
               { value: 'treasurer', label: 'Treasurer' },
               { value: 'admin', label: 'Admin' },
             ]"

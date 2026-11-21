@@ -106,7 +106,9 @@ class MemberPortalTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertInertia(fn ($page) => $page
-            ->component('Member/Dues')
+            ->component('Members/AllDues')
+            ->where('scopeClub.slug', $club->slug)
+            ->has('subscriptions')
             ->has('plans')
             ->has('invoices')
         );

@@ -582,7 +582,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/members/{slug}/events', [MemberPortalController::class, 'events'])->name('member.events');
     Route::get('/members/{slug}/events/{id}/ticket', [EventTicketController::class, 'show'])->name('member.events.ticket');
     Route::get('/members/{slug}/news/{id}', [MemberPortalController::class, 'showPost'])->name('member.posts.show');
-    Route::get('/members/{slug}/dues', [MemberProfileController::class, 'dues'])->name('member.dues');
+    Route::get('/members/{slug}/dues', [MemberListController::class, 'dues'])->name('member.dues');
     Route::get('/members/{slug}/profile', [MemberProfileController::class, 'profile'])->name('member.profile');
     Route::post('/members/{slug}/profile', [MemberProfileController::class, 'updateProfile'])->name('member.profile.update');
     Route::post('/members/{slug}/events/{id}/rsvp', [MemberRsvpController::class, 'updateRsvp'])->name('member.rsvp');

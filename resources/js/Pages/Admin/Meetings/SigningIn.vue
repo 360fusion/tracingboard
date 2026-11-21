@@ -80,7 +80,7 @@ const rowClass = (signedIn) => [
         >
           <span class="min-w-0">
             <span class="block truncate font-medium">{{ person.name }}</span>
-            <span class="block text-xs opacity-75">{{ person.visitor ? 'Visitor, ' : '' }}replied {{ person.reply }}</span>
+            <span class="block text-xs opacity-75">{{ person.visitor ? 'Visitor, ' : '' }}{{ person.reply === 'no reply' ? 'no reply' : `replied ${person.reply}` }}</span>
           </span>
           <span class="shrink-0 text-xs font-semibold">{{ person.signed_in ? 'Signed in' : 'Sign in' }}</span>
         </button>

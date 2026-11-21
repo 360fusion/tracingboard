@@ -100,6 +100,22 @@ class NewsletterSendingTest extends TestCase
         $this->assertSame('sent', $newsletter->fresh()->status);
     }
 
+    public function test_a_newsletter_for_admins_reaches_the_owner_and_a_new_one_starts_with_treasurers_ticked(): void
+    {
+        Mail::fake();
+        $this->join($this->club, 'owner', 'active', ['email' => 'owner@example.test']);
+        $this->join($this->club, 'treasurer', 'active', ['email' => 'treasurer@example.test']);
+        $newsletter = $this->newsletter($this->summons, ['target_roles' => ['admin']]);
+
+        $this->send($newsletter)->assertSessionHasNoErrors();
+
+        $this->assertContains('owner@example.test', $this->recipients($newsletter));
+        $this->assertNotContains('treasurer@example.test', $this->recipients($newsletter));
+
+        $this->actingAs($this->admin)->get(route('admin.newsletters.create', ['clubSlug' => 'club-a']))
+            ->assertInertia(fn ($page) => $page->where('newsletter.target_roles', fn ($roles) => collect($roles)->contains('treasurer')));
+    }
+
     public function test_members_can_opt_out_of_an_optional_channel_but_not_a_mandatory_one(): void
     {
         Mail::fake();

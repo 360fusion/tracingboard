@@ -177,7 +177,7 @@ const form = useForm({
   newsletter_type_id: props.newsletter.newsletter_type_id || props.types?.[0]?.id || null,
   subject: props.newsletter.subject || '',
   content: props.newsletter.content || '',
-  target_roles: props.newsletter.target_roles || ['member', 'admin', 'coach'],
+  target_roles: props.newsletter.target_roles || ['member', 'admin', 'coach', 'treasurer'],
   status: props.newsletter.status || 'draft',
   existing_attachments: existingAttachments.value,
   new_attachments: [],

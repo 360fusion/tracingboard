@@ -8,15 +8,23 @@ use App\Models\Club;
 use App\Models\User;
 use App\Support\EmailVerification;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class RegisterController extends Controller
 {
-    public function create(): Response
+    /**
+     * The sign-up page; the lodge's join link (`/register?club=slug`) turns it into a request to join that lodge.
+     */
+    public function create(Request $request): Response
     {
-        return Inertia::render('Auth/Register');
+        $club = $request->filled('club') ? Club::where('slug', (string) $request->query('club'))->first(['name', 'slug']) : null;
+
+        return Inertia::render('Auth/Register', [
+            'club' => $club?->only(['name', 'slug']),
+        ]);
     }
 
     public function store(StoreRegisterRequest $request): RedirectResponse

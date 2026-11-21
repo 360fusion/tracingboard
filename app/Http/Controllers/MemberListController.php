@@ -265,9 +265,9 @@ class MemberListController extends Controller
         ];
     }
 
-    public function dues(Request $request): Response
+    public function dues(Request $request, ?string $slug = null): Response
     {
-        $scope = MemberScope::fromRequest($request);
+        $scope = MemberScope::fromRequest($request, $slug);
         $userId = $scope->user->id;
 
         $tracker = app(DuesTracker::class);
@@ -306,7 +306,12 @@ class MemberListController extends Controller
                 'created_at' => $invoice->created_at?->toDateString(),
             ]);
 
-        return Inertia::render('Members/AllDues', [...$this->scopeProps($scope), 'subscriptions' => $subscriptions, 'invoices' => $invoices]);
+        // The lodge's own Dues tab also lists the club's membership plans (clubs that sell memberships rather than raise dues).
+        $plans = $slug !== null && $scope->club
+            ? $scope->club->membershipPlans->map(fn ($plan) => ['id' => $plan->id, 'name' => $plan->name, 'description' => $plan->description, 'price' => number_format((float) $plan->price, 2), 'billing_period' => $plan->billing_period])->values()
+            : [];
+
+        return Inertia::render('Members/AllDues', [...$this->scopeProps($scope), 'subscriptions' => $subscriptions, 'invoices' => $invoices, 'plans' => $plans]);
     }
 
     /**

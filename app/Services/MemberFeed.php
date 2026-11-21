@@ -78,7 +78,7 @@ class MemberFeed
 
         $newsletters = Newsletter::whereIn('club_id', $clubIds)->where('status', 'sent')
             ->latest('sent_at')->limit($limit)->get()
-            ->filter(fn (Newsletter $n) => empty($n->target_roles) || in_array($roles[$n->club_id], $n->target_roles, true))
+            ->filter(fn (Newsletter $n) => $n->reachesRole($roles[$n->club_id]))
             ->map(fn (Newsletter $newsletter) => [
                 'key' => 'newsletter-'.$newsletter->id,
                 'type' => 'newsletter',

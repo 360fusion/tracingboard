@@ -5,7 +5,13 @@ import Button from '@/Components/Ui/Button.vue';
 import Input from '@/Components/Ui/Input.vue';
 import UiIcon from '@/Components/Ui/UiIcon.vue';
 
+const props = defineProps({
+  // Set when they came from a lodge's join link: signing up asks to join it.
+  club: { type: Object, default: null },
+});
+
 const form = useForm({
+  club: props.club?.slug ?? null,
   name: '',
   email: '',
   password: '',
@@ -34,7 +40,10 @@ const submit = () => {
         <h1 class="text-2xl font-semibold text-white">
           Create a member account
         </h1>
-        <p class="text-xs text-slate-500 dark:text-slate-400">
+        <p v-if="club" class="text-xs text-slate-500 dark:text-slate-400">
+          Sign up to ask to join {{ club.name }}. The lodge checks each request before it lets you in.
+        </p>
+        <p v-else class="text-xs text-slate-500 dark:text-slate-400">
           Sign up to join club events, manage memberships, and receive notifications.
         </p>
       </div>

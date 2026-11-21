@@ -45,6 +45,11 @@ class NeutralDefaultsTest extends TestCase
                     $page->where("settings.{$key}", '');
                 }
 
+                // Saved with the form and used as the Reply-To of lodge emails, so never a made-up address.
+                foreach (['contact_email', 'email_reply_to', 'tagline'] as $key) {
+                    $page->where("settings.{$key}", fn ($value) => blank($value));
+                }
+
                 $page->where('settings.officers_roster', []);
             });
     }

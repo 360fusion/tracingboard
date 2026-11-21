@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Casts\SanitizedHtml;
+use App\Enums\ClubRole;
 use App\Observers\NewsletterTeamEvents;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -65,5 +66,24 @@ class Newsletter extends Model implements HasMedia
     public function newsletterType(): BelongsTo
     {
         return $this->belongsTo(NewsletterType::class);
+    }
+
+    /**
+     * The club roles a newsletter reaches. The form has no box for owners, so they come with admins.
+     *
+     * @param  list<string>  $roles
+     * @return list<string>
+     */
+    public static function rolesReached(array $roles): array
+    {
+        return in_array(ClubRole::Admin->value, $roles, true) ? array_values(array_unique([...$roles, ClubRole::Owner->value])) : $roles;
+    }
+
+    /**
+     * Whether someone with this club role is among those it was sent to.
+     */
+    public function reachesRole(?string $role): bool
+    {
+        return empty($this->target_roles) || in_array($role, self::rolesReached($this->target_roles), true);
     }
 }

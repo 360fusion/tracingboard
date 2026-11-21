@@ -24,7 +24,7 @@ class NewsletterAudience
     {
         $club = $newsletter->club;
         $type = $newsletter->newsletterType;
-        $roles = $newsletter->target_roles ?: ['member'];
+        $roles = Newsletter::rolesReached($newsletter->target_roles ?: ['member']);
         $mandatory = $type === null || $type->is_mandatory;
 
         $rows = NewsletterSubscription::where('club_id', $club->id)

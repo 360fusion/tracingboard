@@ -145,7 +145,7 @@ class NewsletterAdminController extends Controller
                 'subject' => '',
                 'content' => '',
                 'attachments' => [],
-                'target_roles' => ['member', 'admin', 'coach'],
+                'target_roles' => ['member', 'admin', 'coach', 'treasurer'],
                 'status' => 'draft',
             ]);
 

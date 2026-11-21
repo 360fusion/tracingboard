@@ -121,7 +121,7 @@ const submitProfile = () => {
                 <img :src="avatarPreview" alt="Profile photo" class="w-full h-full object-cover" />
               </div>
               <div v-else class="w-20 h-20 rounded-full bg-blue-600 text-white font-semibold text-2xl flex items-center justify-center border-2 border-white dark:border-slate-700 shadow-sm">
-                {{ profileForm.name ? profileForm.name.substring(0, 2).toUpperCase() : 'MP' }}
+                {{ profileForm.name ? profileForm.name.split(' ').map((part) => part[0]).slice(0, 2).join('').toUpperCase() : 'MP' }}
               </div>
             </div>
 
