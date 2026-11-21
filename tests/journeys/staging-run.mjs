@@ -47,7 +47,7 @@ const sleepSync = (ms) => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)),
 `);
 swap("const pgpass = (fs.readFileSync(`${ROOT}/.env`, 'utf8').match(/^DB_PASSWORD=(.*)$/m) || [])[1]?.replace(/\"/g, '') || '';", '');
 src = src.replace(/const sql = \(q\) => sh\('psql'.*\n/, `const sql = (q) => remote(\`cd ~/manager.360fusionhosting.co.uk && e(){ grep "^$1=" .env | cut -d= -f2- | tr -d '"'; } && PGPASSWORD="$(e DB_PASSWORD)" psql -h 127.0.0.1 -U "$(e DB_USERNAME)" -d "$(e DB_DATABASE)" -qAt -v ON_ERROR_STOP=1 -f -\`, q).trim();\n`);
-swap("sh('sh', ['tests/journeys/reset-demo.sh']);", "console.log('(staging: nothing is reset)');");
+swap("    console.log('Rebuilding the demo database...');\n    sh('sh', ['tests/journeys/reset-demo.sh']);", "    console.log('Staging: nothing is reset.');");
 swap('logStart = fs.statSync(LOG).size;', 'logStart = Date.now() - 5000;');
 
 // Emails from Mailpit, once the queue has sent them.
