@@ -81,6 +81,32 @@
     --color-slate-950: oklch(12.9% 0.05 266);
 }
 
+/* The signed-out public pages (homepage, lodge directory) in dark mode: a midnight navy ground with ivory text, and gold
+   in place of blue for actions and links, so they read as the lodge's colours rather than blue on grey. */
+.dark .tb-public {
+    --color-white: oklch(96.5% 0.018 85);
+    --color-slate-50: oklch(97% 0.012 85);
+    --color-slate-100: oklch(95% 0.015 85);
+    --color-slate-200: oklch(90% 0.02 85);
+    --color-slate-300: oklch(84% 0.02 266);
+    --color-slate-400: oklch(71% 0.035 266);
+    --color-slate-500: oklch(58% 0.045 266);
+    --color-slate-600: oklch(46% 0.06 266);
+    --color-slate-700: oklch(36% 0.065 266);
+    --color-slate-800: oklch(28% 0.065 266);
+    --color-slate-900: oklch(19.5% 0.06 266);
+    --color-slate-950: oklch(14.5% 0.05 266);
+    --color-blue-300: var(--color-gold-200);
+    --color-blue-400: var(--color-gold-300);
+    --color-blue-500: var(--color-gold-300);
+    --color-blue-600: var(--color-gold-400);
+}
+
+/* Gold is light, so text on a primary (gold) button is navy instead of white. */
+.dark .tb-public .bg-blue-600 {
+    color: var(--color-navy-950);
+}
+
 /* The iOS and Android app (Support/nativeApp.js adds .native-app) draws the page under the status bar: the navy top bar
    grows to fill it, and a page without one (sign in) starts below it. */
 .native-app header.cm-nav,

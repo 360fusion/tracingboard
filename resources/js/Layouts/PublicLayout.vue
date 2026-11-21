@@ -33,7 +33,7 @@ const followError = computed(() => page.props.errors?.follow ?? null);
       Skip to main content
     </a>
 
-    <div class="min-h-dvh bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100">
+    <div class="tb-public min-h-dvh bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100">
         <PublicHeader />
 
         <main id="main-content" tabindex="-1" class="mx-auto max-w-6xl px-4 py-5 focus:outline-none sm:px-6 sm:py-8">

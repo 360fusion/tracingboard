@@ -76,7 +76,7 @@ const steps = [
         Skip to main content
     </a>
 
-    <div class="min-h-dvh bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-200">
+    <div class="tb-public min-h-dvh bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-200">
         <PublicHeader />
 
         <main id="main-content" tabindex="-1" class="focus:outline-none">
@@ -107,7 +107,7 @@ const steps = [
                 <div class="relative lg:mb-16" role="img" aria-label="Example of a meeting summons with reply buttons and the number of replies so far">
                     <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-900/5 dark:border-slate-800 dark:bg-slate-900" aria-hidden="true">
                         <div class="flex items-start gap-4">
-                            <div class="flex h-16 w-16 shrink-0 flex-col items-center justify-center rounded-2xl bg-navy-900 text-white">
+                            <div class="flex h-16 w-16 shrink-0 flex-col items-center justify-center rounded-2xl bg-navy-900 text-white dark:bg-navy-800">
                                 <span class="text-[10px] font-bold uppercase tracking-wider text-gold-300">Dec</span>
                                 <span class="font-display text-2xl font-bold lining-nums leading-none">1</span>
                             </div>
@@ -154,7 +154,7 @@ const steps = [
                     </div>
                     <div class="mt-12 grid gap-6 lg:grid-cols-3">
                         <article v-for="role in roles" :key="role.title" class="flex flex-col rounded-2xl border border-slate-200 bg-slate-50 p-6 dark:border-slate-800 dark:bg-slate-950/60">
-                            <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-navy-900 text-gold-300"><UiIcon :name="role.icon" :size="20" /></span>
+                            <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-navy-900 text-gold-300 dark:bg-navy-800"><UiIcon :name="role.icon" :size="20" /></span>
                             <h3 class="mt-4 font-display text-2xl font-bold text-slate-900 dark:text-white">{{ role.title }}</h3>
                             <p class="mt-2 text-slate-600 dark:text-slate-300">{{ role.intro }}</p>
                             <ul class="mt-5 space-y-3 text-sm">
@@ -228,7 +228,7 @@ const steps = [
 
             <!-- Call to action -->
             <section class="px-4 pb-16 sm:px-6 sm:pb-24">
-                <div class="mx-auto flex max-w-6xl flex-col items-start gap-8 rounded-2xl bg-navy-900 p-8 sm:p-12 md:flex-row md:items-center md:justify-between">
+                <div class="mx-auto flex max-w-6xl flex-col items-start gap-8 rounded-2xl bg-navy-900 p-8 sm:p-12 dark:border dark:border-gold-400/30 dark:bg-navy-800 md:flex-row md:items-center md:justify-between">
                     <div class="flex items-start gap-5">
                         <img src="/icons/tracing-board-mark-gold.svg" alt="" class="hidden h-16 w-16 shrink-0 sm:block">
                         <div>
