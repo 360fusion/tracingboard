@@ -41,6 +41,55 @@ Not urgent; most of it goes away if the server is rebuilt, but worth knowing:
 - [x] Node.js on staging moved from 22.23.4 to 24.22.1 on 27 Oct 2026 (NodeSource source switched to `node_24.x` as root in the DigitalOcean droplet console; npm is now 11.19.1). Still to do: redeploy each staging site once and check it loads. For production, set up Node 24 from the start.
 - [ ] PHP 8.4.27 is current. cropperjs is on 1.7.0; 2.x is a rewrite of the crop dialog, to do as its own change.
 
+## Go live on tracingboard.app (new Forge server, Cloudflare DNS)
+
+Plan (21 Nov 2026): the app on `tracingboard.app`, DNS on Cloudflare, mail sent by a provider (Cloudflare does not send mail). **Live runs on the staging droplet for now** (Forge site 3513043, branch `main`, push-to-deploy off, zero-downtime; `dev` = staging, merge `dev` into `main` and press Deploy to release). Moving to its own server later is the section below.
+
+Done 21 Nov 2026: Forge site with the deploy script, both queue workers and the scheduler ("Tracing Board scheduler"; Forge job names are unique per server); Cloudflare A records for `@`, `www`, `sites` (DNS only); Let's Encrypt certificate; `.env` set for PostgreSQL `tracingboard`, https, `CLUB_DOMAIN_TARGET`, FCM key (Forge's original kept as `.env.forge-original-2026-11-21`).
+
+Still to do for this setup:
+- [x] PostgreSQL user and database `tracingboard` created; first deploy of `bc605a6` ran every migration (21 Nov 2026). The password has special characters, so it is single-quoted in `.env`; keep the quotes if it is ever changed.
+- [ ] Nightly `pg_dump` of `tracingboard` copied off the server (Forge does not back up this PostgreSQL).
+- [x] Web-push keys made; directory seeded (9,688 lodges, 945 halls); workers restarted; `/up` answers 200.
+- [ ] Sign up on https://tracingboard.app, then `php artisan superadmin:grant <your email>` in Forge's Commands tab.
+- [ ] Set `OPS_ALERT_EMAILS` and `SECURITY_CONTACT_EMAIL` (`app:doctor` fails without them). Its "Proxies trusted" failure is a false alarm from the command line: nothing sits in front of this server.
+- [ ] Mail provider (below).
+
+Addresses:
+- `tracingboard.app`: the app (members, admin, `/site/{slug}`). `www` forwards to it.
+- `sites.tracingboard.app`: what lodges point their own domains at (`CLUB_DOMAIN_TARGET`). **DNS only (grey cloud)**, always.
+- `mail.tracingboard.app` (or the provider's suggested name): the sending domain's SPF/DKIM/bounce records.
+- Staging stays at `staging.manager.360fusionhosting.co.uk` for now.
+
+Cloudflare:
+- [ ] Add `tracingboard.app` to Cloudflare and switch the nameservers at the registrar.
+- [ ] Records: `A tracingboard.app → <server IP>`, `CNAME www → tracingboard.app`, `A sites → <server IP>` (grey cloud). Start the main domain grey too, so Forge's Let's Encrypt works; turn the orange cloud on later only if you want Cloudflare's caching/DDoS shield.
+- [ ] If the main domain is proxied: SSL/TLS mode **Full (strict)**, `TRUSTED_PROXIES` set to Cloudflare's IP ranges (or `*` with the Forge firewall only allowing Cloudflare on 80/443), and renew the certificate with Cloudflare's Origin Certificate instead of Let's Encrypt.
+- [ ] Email Routing (free, receive only): forward `hello@`, `support@`, `security@` and `dmarc@` to your inbox.
+- [ ] `.app` is HTTPS-only in every browser (HSTS preload): nothing works over plain http, so get the certificate before testing.
+
+Own server (later):
+- [ ] New server on DigitalOcean, London, Ubuntu 24.04, **4 GB RAM / 2 vCPU** at least (website builds run headless Chrome). PHP 8.4, database **PostgreSQL** (a new server can pick it in Forge, unlike staging), Node 24. Turn on DigitalOcean weekly backups.
+- [ ] New site `tracingboard.app` (alias `www.tracingboard.app`), repository 360fusion/club-manager, branch `main`, **zero-downtime deploys**. Turn on "Optimize OPcache for production".
+- [ ] Deploy script: copy staging's (it runs `artisan optimize`), and make sure it runs `migrate --force`, `npm ci && npm run build`, `storage:link` (once) and `queue:restart`.
+- [ ] Install Chrome for Browsershot (`npx puppeteer browsers install chrome` as the site user, plus Chrome's system libraries as root). Without it builds still work, Vue draws the pages.
+- [ ] SSL: Let's Encrypt for `tracingboard.app` and `www`.
+- [ ] Daemons: `queue:work --queue=transactional,default,bulk --tries=3 --max-time=3600` and `queue:work --queue=sites --tries=3 --timeout=960 --max-time=3600`. Scheduler: `schedule:run` every minute. `DB_QUEUE_RETRY_AFTER=960`.
+- [ ] Database backups: Forge's backup feature to DigitalOcean Spaces or S3, daily, and try one restore.
+- [ ] `.env`: `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL=https://tracingboard.app`, new `APP_KEY`, `DB_CONNECTION=pgsql` and its details, `SESSION_SECURE_COOKIE=true`, `TRUSTED_PROXIES`, `QUEUE_CONNECTION=database`, `CLUB_DOMAIN_TARGET=sites.tracingboard.app`, `OPS_ALERT_EMAILS`, the mail settings below, `FCM_CREDENTIALS_PATH` (copy the key from staging), APNs keys when the iPhone app ships. Leave `EVENTS_ONLINE_PAYMENTS`/`EVENTS_PLATFORM_PAYMENTS` off until the payment sections above are done.
+- [ ] Run `php artisan app:doctor` until it passes (it checks most of the above), make your superadmin account, and point an uptime monitor at `https://tracingboard.app/up`.
+- [ ] Seed the directory as on staging (ClubType, GrandLodge, Province, District, MasonicHall, Lodge seeders); do not run the demo seeders.
+
+Email (sending):
+- [ ] Pick a provider. Mailgun is already set up for staging (settings in `.env.mailgun-backup-2026-11-21` there), so reuse the account with a new domain `mail.tracingboard.app`; Postmark has the best inbox placement for transactional mail; SES is cheapest at volume.
+- [ ] Add the provider's SPF, DKIM and return-path records in Cloudflare (all grey/DNS only), plus `_dmarc.tracingboard.app TXT "v=DMARC1; p=none; rua=mailto:dmarc@tracingboard.app"`; move to `p=quarantine` after a few clean weeks.
+- [ ] `.env`: `MAIL_MAILER`, credentials, `MAIL_FROM_ADDRESS=hello@tracingboard.app` (or `noreply@`), `MAIL_FROM_NAME="Tracing Board"`.
+- [ ] Test: sign up a new account (confirmation email), "Send test to me" on a newsletter, and check the headers show SPF, DKIM and DMARC pass (Gmail, Show original).
+
+After go-live:
+- [ ] Mobile app: `server.url` and `allowNavigation` to `https://tracingboard.app` (see the app section).
+- [ ] Stripe Connect redirect and webhook URLs on `tracingboard.app`.
+
 ## Email sending (needed for newsletters and all emails now)
 
 Emails are now sent from a **queue**, so a worker must be running or nothing is delivered (booking confirmations, invitations, newsletters, receipts).
