@@ -41,6 +41,10 @@ class EventOrganiserBookingController extends Controller
         // "!" is the escape character, so a typed % or _ is matched literally.
         $like = '%'.str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $term).'%';
 
+        if ($club->isHall()) {
+            return $this->hallSearch($event, $club, $like);
+        }
+
         $members = $club->users()
             ->withPivot('home_club_name')
             ->wherePivot('status', ClubMemberStatus::Active->value)
@@ -64,6 +68,37 @@ class EventOrganiserBookingController extends Controller
             'dietary_notes' => $member->pivot->dietary_notes,
             'registration_id' => $booked->get($member->id)?->id,
             'registration_status' => $booked->get($member->id)?->status,
+        ])->values()]);
+    }
+
+    /**
+     * A hall has no members of its own: only people who have booked one of its events before can be found.
+     */
+    private function hallSearch(Event $event, Club $club, string $like): JsonResponse
+    {
+        $users = EventRegistrationService::hallBookers($club)
+            ->where(fn ($q) => $q->whereRaw("users.name LIKE ? ESCAPE '!'", [$like])
+                ->orWhereRaw("users.email LIKE ? ESCAPE '!'", [$like]))
+            ->orderBy('users.name')
+            ->limit(10)
+            ->get();
+
+        $booked = EventRegistration::where('event_id', $event->id)->whereIn('user_id', $users->pluck('id'))->get()->keyBy('user_id');
+        $latest = EventRegistration::whereIn('user_id', $users->pluck('id'))
+            ->whereIn('event_id', Event::select('id')->where('club_id', $club->id))
+            ->orderBy('id')->get()->keyBy('user_id');
+
+        return response()->json(['members' => $users->map(fn (User $user) => [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'phone' => $latest->get($user->id)?->contact_phone,
+            'rank' => null,
+            'lodge' => null,
+            'member_number' => null,
+            'dietary_notes' => null,
+            'registration_id' => $booked->get($user->id)?->id,
+            'registration_status' => $booked->get($user->id)?->status,
         ])->values()]);
     }
 
@@ -111,7 +146,10 @@ class EventOrganiserBookingController extends Controller
         $member = null;
 
         if (! empty($validated['member_id'])) {
-            $member = $club->users()->wherePivot('status', ClubMemberStatus::Active->value)->where('users.id', $validated['member_id'])->first();
+            // A hall has no members: the service refuses anyone who has not booked there before.
+            $member = $club->isHall()
+                ? User::find($validated['member_id'])
+                : $club->users()->wherePivot('status', ClubMemberStatus::Active->value)->where('users.id', $validated['member_id'])->first();
 
             if (! $member) {
                 throw ValidationException::withMessages(['member_id' => 'That person is not an active member of this club.']);

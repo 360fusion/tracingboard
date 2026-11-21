@@ -4,6 +4,7 @@ namespace App\Services\Events;
 
 use App\Enums\EventStatus;
 use App\Mail\EventGuestBookingMail;
+use App\Models\Club;
 use App\Models\ClubPaymentMethod;
 use App\Models\Event;
 use App\Models\EventAttendee;
@@ -13,6 +14,7 @@ use App\Models\EventPromo;
 use App\Models\EventRegistration;
 use App\Models\EventTicketTier;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -69,10 +71,24 @@ class EventRegistrationService
                 $member = $existing->user;
             } elseif ($member && EventRegistration::where('event_id', $event->id)->where('user_id', $member->id)->exists()) {
                 throw ValidationException::withMessages(['member_id' => $member->name.' already has a booking for this event. Edit that booking instead.']);
+            } elseif ($member && $event->club->isHall() && ! self::hallBookers($event->club)->whereKey($member->id)->exists()) {
+                throw ValidationException::withMessages(['member_id' => 'That person has not booked an event at this hall before.']);
             }
 
             return $this->persist($event, $existing, $member, $data, $actor, $overCapacity);
         });
+    }
+
+    /**
+     * Users who have booked any event of this hall: the only people its organiser can pick by search.
+     * Attendee rows only carry the booker's own user id, so registrations are the whole set.
+     *
+     * @return Builder<User>
+     */
+    public static function hallBookers(Club $hall): Builder
+    {
+        return User::whereIn('id', EventRegistration::select('user_id')->whereNotNull('user_id')
+            ->whereIn('event_id', Event::select('id')->where('club_id', $hall->id)));
     }
 
     /**
