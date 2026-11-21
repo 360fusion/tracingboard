@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\OrderColours;
 use Database\Factories\ClubTypeFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -31,6 +32,7 @@ class ClubType extends Model
     {
         return static::firstOrCreate(['code' => self::HALL], [
             'name' => 'Masonic hall',
+            'colour' => OrderColours::for(self::HALL),
             'available_modules' => ['accounting', 'communications', 'events', 'newsletters', 'website_builder'],
             'default_settings' => [],
             'terminology' => ['club' => 'Hall', 'members' => 'Board', 'master' => 'Chairman'],

@@ -41,6 +41,7 @@ final class OrderColours
         'sria_college' => 'violet',
         'royal_order_scotland' => 'cyan',
         'scarlet_cord' => 'lime',
+        'hall' => 'sky',
     ];
 
     public static function for(string $code): string

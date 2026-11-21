@@ -13,6 +13,7 @@ return new class extends Migration
 
         DB::table('club_types')->insert([
             'code' => 'hall',
+            'colour' => 'sky',
             'name' => 'Masonic hall',
             'available_modules' => json_encode(['accounting', 'communications', 'events', 'newsletters', 'website_builder']),
             'default_settings' => json_encode([]),
