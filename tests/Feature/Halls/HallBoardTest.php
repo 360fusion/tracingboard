@@ -7,6 +7,7 @@ use App\Mail\MemberInvitationMail;
 use App\Models\Club;
 use App\Models\MasonicHall;
 use App\Models\User;
+use App\Services\Halls\HallBoard;
 use App\Services\Halls\HallClubs;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
@@ -63,12 +64,12 @@ class HallBoardTest extends TestCase
 
     public function test_secretary_cannot_reach_the_board_screen(): void
     {
-        $this->actingAs($this->staff('secretary'))->get($this->url())->assertForbidden();
+        $this->actingAs($this->staff('coach'))->get($this->url())->assertForbidden();
     }
 
     public function test_owner_sees_the_board_and_changes_an_office(): void
     {
-        $sec = $this->staff('secretary');
+        $sec = $this->staff('coach');
 
         $this->actingAs($this->owner)->get($this->url())->assertOk();
         $this->put($this->url("/{$sec->id}"), ['office' => 'Chairman', 'role' => 'admin'])->assertSessionHasNoErrors();
@@ -87,11 +88,26 @@ class HallBoardTest extends TestCase
 
     public function test_removing_someone_ends_their_access(): void
     {
-        $sec = $this->staff('secretary');
+        $sec = $this->staff('coach');
 
         $this->actingAs($this->owner)->delete($this->url("/{$sec->id}"))->assertSessionHas('success');
 
         $this->actingAs($sec)->get("/{$this->club->slug}/admin/hall")->assertForbidden();
+    }
+
+    public function test_the_secretary_office_gets_the_coach_role_and_runs_details_events_and_newsletters(): void
+    {
+        $this->actingAs($this->owner)->post($this->url(), ['name' => 'Sam Secretary', 'email' => 'sam@example.com', 'office' => 'Secretary', 'role' => HallBoard::defaultRole('Secretary')]);
+        $sam = User::where('email', 'sam@example.com')->firstOrFail();
+        $this->club->users()->updateExistingPivot($sam->id, ['status' => 'active']);
+        $this->assertSame('coach', $this->club->users()->where('users.id', $sam->id)->first()->pivot->role);
+        $this->assertSame('coach', HallBoard::defaultRole('Hall manager'));
+        $this->flushSession(); // the owner's session would sign Sam out
+
+        foreach (['hall', 'lodges', 'events', 'newsletters'] as $section) {
+            $this->actingAs($sam)->get("/{$this->club->slug}/admin/{$section}")->assertOk();
+        }
+        $this->actingAs($sam)->get("/{$this->club->slug}/admin/accounting")->assertForbidden();
     }
 
     public function test_treasurer_can_open_accounting_but_not_hall_details(): void
@@ -138,7 +154,7 @@ class HallBoardTest extends TestCase
 
     public function test_removal_clears_the_invitation_token_and_a_past_person_is_not_found(): void
     {
-        $sec = $this->staff('secretary');
+        $sec = $this->staff('coach');
         $this->club->users()->updateExistingPivot($sec->id, ['invitation_token' => 'abc']);
 
         $this->actingAs($this->owner)->delete($this->url("/{$sec->id}"));
@@ -155,19 +171,19 @@ class HallBoardTest extends TestCase
         $lodge->users()->attach($existing->id, ['role' => 'member', 'status' => 'active']);
         $password = $existing->password;
 
-        $this->actingAs($this->owner)->post($this->url(), ['name' => 'Other Name', 'email' => 'bro@example.com', 'office' => 'Secretary', 'role' => 'secretary'])->assertSessionMissing('error');
+        $this->actingAs($this->owner)->post($this->url(), ['name' => 'Other Name', 'email' => 'bro@example.com', 'office' => 'Secretary', 'role' => 'coach'])->assertSessionMissing('error');
 
         $existing->refresh();
         $this->assertSame(['Original Name', $password], [$existing->name, $existing->password]);
         $this->assertSame('member', $lodge->users()->where('users.id', $existing->id)->first()->pivot->role);
-        $this->assertSame('secretary', $this->club->users()->where('users.id', $existing->id)->first()->pivot->role);
+        $this->assertSame('coach', $this->club->users()->where('users.id', $existing->id)->first()->pivot->role);
     }
 
     public function test_a_duplicate_invite_returns_the_error(): void
     {
-        $sec = $this->staff('secretary');
+        $sec = $this->staff('coach');
 
-        $this->actingAs($this->owner)->post($this->url(), ['name' => 'X Y', 'email' => $sec->email, 'office' => 'Secretary', 'role' => 'secretary'])
+        $this->actingAs($this->owner)->post($this->url(), ['name' => 'X Y', 'email' => $sec->email, 'office' => 'Secretary', 'role' => 'coach'])
             ->assertSessionHas('error', 'That person is already on the board.');
     }
 

@@ -16,19 +16,21 @@ const props = defineProps({
   roles: { type: Array, default: () => [] },
 });
 
-const roleOptions = computed(() => props.roles.map(r => ({ value: r, label: r.charAt(0).toUpperCase() + r.slice(1) })));
+// The coach role is shown as "Secretary", as on the other role screens.
+const roleLabel = r => (r === 'coach' ? 'Secretary' : r.charAt(0).toUpperCase() + r.slice(1));
+const roleOptions = computed(() => props.roles.map(r => ({ value: r, label: roleLabel(r) })));
 
-const invite = useForm({ name: '', email: '', office: '', role: 'secretary' });
+const invite = useForm({ name: '', email: '', office: '', role: 'coach' });
 // A familiar office pre-selects its usual role; the role can still be changed.
 function officeChanged() {
-  invite.role = props.officeRoles[invite.office] ?? 'secretary';
+  invite.role = props.officeRoles[invite.office] ?? 'coach';
 }
 function sendInvite() {
   invite.post(route('admin.board.store', { clubSlug: props.club.slug }), { preserveScroll: true, onSuccess: () => invite.reset() });
 }
 
 const editing = ref(null);
-const edit = useForm({ office: '', role: 'secretary' });
+const edit = useForm({ office: '', role: 'coach' });
 function startEdit(person) {
   editing.value = person.id;
   edit.office = person.office ?? '';
@@ -49,15 +51,14 @@ function confirmRemove() {
 
 <template>
   <Head title="Board" />
-  <AdminLayout>
+  <AdminLayout title="Board">
     <div class="max-w-3xl mx-auto space-y-4">
-      <h1 class="text-2xl font-bold">Board</h1>
 
       <Card v-for="person in people" :key="person.id" class="p-5">
         <div v-if="editing !== person.id" class="flex items-center justify-between gap-3">
           <div>
             <div class="font-semibold">{{ person.name }} <Badge v-if="person.pending">Invited</Badge></div>
-            <div class="text-sm text-slate-600">{{ person.office || 'No office' }} · {{ person.role }} · {{ person.email }}</div>
+            <div class="text-sm text-slate-600">{{ person.office || 'No office' }} · {{ roleLabel(person.role) }} · {{ person.email }}</div>
           </div>
           <div class="flex gap-2">
             <Button variant="secondary" size="sm" @click="startEdit(person)">Edit</Button>

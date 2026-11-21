@@ -26,7 +26,7 @@ class HallBoardController extends Controller
 {
     public const OFFICE_ROLES = HallBoard::OFFICE_ROLES;
 
-    private const ROLES = ['owner', 'admin', 'secretary', 'treasurer'];
+    private const ROLES = ['owner', 'admin', 'coach', 'treasurer'];
 
     public function index(string $clubSlug): Response
     {

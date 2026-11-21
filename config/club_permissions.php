@@ -83,7 +83,8 @@ return [
         'manage_hall' => [
             'label' => 'Hall details',
             'description' => 'Edit the hall\'s address, contacts, facilities and the lodges that meet there',
-            'roles' => ['owner', 'admin', 'secretary'],
+            // A hall's Secretary has the coach role (the screens call it "Secretary").
+            'roles' => ['owner', 'admin', 'coach', 'secretary'],
         ],
         'manage_board' => [
             'label' => 'Hall board',
@@ -142,7 +143,7 @@ return [
 
         'hall' => 'manage_hall',
         'board' => 'manage_board',
-        'lodges' => 'view_dashboard',
+        'lodges' => 'manage_hall',
     ],
 
     /**

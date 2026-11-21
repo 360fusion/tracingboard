@@ -14,14 +14,14 @@ use Illuminate\Support\Facades\DB;
 
 class HallBoard
 {
-    /** The role pre-selected for each office; any other office defaults to secretary. The role can still be changed. */
-    public const OFFICE_ROLES = ['Chairman' => 'admin', 'Secretary' => 'secretary', 'Treasurer' => 'treasurer'];
+    /** The role pre-selected for each office; any other office defaults to coach (shown as "Secretary"). The role can still be changed. */
+    public const OFFICE_ROLES = ['Chairman' => 'admin', 'Secretary' => 'coach', 'Treasurer' => 'treasurer'];
 
     public function __construct(private MemberInvitationService $invitations) {}
 
     public static function defaultRole(string $office): string
     {
-        return self::OFFICE_ROLES[$office] ?? 'secretary';
+        return self::OFFICE_ROLES[$office] ?? 'coach';
     }
 
     /**
