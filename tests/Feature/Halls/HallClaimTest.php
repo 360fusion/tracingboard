@@ -142,8 +142,25 @@ class HallClaimTest extends TestCase
         $claim = $this->claim();
 
         $this->actingAs($this->claimant)->post(route('superadmin.hall_claims.approve', $claim->id))->assertRedirect(route('home'));
+        $this->assertSame(HallClaim::PENDING, $claim->fresh()->status);
+        $this->assertNull($this->hall->fresh()->club_id);
+
+        $stranger = User::factory()->create();
+        $this->actingAs($stranger)->delete(route('lodges.hall.claim.withdraw', [$this->hall->slug, $claim->id]))->assertNotFound();
+        $this->assertSame(HallClaim::PENDING, $claim->fresh()->status);
+
         $this->actingAs($this->claimant)->delete(route('lodges.hall.claim.withdraw', [$this->hall->slug, $claim->id]))->assertSessionHas('success');
         $this->assertSame(HallClaim::WITHDRAWN, $claim->fresh()->status);
+    }
+
+    public function test_a_decided_claim_cannot_be_withdrawn_or_approved_again(): void
+    {
+        $claim = $this->claim();
+        $this->actingAs($this->superAdmin)->post(route('superadmin.hall_claims.approve', $claim->id))->assertSessionHasNoErrors();
+
+        $this->actingAs($this->claimant)->delete(route('lodges.hall.claim.withdraw', [$this->hall->slug, $claim->id]))->assertSessionHasErrors('claim');
+        $this->actingAs($this->superAdmin)->post(route('superadmin.hall_claims.approve', $claim->id))->assertSessionHasErrors('claim');
+        $this->assertSame(HallClaim::APPROVED, $claim->fresh()->status);
     }
 
     public function test_superadmin_page_lists_waiting_hall_claims(): void

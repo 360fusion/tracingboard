@@ -25,19 +25,25 @@ class HallClaimService
      */
     public function submit(MasonicHall $hall, User $user, array $data): HallClaim
     {
-        if ($hall->club_id) {
-            throw ValidationException::withMessages(['hall' => 'This hall already has a board. If someone already runs it, ask them for access.']);
-        }
+        // Lock the hall, then the user, so two simultaneous posts cannot both pass the checks below.
+        $claim = DB::transaction(function () use ($hall, $user, $data) {
+            $lockedHall = MasonicHall::whereKey($hall->id)->lockForUpdate()->firstOrFail();
+            User::whereKey($user->id)->lockForUpdate()->first();
 
-        if (HallClaim::where('masonic_hall_id', $hall->id)->where('user_id', $user->id)->open()->exists()) {
-            throw ValidationException::withMessages(['hall' => 'You already have a claim for this hall waiting to be checked.']);
-        }
+            if ($lockedHall->club_id) {
+                throw ValidationException::withMessages(['hall' => 'This hall already has a board. If someone already runs it, ask them for access.']);
+            }
 
-        if (HallClaim::where('user_id', $user->id)->open()->count() >= HallClaim::MAX_OPEN_PER_USER) {
-            throw ValidationException::withMessages(['hall' => 'You have '.HallClaim::MAX_OPEN_PER_USER.' claims waiting to be checked. Wait for a decision, or withdraw one, before making another.']);
-        }
+            if (HallClaim::where('masonic_hall_id', $hall->id)->where('user_id', $user->id)->open()->exists()) {
+                throw ValidationException::withMessages(['hall' => 'You already have a claim for this hall waiting to be checked.']);
+            }
 
-        $claim = HallClaim::create([...$data, 'masonic_hall_id' => $hall->id, 'user_id' => $user->id, 'status' => HallClaim::PENDING]);
+            if (HallClaim::where('user_id', $user->id)->open()->count() >= HallClaim::MAX_OPEN_PER_USER) {
+                throw ValidationException::withMessages(['hall' => 'You have '.HallClaim::MAX_OPEN_PER_USER.' claims waiting to be checked. Wait for a decision, or withdraw one, before making another.']);
+            }
+
+            return HallClaim::create([...$data, 'masonic_hall_id' => $hall->id, 'user_id' => $user->id, 'status' => HallClaim::PENDING]);
+        });
 
         $this->tellSuperAdmins(HallClaimNotification::submitted($claim->load(['hall', 'user'])));
 
@@ -46,9 +52,7 @@ class HallClaimService
 
     public function requestInfo(HallClaim $claim, User $admin, string $question): void
     {
-        $this->guardOpen($claim, [HallClaim::PENDING]);
-
-        $claim->forceFill(['status' => HallClaim::INFO_REQUESTED, 'question' => $question])->save();
+        $this->transition($claim, [HallClaim::PENDING], fn (HallClaim $locked) => $locked->forceFill(['status' => HallClaim::INFO_REQUESTED, 'question' => $question])->save());
 
         $claim->load(['hall', 'user'])->user->notify(HallClaimNotification::moreInfoNeeded($claim, $question));
     }
@@ -56,9 +60,8 @@ class HallClaimService
     public function respond(HallClaim $claim, User $user, string $reply): void
     {
         abort_unless($claim->user_id === $user->id, 404);
-        $this->guardOpen($claim, [HallClaim::INFO_REQUESTED]);
 
-        $claim->forceFill(['status' => HallClaim::PENDING, 'reply' => $reply])->save();
+        $this->transition($claim, [HallClaim::INFO_REQUESTED], fn (HallClaim $locked) => $locked->forceFill(['status' => HallClaim::PENDING, 'reply' => $reply])->save());
 
         $this->tellSuperAdmins(HallClaimNotification::replied($claim->load(['hall', 'user'])));
     }
@@ -66,16 +69,13 @@ class HallClaimService
     public function withdraw(HallClaim $claim, User $user): void
     {
         abort_unless($claim->user_id === $user->id, 404);
-        $this->guardOpen($claim);
 
-        $this->settle($claim, HallClaim::WITHDRAWN);
+        $this->transition($claim, HallClaim::OPEN, fn (HallClaim $locked) => $this->settle($locked, HallClaim::WITHDRAWN));
     }
 
     public function reject(HallClaim $claim, User $admin, string $reason): void
     {
-        $this->guardOpen($claim);
-
-        $this->settle($claim, HallClaim::REJECTED, $admin, $reason);
+        $this->transition($claim, HallClaim::OPEN, fn (HallClaim $locked) => $this->settle($locked, HallClaim::REJECTED, $admin, $reason));
 
         $claim->load(['hall', 'user'])->user->notify(HallClaimNotification::rejected($claim));
     }
@@ -111,13 +111,24 @@ class HallClaimService
     }
 
     /**
+     * Lock the claim row, check its status on the locked row, then change it, so a withdraw or refusal cannot race an
+     * approval. The caller's copy is refreshed with the result.
+     *
      * @param  list<string>  $allowed
+     * @param  callable(HallClaim): mixed  $change
      */
-    private function guardOpen(HallClaim $claim, array $allowed = HallClaim::OPEN): void
+    private function transition(HallClaim $claim, array $allowed, callable $change): void
     {
-        if (! in_array($claim->fresh()->status, $allowed, true)) {
-            throw ValidationException::withMessages(['claim' => 'This claim has already been dealt with.']);
-        }
+        DB::transaction(function () use ($claim, $allowed, $change) {
+            $locked = HallClaim::whereKey($claim->id)->lockForUpdate()->firstOrFail();
+
+            if (! in_array($locked->status, $allowed, true)) {
+                throw ValidationException::withMessages(['claim' => 'This claim has already been dealt with.']);
+            }
+
+            $change($locked);
+            $claim->setRawAttributes($locked->getAttributes(), true);
+        });
     }
 
     /**
