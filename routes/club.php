@@ -50,6 +50,7 @@ use App\Http\Controllers\EventPaymentController;
 use App\Http\Controllers\EventQuoteController;
 use App\Http\Controllers\EventRegistrationAdminController;
 use App\Http\Controllers\EventTicketController;
+use App\Http\Controllers\HallBoardController;
 use App\Http\Controllers\HallDetailsController;
 use App\Http\Controllers\HallLodgesController;
 use App\Http\Controllers\InvoiceController;
@@ -133,6 +134,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/{clubSlug}/admin/hall/photos', [HallDetailsController::class, 'storePhoto'])->name('admin.hall.photos.store');
     Route::delete('/{clubSlug}/admin/hall/photos/{mediaId}', [HallDetailsController::class, 'destroyPhoto'])->name('admin.hall.photos.destroy');
     Route::get('/{clubSlug}/admin/lodges', [HallLodgesController::class, 'index'])->name('admin.hall.lodges');
+    Route::get('/{clubSlug}/admin/board', [HallBoardController::class, 'index'])->name('admin.board.index');
+    Route::post('/{clubSlug}/admin/board', [HallBoardController::class, 'store'])->name('admin.board.store');
+    Route::put('/{clubSlug}/admin/board/{userId}', [HallBoardController::class, 'update'])->name('admin.board.update');
+    Route::delete('/{clubSlug}/admin/board/{userId}', [HallBoardController::class, 'destroy'])->name('admin.board.destroy');
     Route::get('/{clubSlug}/admin/settings', [ClubSettingsController::class, 'show'])->name('admin.settings.show');
     Route::put('/{clubSlug}/admin/settings', [ClubSettingsController::class, 'update'])->name('admin.settings.update');
     Route::post('/{clubSlug}/admin/settings/ranks/reset', [ClubSettingsController::class, 'resetRanks'])->name('admin.settings.ranks.reset');
