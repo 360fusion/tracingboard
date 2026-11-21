@@ -311,7 +311,7 @@ class MemberPortalController extends Controller
         $events = $eventModels->map(fn (Event $event) => EventPayload::forMember($event, $eventRegistrations->get($event->id)));
 
         return Inertia::render('Member/Events', [
-            'club' => $club->only(['id', 'name', 'slug', 'lodge_number']),
+            'club' => [...$club->only(['id', 'name', 'slug', 'lodge_number']), 'is_hall' => $isHallAudience],
             'memberRole' => $memberPivot->role ?? 'member',
             'meetings' => $meetings,
             'events' => $events,

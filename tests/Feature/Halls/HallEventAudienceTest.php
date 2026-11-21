@@ -150,6 +150,15 @@ class HallEventAudienceTest extends TestCase
         $this->actingAs($this->member)->get("{$this->hallEventsUrl()}/{$this->event->id}/ticket")->assertOk();
     }
 
+    public function test_hall_events_page_marks_the_club_as_a_hall_so_the_lodge_tabs_are_left_out(): void
+    {
+        $this->actingAs($this->member)->get($this->hallEventsUrl())
+            ->assertInertia(fn (Assert $page) => $page->where('club.is_hall', true));
+
+        $this->actingAs($this->member)->get("/members/{$this->lodge->slug}/events")
+            ->assertInertia(fn (Assert $page) => $page->where('club.is_hall', false));
+    }
+
     public function test_member_gets_the_price_quote_for_a_hall_event(): void
     {
         $this->priceHallEventWithCard();
