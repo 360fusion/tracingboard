@@ -97,7 +97,41 @@ class HallEventAudienceTest extends TestCase
 
         $lodgeAdmin = User::factory()->create();
         $this->lodge->users()->attach($lodgeAdmin->id, ['role' => 'admin', 'status' => 'active']);
+        $this->actingAs($board)->get("/{$this->hallClub->slug}/admin/posts/create")
+            ->assertInertia(fn (Assert $page) => $page->where('visibilityOptions.0.label', 'Members of lodges that meet here'));
+
         $this->actingAs($lodgeAdmin)->get("/{$this->lodge->slug}/admin/events/create")
             ->assertInertia(fn (Assert $page) => $page->where('visibilityOptions.0.label', 'Club members only'));
+    }
+
+    public function test_member_events_page_and_ics_feed_include_the_hall_event(): void
+    {
+        $this->actingAs($this->member)->get('/members/events')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->where('events', fn ($items) => collect($items)->pluck('title')->contains('Hall open evening')));
+
+        $this->actingAs($this->member)->get('/members/calendar')->assertOk();
+        $url = route('members.calendar.feed', ['token' => $this->member->fresh()->calendar_token], false);
+        auth()->logout();
+        $this->get($url)
+            ->assertOk()->assertSee('Hall open evening', false);
+    }
+
+    public function test_lodge_member_books_a_hall_event_as_themselves_through_the_public_page(): void
+    {
+        $url = "/site/{$this->hallClub->slug}/events/open-evening/member-register";
+        $payload = ['attendance_status' => 'attending', 'attendees' => [['name' => 'Me', 'attending_dining' => false]]];
+
+        $this->actingAs($this->member)->get("/site/{$this->hallClub->slug}/events/open-evening")
+            ->assertInertia(fn (Assert $page) => $page->where('canBookAsMember', true));
+
+        $this->actingAs($this->member)->post($url, $payload)->assertRedirect();
+        $this->assertDatabaseHas('event_registrations', ['event_id' => $this->event->id, 'user_id' => $this->member->id]);
+
+        $other = Club::factory()->create(['masonic_hall_id' => MasonicHall::factory()->create()->id]);
+        $outsider = User::factory()->create();
+        $other->users()->attach($outsider->id, ['role' => 'member', 'status' => 'active']);
+        $this->actingAs($outsider)->post($url, $payload)->assertNotFound();
+        $this->assertDatabaseMissing('event_registrations', ['user_id' => $outsider->id]);
     }
 }

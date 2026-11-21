@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\MemberRsvp\UpdateRsvp2Request;
 use App\Http\Requests\PublicEvent\RegisterRequest;
 use App\Mail\EventBookingMail;
 use App\Models\Club;
@@ -33,6 +34,7 @@ class PublicEventController extends Controller
         return Inertia::render('Public/Event', [
             ...SiteChrome::forClub($club),
             'event' => EventPayload::forMember($event),
+            'canBookAsMember' => $this->membersMayBook($event),
             'canBookAsGuest' => $event->allow_public_registration && $event->visibility->value === 'public' && ! in_array($event->status, ['cancelled', 'completed'], true),
             'isSignedIn' => Auth::check(),
         ]);
@@ -84,6 +86,19 @@ class PublicEventController extends Controller
         return $this->thanks($club, $event);
     }
 
+    /**
+     * A signed-in user who may book a members-only event (such as a hall's event for the lodges that meet there)
+     * books as themselves, with the same rules as the members area.
+     */
+    public function registerAsMember(UpdateRsvp2Request $request, string $clubSlug, string $eventSlug, EventRegistrationService $registrations, EventOnlinePayment $online): RedirectResponse|SymfonyResponse
+    {
+        $event = $this->findEvent($this->findClub($clubSlug), $eventSlug);
+
+        abort_unless($this->membersMayBook($event), 403, 'This event is not open to your account.');
+
+        return app(MemberRsvpController::class)->updateRsvp($request, $clubSlug, $event->id, $registrations, $online);
+    }
+
     public function booking(string $clubSlug, string $token): Response
     {
         $club = $this->findClub($clubSlug);
@@ -118,6 +133,16 @@ class PublicEventController extends Controller
         $registrations->cancel($registration);
 
         return back()->with('success', 'Your booking has been cancelled.');
+    }
+
+    private function membersMayBook(Event $event): bool
+    {
+        $user = Auth::user();
+
+        return $user !== null
+            && ! ($event->allow_public_registration && $event->visibility->value === 'public')
+            && ! in_array($event->status, ['cancelled', 'completed'], true)
+            && $event->canBeRsvpedBy($user);
     }
 
     private function findEvent(Club $club, string $eventSlug): Event

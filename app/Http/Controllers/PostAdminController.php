@@ -91,7 +91,7 @@ class PostAdminController extends Controller
             'club' => $club,
             'post' => $postArray,
             'tags' => $club->newsTags()->orderBy('name')->get(['id', 'name', 'color']),
-            'visibilityOptions' => Visibility::options(),
+            'visibilityOptions' => Visibility::options($club),
         ]);
     }
 

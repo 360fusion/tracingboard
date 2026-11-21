@@ -113,7 +113,7 @@ final class MemberScope
 
     public function clubFor(int $clubId): ?Club
     {
-        return $this->clubs()->firstWhere('id', $clubId);
+        return $this->clubs()->firstWhere('id', $clubId) ?? $this->hallClubs()->firstWhere('id', $clubId);
     }
 
     public function roleIn(int $clubId): string

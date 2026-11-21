@@ -155,6 +155,7 @@ class MasonicHall extends Model implements HasMedia
         }
 
         return Club::with('clubType')
+            ->whereHas('clubType', fn ($type) => $type->where('code', ClubType::HALL))
             ->whereIn('id', self::whereIn('id', $hallIds)->whereNotNull('club_id')->select('club_id'))
             ->get();
     }
