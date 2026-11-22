@@ -137,7 +137,7 @@ class MasonicHall extends Model implements HasMedia
      */
     public function memberClubIds(): Collection
     {
-        return $this->clubs()->notHalls()->pluck('id');
+        return $this->clubs()->notGroups()->pluck('id');
     }
 
     /**

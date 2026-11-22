@@ -108,7 +108,7 @@ class AnalyticsController extends Controller
             ],
             // A hall's headline tiles: the lodges that meet there (as its Lodges screen lists them) and its active board.
             'hallMetrics' => $isHall ? [
-                'lodges_count' => $hall ? $hall->clubs()->notHalls()->count() + Lodge::where('masonic_hall_id', $hall->id)->whereNull('club_id')->count() : 0,
+                'lodges_count' => $hall ? $hall->clubs()->notGroups()->count() + Lodge::where('masonic_hall_id', $hall->id)->whereNull('club_id')->count() : 0,
                 'board_count' => (clone $activeBoard)->count(),
             ] : null,
             // A hall has no members or meetings: its dashboard has its own first steps.

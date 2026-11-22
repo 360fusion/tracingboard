@@ -46,14 +46,14 @@ class HallClubsTest extends TestCase
         $this->assertSame(1, Club::whereHas('clubType', fn ($q) => $q->where('code', ClubType::HALL))->count());
     }
 
-    public function test_is_hall_works_without_the_type_loaded_and_not_halls_scope_excludes_halls(): void
+    public function test_is_hall_works_without_the_type_loaded_and_not_groups_scope_excludes_halls(): void
     {
         $hall = Club::factory()->hall()->create();
         $lodge = Club::factory()->create();
 
         $this->assertTrue(Club::find($hall->id)->isHall());
         $this->assertFalse(Club::find($lodge->id)->isHall());
-        $this->assertSame([$lodge->id], Club::notHalls()->pluck('id')->all());
+        $this->assertSame([$lodge->id], Club::notGroups()->pluck('id')->all());
     }
 
     public function test_hall_club_cannot_set_its_own_masonic_hall(): void

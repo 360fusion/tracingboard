@@ -60,7 +60,7 @@ class MemberLodgesController extends Controller
 
         // The member's own lodges, and lodges to follow: those sharing their hall and the ones each lodge lists as
         // sister or reciprocal visit lodges, less any they already follow or belong to.
-        $ownClubs = $user->clubs()->notHalls()->wherePivot('status', ClubMemberStatus::Active->value)->with('lodge.masonicHall:id,name,slug,town')->orderBy('name')->get();
+        $ownClubs = $user->clubs()->notGroups()->wherePivot('status', ClubMemberStatus::Active->value)->with('lodge.masonicHall:id,name,slug,town')->orderBy('name')->get();
         $own = $ownClubs->map(fn (Club $club) => [
             'name' => $club->lodge?->displayName() ?? $club->name,
             'slug' => $club->slug,

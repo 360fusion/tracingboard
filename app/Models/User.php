@@ -129,7 +129,7 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
      */
     public function activeClubIds(): Collection
     {
-        return $this->clubs()->notHalls()->wherePivot('status', ClubMemberStatus::Active->value)->pluck('clubs.id');
+        return $this->clubs()->notGroups()->wherePivot('status', ClubMemberStatus::Active->value)->pluck('clubs.id');
     }
 
     /**
@@ -141,7 +141,7 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
     public function hallAudienceClubIds(): Collection
     {
         return $this->hallAudienceClubIds ??= MasonicHall::hallClubsFor(
-            $this->clubs()->notHalls()->wherePivot('status', ClubMemberStatus::Active->value)->get(['clubs.id', 'clubs.masonic_hall_id'])
+            $this->clubs()->notGroups()->wherePivot('status', ClubMemberStatus::Active->value)->get(['clubs.id', 'clubs.masonic_hall_id'])
         )->pluck('id');
     }
 

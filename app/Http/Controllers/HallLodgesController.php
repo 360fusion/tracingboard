@@ -17,7 +17,7 @@ class HallLodgesController extends Controller
         $hall = $this->findClub($clubSlug)->hall()->firstOrFail();
 
         // A claimed lodge is shown once, through its club, and the club's own hall decides whether it is listed here.
-        $listed = $hall->clubs()->notHalls()->with('lodge.schedules')->get()->map(fn ($club) => [
+        $listed = $hall->clubs()->notGroups()->with('lodge.schedules')->get()->map(fn ($club) => [
             'name' => $club->name,
             'number' => $club->lodge_number ?? $club->lodge?->number,
             'meets_text' => $club->lodge?->meets_text,

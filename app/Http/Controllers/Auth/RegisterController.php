@@ -20,7 +20,7 @@ class RegisterController extends Controller
      */
     public function create(Request $request): Response|RedirectResponse
     {
-        $club = $request->filled('club') ? Club::notHalls()->where('slug', (string) $request->query('club'))->first(['clubs.name', 'clubs.slug']) : null;
+        $club = $request->filled('club') ? Club::notGroups()->where('slug', (string) $request->query('club'))->first(['clubs.name', 'clubs.slug']) : null;
 
         // Invitation-only: an account comes through a lodge (its join link names it), otherwise ask us for access.
         if (! $club && ! config('app.public_registration')) {
@@ -39,7 +39,7 @@ class RegisterController extends Controller
 
         $clubSlug = $request->input('club') ?? $request->input('club_slug');
         // A hall's board is invite-only, so a hall named here is ignored.
-        $club = $clubSlug ? Club::notHalls()->where('slug', $clubSlug)->first() : null;
+        $club = $clubSlug ? Club::notGroups()->where('slug', $clubSlug)->first() : null;
 
         if (! $club && ! config('app.public_registration')) {
             return redirect()->route('contact');

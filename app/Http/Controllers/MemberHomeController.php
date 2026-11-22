@@ -47,7 +47,7 @@ class MemberHomeController extends Controller
 
         $scope = MemberScope::for($user);
         $clubs = $scope->memberClubs;
-        $pending = $user->clubs()->notHalls()->with('clubType')->wherePivot('status', ClubMemberStatus::Pending->value)->get();
+        $pending = $user->clubs()->notGroups()->with('clubType')->wherePivot('status', ClubMemberStatus::Pending->value)->get();
 
         return Inertia::render('Members/Dashboard', [
             'clubs' => $clubs->map(fn (Club $club) => $this->clubSummary($club))->all(),

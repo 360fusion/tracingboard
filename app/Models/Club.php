@@ -49,6 +49,8 @@ class Club extends Model implements HasMedia
         'club_type_id',
         'province_id',
         'masonic_hall_id',
+        'parent_club_id',
+        'order_club_type_id',
         'name',
         'slug',
         'email',
@@ -133,13 +135,59 @@ class Club extends Model implements HasMedia
         return $this->clubType?->code === ClubType::HALL;
     }
 
+    public function isProvinceGroup(): bool
+    {
+        return $this->clubType?->code === ClubType::PROVINCE_GROUP;
+    }
+
+    public function isProvinceSection(): bool
+    {
+        return $this->clubType?->code === ClubType::PROVINCE_SECTION;
+    }
+
+    /** A hall, province group or province section: a club with no members of its own. */
+    public function isGroup(): bool
+    {
+        return in_array($this->clubType?->code, ClubType::GROUP_CODES, true);
+    }
+
     /**
      * @param  Builder<Club>  $query
      * @return Builder<Club>
      */
-    public function scopeNotHalls(Builder $query): Builder
+    public function scopeNotGroups(Builder $query): Builder
     {
-        return $query->whereDoesntHave('clubType', fn ($type) => $type->where('code', ClubType::HALL));
+        return $query->whereDoesntHave('clubType', fn ($type) => $type->whereIn('code', ClubType::GROUP_CODES));
+    }
+
+    /**
+     * The province group a section belongs to.
+     *
+     * @return BelongsTo<Club, $this>
+     */
+    public function parentClub(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'parent_club_id');
+    }
+
+    /**
+     * The sections of a province group.
+     *
+     * @return HasMany<Club, $this>
+     */
+    public function sections(): HasMany
+    {
+        return $this->hasMany(self::class, 'parent_club_id');
+    }
+
+    /**
+     * The order (club type) a section covers.
+     *
+     * @return BelongsTo<ClubType, $this>
+     */
+    public function orderClubType(): BelongsTo
+    {
+        return $this->belongsTo(ClubType::class, 'order_club_type_id');
     }
 
     /**

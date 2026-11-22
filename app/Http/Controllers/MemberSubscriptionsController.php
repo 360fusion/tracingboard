@@ -20,7 +20,7 @@ class MemberSubscriptionsController extends Controller
     public function index(Request $request): Response
     {
         $user = Auth::user();
-        $userClubs = $user->clubs()->notHalls()->get();
+        $userClubs = $user->clubs()->notGroups()->get();
 
         // Ensure default types exist for user clubs
         foreach ($userClubs as $club) {
@@ -134,7 +134,7 @@ class MemberSubscriptionsController extends Controller
             $isMember = $user->hallAudienceClubIds()->contains($club->id);
             abort_unless($isMember || $existing, 404);
         } else {
-            $isMember = $user->clubs()->notHalls()->where('clubs.id', $club->id)->exists();
+            $isMember = $user->clubs()->notGroups()->where('clubs.id', $club->id)->exists();
         }
 
         if ($isMember && $type->is_mandatory && ! $club->isHall()) {
