@@ -57,6 +57,7 @@ class ProvinceDashboardTest extends TestCase
         Lodge::factory()->create(['province_id' => $this->durham->id, 'club_type_id' => $this->roseCroix->id]);
         LodgeCorrection::factory()->create(['lodge_id' => $lodge->id, 'changes' => ['number' => '4800']]);
         Event::create(['club_id' => $this->section->id, 'title' => 'Festival', 'slug' => 'festival', 'starts_at' => now()->addDays(3), 'status' => 'upcoming']);
+        Event::create(['club_id' => $this->section->id, 'title' => 'Called off', 'slug' => 'called-off', 'starts_at' => now()->addDays(4), 'status' => 'cancelled']);
         Event::create(['club_id' => $this->section->id, 'title' => 'Old', 'slug' => 'old', 'starts_at' => now()->subDays(3), 'status' => 'upcoming']);
 
         $this->actingAs($this->person($this->section))->get(route('admin.analytics', ['slug' => $this->section->slug]))
@@ -89,6 +90,20 @@ class ProvinceDashboardTest extends TestCase
 
         $this->actingAs($this->person($this->group))->get(route('members.dashboard'))
             ->assertRedirect(route('admin.sections.index', ['clubSlug' => $this->group->slug]));
+    }
+
+    public function test_group_staff_without_manage_sections_land_on_the_dashboard(): void
+    {
+        $dashboard = route('admin.analytics', ['slug' => $this->group->slug]);
+        $this->actingAs($this->person($this->group, 'treasurer'))->get(route('members.dashboard'))->assertRedirect($dashboard);
+        $this->get($dashboard)->assertOk();
+        auth()->logout();
+
+        $user = User::factory()->unverified()->create(['password' => Hash::make('temp-secret')]);
+        $this->group->users()->attach($user->id, ['role' => 'coach', 'invitation_token' => hash('sha256', 'tok-3'), 'invited_at' => now(), 'status' => 'active']);
+
+        $this->post(route('invitation.submit', ['slug' => $this->group->slug, 'token' => 'tok-3']), ['password' => 'new-secure-password', 'password_confirmation' => 'new-secure-password'])
+            ->assertRedirect($dashboard);
     }
 
     public function test_section_home_page_links_chapters_and_officers(): void

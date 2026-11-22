@@ -54,12 +54,13 @@ class HallClubs
     }
 
     /**
-     * Where someone on the hall's board starts: the hall details when they may edit them, else the admin dashboard.
+     * Where someone on a group's board starts: a hall's details or a province group's sections when they may edit
+     * them, else the admin dashboard.
      * There is no /{slug}/admin page and a hall has no member area, so every way into a hall comes through here.
      */
     public static function landingUrl(Club $club, ?User $user, bool $absolute = true): string
     {
-        return self::landingUrlFor($club, ClubAccess::can($user, $club, 'manage_hall'), $absolute);
+        return self::landingUrlFor($club, ClubAccess::can($user, $club, self::homeCapability($club)), $absolute);
     }
 
     /**
@@ -69,20 +70,21 @@ class HallClubs
     {
         $role = ($club->pivot->status ?? null) === ClubMemberStatus::Active->value ? $club->pivot->role : null;
 
-        return self::landingUrlFor($club, $user->actsAsSuperAdmin() || ClubPermissions::allows($club, $role, 'manage_hall'));
+        return self::landingUrlFor($club, $user->actsAsSuperAdmin() || ClubPermissions::allows($club, $role, self::homeCapability($club)));
     }
 
-    private static function landingUrlFor(Club $club, bool $mayEditHall, bool $absolute = true): string
+    private static function homeCapability(Club $club): string
     {
-        if ($club->isProvinceGroup()) {
+        return $club->isProvinceGroup() ? 'manage_sections' : 'manage_hall';
+    }
+
+    private static function landingUrlFor(Club $club, bool $mayOpenHome, bool $absolute = true): string
+    {
+        if ($club->isProvinceGroup() && $mayOpenHome) {
             return route('admin.sections.index', ['clubSlug' => $club->slug], $absolute);
         }
 
-        if ($club->isProvinceSection()) {
-            return route('admin.analytics', ['slug' => $club->slug], $absolute);
-        }
-
-        return $mayEditHall
+        return $mayOpenHome && ! $club->isProvinceGroup() && ! $club->isProvinceSection()
             ? route('admin.hall.edit', ['clubSlug' => $club->slug], $absolute)
             : route('admin.analytics', ['slug' => $club->slug], $absolute);
     }

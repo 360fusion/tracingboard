@@ -154,7 +154,7 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
     public function boardGroupClubIds(): Collection
     {
         return $this->clubs()->whereHas('clubType', fn ($type) => $type->whereIn('code', ClubType::GROUP_CODES))
-            ->wherePivot('status', ClubMemberStatus::Active->value)->pluck('clubs.id');
+            ->wherePivot('status', ClubMemberStatus::Active->value)->orderBy('clubs.id')->pluck('clubs.id');
     }
 
     /**

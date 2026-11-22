@@ -6,6 +6,7 @@ use App\Domains\ClubAccounting\Models\Member;
 use App\Domains\ClubAccounting\Models\MemberSubscription;
 use App\Enums\ClubMemberStatus;
 use App\Enums\DocumentStatus;
+use App\Enums\EventStatus;
 use App\Models\Accounting\Bill;
 use App\Models\Club;
 use App\Models\ClubPaymentMethod;
@@ -151,7 +152,7 @@ class AnalyticsController extends Controller
 
         $sectionStats = $club->isProvinceSection() ? [
             'chapters_count' => SectionChapters::for($club)->count(),
-            'upcoming_events' => $club->events()->where('starts_at', '>=', now())->count(),
+            'upcoming_events' => $club->events()->where('status', EventStatus::Upcoming->value)->where('starts_at', '>=', now())->count(),
             'open_fixes' => LodgeCorrection::open()->whereHas('lodge', fn ($lodge) => $lodge->where('province_id', $club->province_id)
                 ->where('club_type_id', $club->order_club_type_id)->whereNull('club_id'))->count(),
             'last_newsletter_at' => Newsletter::where('club_id', $club->id)->whereNotNull('sent_at')->max('sent_at'),
