@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Domains\ClubAccounting\Services\MemberInvitationException;
 use App\Http\Requests\SuperAdmin\StoreDistrictRequest;
 use App\Http\Requests\SuperAdmin\StoreProvinceRequest;
 use App\Http\Requests\SuperAdminProvince\UpdateDistrictRequest;
@@ -10,8 +11,12 @@ use App\Models\District;
 use App\Models\GrandLodge;
 use App\Models\Province;
 use App\Models\User;
+use App\Services\Halls\HallBoard;
+use App\Services\Provinces\ProvinceGroups;
+use DomainException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -37,7 +42,7 @@ class SuperAdminProvinceController extends Controller
     /**
      * View dedicated specification page for a Masonic Province.
      */
-    public function showProvince(int $id): Response
+    public function showProvince(int $id, ProvinceGroups $groups): Response
     {
         $province = Province::with(['grandLodge', 'clubs.clubType'])
             ->withCount('clubs')
@@ -48,10 +53,31 @@ class SuperAdminProvinceController extends Controller
 
         return Inertia::render('SuperAdmin/Provinces/Show', [
             'province' => $province,
+            'group' => $groups->groupFor($province)?->only(['name', 'slug']),
             'admins' => $province->admins()->orderBy('name')->get(['users.id', 'users.name', 'users.email']),
             'allProvinces' => $allProvinces,
             'grandLodges' => $grandLodges,
         ]);
+    }
+
+    /**
+     * Make the province's group club if it has none, then invite the named person as its owner.
+     */
+    public function setUpGroup(Request $request, int $id, ProvinceGroups $groups, HallBoard $board): RedirectResponse
+    {
+        $province = Province::findOrFail($id);
+        $data = $request->validate(['name' => 'required|string|max:255', 'email' => 'required|email|max:255']);
+
+        try {
+            DB::transaction(function () use ($province, $data, $groups, $board, $request) {
+                $club = $groups->groupFor($province) ?? $groups->createGroup($province);
+                $board->invite($club, $data['name'], $data['email'], 'Provincial Secretary', 'owner', $request->user());
+            });
+        } catch (DomainException|MemberInvitationException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return back()->with('success', "Invitation sent to {$data['email']}.");
     }
 
     /**

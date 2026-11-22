@@ -13,6 +13,11 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  // The province's group club ({ name, slug }), once it has one.
+  group: {
+    type: Object,
+    default: null,
+  },
   // People who review suggested fixes to this province's lodge listings.
   admins: {
     type: Array,
@@ -34,6 +39,15 @@ function addAdmin() {
   adminForm.post(route('superadmin.provinces.admins.store', props.province.id), {
     preserveScroll: true,
     onSuccess: () => adminForm.reset(),
+  });
+}
+
+const groupForm = useForm({ name: '', email: '' });
+
+function setUpGroup() {
+  groupForm.post(route('superadmin.provinces.group', props.province.id), {
+    preserveScroll: true,
+    onSuccess: () => groupForm.reset(),
   });
 }
 
@@ -222,6 +236,24 @@ function handleSwitchProvince(event) {
                 {{ province.description || 'No detailed background notes recorded for this province.' }}
               </p>
             </div>
+          </Card>
+
+          <Card class="space-y-4">
+            <template #header>
+              <h3 class="text-base font-semibold text-slate-900 dark:text-white">Province group</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400">The province's own space for its website, news and the sections of each order. Invite its first owner here.</p>
+            </template>
+
+            <p v-if="group" class="text-sm text-slate-700 dark:text-slate-300">
+              <a :href="route('admin.analytics', group.slug)" class="font-medium text-blue-600 hover:underline dark:text-blue-400">{{ group.name }}</a>
+            </p>
+            <p v-else class="text-sm text-slate-500 dark:text-slate-400">No group yet. Inviting the first owner creates it.</p>
+
+            <form class="flex flex-wrap items-end gap-2" @submit.prevent="setUpGroup">
+              <Input v-model="groupForm.name" label="Name" placeholder="Their name" :error="groupForm.errors.name" required class="flex-1 min-w-40" />
+              <Input v-model="groupForm.email" type="email" label="Email address" placeholder="Provincial Secretary's email address" :error="groupForm.errors.email" required class="flex-1 min-w-56" />
+              <Button type="submit" variant="secondary" :loading="groupForm.processing">{{ group ? 'Invite owner' : 'Create group and invite' }}</Button>
+            </form>
           </Card>
 
           <Card class="space-y-4">
