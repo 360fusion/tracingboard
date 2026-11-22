@@ -1,7 +1,7 @@
 <script setup>
 // The Secretary passes on a sister or reciprocal lodge's summons or notice, or a Provincial or Grand Lodge
 // communication, once; each member gets it as they chose (PassOnController, SendPassedOnItem).
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { Link, useForm } from '@inertiajs/vue3';
 import MembersLayout from '@/Layouts/MembersLayout.vue';
 import Card from '@/Components/Ui/Card.vue';
@@ -17,6 +17,7 @@ const props = defineProps({
     kinds: { type: Array, required: true },
     lodges: { type: Object, required: true },
     sent: { type: Array, required: true },
+    circulars: { type: Array, default: () => [] },
 });
 
 const form = useForm({
@@ -47,11 +48,26 @@ function pickFile(event) {
     form.attachment = event.target.files[0] ?? null;
 }
 
+// The circular being passed on: its PDF cannot be put into the file box, so the form links to it for re-attaching.
+const fromCircular = ref(null);
+
+function passOnCircular(circular) {
+    chooseKind('provincial');
+    form.title = circular.title;
+    form.body = circular.body;
+    form.attachment = null;
+    fromCircular.value = circular;
+    document.getElementById('pass-on-form')?.scrollIntoView({ behavior: 'smooth' });
+}
+
 function send() {
     form.post(route('member.pass_on.store', { slug: props.club.slug }), {
         forceFormData: true,
         preserveScroll: true,
-        onSuccess: () => form.reset(),
+        onSuccess: () => {
+            form.reset();
+            fromCircular.value = null;
+        },
     });
 }
 </script>
@@ -65,7 +81,18 @@ function send() {
                 <Link :href="route('member.pass_on.lists', { slug: club.slug })" class="mt-2 inline-block text-sm font-medium text-blue-600 hover:underline dark:text-blue-400">Sister and reciprocal lodges</Link>
             </div>
 
-            <form class="space-y-4" @submit.prevent="send">
+            <Card v-if="circulars.length" padding="none" class="divide-y divide-slate-100 dark:divide-slate-800">
+                <h3 class="px-4 py-3 font-medium text-slate-900 dark:text-white">From the Province</h3>
+                <div v-for="circular in circulars" :key="circular.id" class="flex items-start justify-between gap-3 px-4 py-3 text-sm">
+                    <div class="min-w-0">
+                        <p class="font-medium text-slate-900 dark:text-white">{{ circular.title }}</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">{{ circular.from }} · {{ circular.sent_on }}<template v-if="circular.attachment_url"> · <a :href="circular.attachment_url" target="_blank" rel="noopener" class="font-medium text-blue-600 hover:underline dark:text-blue-400">PDF</a></template></p>
+                    </div>
+                    <Button variant="secondary" size="sm" @click="passOnCircular(circular)">Pass this on</Button>
+                </div>
+            </Card>
+
+            <form id="pass-on-form" class="space-y-4" @submit.prevent="send">
                 <div class="grid grid-cols-2 gap-2" role="group" aria-label="What is it?">
                     <button v-for="kind in kinds" :key="kind.key" type="button" :aria-pressed="form.kind === kind.key" :class="['min-h-14 rounded-xl border px-3 py-2 text-left text-sm font-medium', form.kind === kind.key ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-300 bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200']" @click="chooseKind(kind.key)">{{ kind.label }}</button>
                 </div>
@@ -96,6 +123,10 @@ function send() {
                     </div>
 
                     <Textarea v-model="form.body" label="Text or a note" hint="Paste the text, or add a note to go with the PDF." :rows="5" :error="form.errors.body" />
+
+                    <Alert v-if="fromCircular?.attachment_url && !form.attachment" variant="info">
+                        This circular came with a PDF. <a :href="fromCircular.attachment_url" target="_blank" rel="noopener" class="font-medium underline">Download {{ fromCircular.attachment_name || 'the PDF' }}</a> and attach it below to pass it on with the text.
+                    </Alert>
 
                     <div>
                         <label for="pass-on-pdf" class="block text-sm font-medium text-slate-700 dark:text-slate-200">The PDF</label>

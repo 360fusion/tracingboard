@@ -10,12 +10,15 @@ use App\Models\Club;
 use App\Models\ClubLodgeLink;
 use App\Models\Lodge;
 use App\Models\PassedOnItem;
+use App\Models\SectionCircular;
 use App\Models\User;
 use App\Services\PassedOn\LodgeLinks;
 use App\Services\PassedOn\PassedOnAudience;
 use App\Services\PassedOn\PlatformSummons;
 use App\Support\ClubAccess;
+use App\Support\GroupAudience;
 use App\Support\PassedOnPreferences;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -60,6 +63,15 @@ class PassOnController extends Controller
                     'emails' => $item->email_count,
                     'attachment_url' => $item->attachment_path ? route('member.pass_on.attachment', ['slug' => $club->slug, 'item' => $item->id]) : null,
                 ]),
+            'circulars' => self::circularsFor($club)->load('club:id,name')->map(fn (SectionCircular $circular) => [
+                'id' => $circular->id,
+                'title' => $circular->title,
+                'body' => $circular->bodyText(),
+                'from' => $circular->club->name,
+                'sent_on' => $circular->created_at->format('j M Y'),
+                'attachment_name' => $circular->attachment_name,
+                'attachment_url' => $circular->attachment_path ? route('member.pass_on.circular_attachment', ['slug' => $club->slug, 'id' => $circular->id]) : null,
+            ]),
         ]);
     }
 
@@ -112,6 +124,29 @@ class PassOnController extends Controller
         return $passedOn->streamAttachmentResponse();
     }
 
+    /** A province section's circular PDF, only for senders in a chapter it reaches. */
+    public function circularAttachment(Request $request, string $slug, int $id): StreamedResponse
+    {
+        $club = $this->authorizedClub($request, $slug);
+
+        $circular = self::circularsFor($club)->firstWhere('id', $id);
+        abort_unless($circular !== null, 404);
+
+        return $circular->streamAttachmentResponse();
+    }
+
+    /**
+     * The last 90 days' circulars from the province sections whose chapters include this club, latest first.
+     *
+     * @return Collection<int, SectionCircular>
+     */
+    private static function circularsFor(Club $club): Collection
+    {
+        $sectionIds = GroupAudience::groupClubsFor(collect([$club]))->filter(fn (Club $group) => $group->isProvinceSection())->pluck('id');
+
+        return $sectionIds->isEmpty() ? new Collection : SectionCircular::whereIn('club_id', $sectionIds)->where('created_at', '>=', now()->subDays(90))->latest('id')->get();
+    }
+
     public function lists(Request $request, string $slug, LodgeLinks $links): Response
     {
         $club = $this->authorizedClub($request, $slug);
@@ -155,7 +190,7 @@ class PassOnController extends Controller
     }
 
     /** Text pasted from an email keeps its paragraphs and line breaks; anything already HTML is left to the sanitiser. */
-    private static function asHtml(?string $text): ?string
+    public static function asHtml(?string $text): ?string
     {
         if ($text === null || trim($text) === '' || $text !== strip_tags($text)) {
             return $text;

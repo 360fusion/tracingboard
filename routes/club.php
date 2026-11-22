@@ -111,6 +111,7 @@ use App\Http\Controllers\ProvinceSectionsController;
 use App\Http\Controllers\ProvincialOfficerController;
 use App\Http\Controllers\QuickRsvpController;
 use App\Http\Controllers\SectionChaptersController;
+use App\Http\Controllers\SectionCircularController;
 use App\Http\Controllers\SectionLodgeController;
 use App\Http\Controllers\SectionLodgeCorrectionController;
 use App\Http\Controllers\SignatureAdminController;
@@ -151,6 +152,8 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/{clubSlug}/admin/provincial-officers/order', [ProvincialOfficerController::class, 'reorder'])->name('admin.provincial-officers.reorder');
     Route::put('/{clubSlug}/admin/provincial-officers/{id}', [ProvincialOfficerController::class, 'update'])->name('admin.provincial-officers.update');
     Route::delete('/{clubSlug}/admin/provincial-officers/{id}', [ProvincialOfficerController::class, 'destroy'])->name('admin.provincial-officers.destroy');
+    Route::get('/{clubSlug}/admin/circulars', [SectionCircularController::class, 'index'])->name('admin.circulars.index');
+    Route::post('/{clubSlug}/admin/circulars', [SectionCircularController::class, 'store'])->name('admin.circulars.store');
     Route::get('/{clubSlug}/admin/chapters/listings', [SectionLodgeController::class, 'index'])->name('admin.chapters.listings.index');
     Route::post('/{clubSlug}/admin/chapters/listings', [SectionLodgeController::class, 'store'])->name('admin.chapters.listings.store');
     Route::put('/{clubSlug}/admin/chapters/listings/{id}', [SectionLodgeController::class, 'sectionUpdate'])->name('admin.chapters.listings.update');
@@ -631,6 +634,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/members/{slug}/pass-on', [PassOnController::class, 'index'])->name('member.pass_on');
     Route::post('/members/{slug}/pass-on', [PassOnController::class, 'store'])->middleware('throttle:10,60')->name('member.pass_on.store');
     Route::get('/members/{slug}/pass-on/{item}/attachment', [PassOnController::class, 'attachment'])->whereNumber('item')->name('member.pass_on.attachment');
+    Route::get('/members/{slug}/pass-on/circulars/{id}/attachment', [PassOnController::class, 'circularAttachment'])->whereNumber('id')->name('member.pass_on.circular_attachment');
     Route::get('/members/{slug}/pass-on/lists', [PassOnController::class, 'lists'])->name('member.pass_on.lists');
     Route::post('/members/{slug}/pass-on/lists', [PassOnController::class, 'updateLists'])->middleware('throttle:60,1')->name('member.pass_on.lists.update');
     Route::get('/members/{slug}/accounts', [MemberAccountsController::class, 'show'])->name('member.accounts');
