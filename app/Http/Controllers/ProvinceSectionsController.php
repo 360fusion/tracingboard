@@ -25,7 +25,7 @@ class ProvinceSectionsController extends Controller
         $group = $this->findGroup($clubSlug);
 
         return Inertia::render('Admin/Province/Sections', [
-            'club' => $group,
+            'club' => $group->only(['id', 'name', 'slug']),
             'orders' => $this->availableOrders($group)->get(['id', 'name']),
             'sections' => $group->sections()->with([
                 'orderClubType:id,name',

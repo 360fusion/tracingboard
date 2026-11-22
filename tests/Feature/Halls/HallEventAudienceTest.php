@@ -8,9 +8,12 @@ use App\Models\ClubPaymentMethod;
 use App\Models\Event;
 use App\Models\EventPaymentMethod;
 use App\Models\MasonicHall;
+use App\Models\Post;
 use App\Models\User;
 use App\Services\Events\EventRegistrationService;
+use App\Services\MemberFeed;
 use App\Services\Payment\StripeGateway;
+use App\Support\MemberScope;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
 use Mockery\MockInterface;
@@ -64,6 +67,21 @@ class HallEventAudienceTest extends TestCase
 
         $this->assertFalse($this->event->isVisibleTo($outsider));
         $this->assertFalse(Event::visibleTo($outsider)->whereKey($this->event->id)->exists());
+    }
+
+    public function test_a_hall_members_only_post_reaches_the_member_feed_of_lodges_that_meet_there(): void
+    {
+        Post::create([
+            'club_id' => $this->hallClub->id, 'author_id' => $this->member->id, 'title' => 'Car park closed', 'slug' => 'car-park-closed',
+            'content' => '<p>Body</p>', 'status' => 'published', 'visibility' => Visibility::Club,
+        ]);
+        $other = Club::factory()->create(['masonic_hall_id' => MasonicHall::factory()->create()->id]);
+        $outsider = User::factory()->create();
+        $other->users()->attach($outsider->id, ['role' => 'member', 'status' => 'active']);
+        $feedTitles = fn (User $user) => collect(app(MemberFeed::class)->items($user, MemberScope::for($user)->clubs()))->pluck('title');
+
+        $this->assertContains('Car park closed', $feedTitles($this->member));
+        $this->assertNotContains('Car park closed', $feedTitles($outsider));
     }
 
     public function test_lodge_moving_hall_moves_the_audience(): void

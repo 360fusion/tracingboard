@@ -21,7 +21,7 @@ class ProvincialOfficerController extends Controller
         abort_unless($club->isProvinceSection(), 404);
 
         return Inertia::render('Admin/Province/Officers', [
-            'club' => $club,
+            'club' => $club->only(['id', 'name', 'slug']),
             'officers' => ProvincialOfficer::where('club_id', $club->id)->orderBy('position')->orderBy('id')->get(['id', 'office', 'name', 'rank']),
         ]);
     }

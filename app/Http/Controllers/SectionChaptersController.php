@@ -16,6 +16,6 @@ class SectionChaptersController extends Controller
         $club = $this->findClub($clubSlug);
         abort_unless($club->isProvinceSection(), 404);
 
-        return Inertia::render('Admin/Province/Chapters', ['club' => $club, 'chapters' => SectionChapters::for($club)]);
+        return Inertia::render('Admin/Province/Chapters', ['club' => $club->only(['id', 'name', 'slug']), 'chapters' => SectionChapters::for($club)]);
     }
 }

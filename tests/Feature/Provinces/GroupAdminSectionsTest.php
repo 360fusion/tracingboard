@@ -57,6 +57,43 @@ class GroupAdminSectionsTest extends TestCase
         $this->actingAs($admin)->get(route('admin.analytics', ['slug' => $this->group->slug]))->assertForbidden();
     }
 
+    public function test_section_editor_does_not_reach_a_chapter_admin(): void
+    {
+        $chapter = Club::factory()->create(['club_type_id' => $this->section->order_club_type_id, 'province_id' => $this->section->province_id]);
+
+        $this->actingAs($this->person($this->section, 'coach'))->get(route('admin.analytics', ['slug' => $chapter->slug]))->assertForbidden();
+    }
+
+    public function test_province_admin_pages_send_only_the_clubs_name_and_slug(): void
+    {
+        $pages = [
+            [$this->group, 'admin.sections.index'],
+            [$this->section, 'admin.provincial-officers.index'],
+            [$this->section, 'admin.chapters.index'],
+            [$this->section, 'admin.circulars.index'],
+        ];
+
+        foreach ($pages as [$club, $name]) {
+            $this->actingAs($this->person($club, 'owner'))->get(route($name, ['clubSlug' => $club->slug]))
+                ->assertInertia(fn ($page) => $page->where('club', ['id' => $club->id, 'name' => $club->name, 'slug' => $club->slug])->etc());
+        }
+    }
+
+    public function test_settings_cannot_move_a_section_or_group_to_another_province(): void
+    {
+        $other = Province::create(['grand_lodge_id' => GrandLodge::first()->id, 'name' => 'Northumberland', 'code' => 'northumberland', 'country' => 'England']);
+
+        foreach ([$this->section, $this->group] as $club) {
+            $province = $club->province_id;
+
+            $this->actingAs($this->person($club, 'owner'))
+                ->put(route('admin.settings.update', ['clubSlug' => $club->slug]), ['name' => $club->name, 'province_id' => $other->id])
+                ->assertSessionHasNoErrors()->assertRedirect();
+
+            $this->assertSame($province, $club->fresh()->province_id);
+        }
+    }
+
     public function test_group_has_no_events_or_accounts(): void
     {
         $owner = $this->person($this->group, 'owner');
