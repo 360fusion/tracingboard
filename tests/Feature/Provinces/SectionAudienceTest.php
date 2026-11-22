@@ -143,6 +143,7 @@ class SectionAudienceTest extends TestCase
         $club = collect(Visibility::options($this->section))->firstWhere('value', Visibility::Club->value);
 
         $this->assertSame('Members of Rose Croix chapters in Durham', $club['label']);
+        $this->assertSame('Members of lodges and chapters in Durham', GroupAudience::audienceLabel(Club::findOrFail($this->section->parent_club_id)));
     }
 
     public function test_group_clubs_for_makes_at_most_two_queries(): void

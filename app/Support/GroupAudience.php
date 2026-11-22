@@ -80,6 +80,10 @@ final class GroupAudience
             return 'Members of lodges that meet here';
         }
 
+        if ($group->isProvinceGroup()) {
+            return 'Members of lodges and chapters'.($group->province ? " in {$group->province->name}" : '');
+        }
+
         $order = $group->orderClubType;
         $word = Str::plural(strtolower(Lodge::typeWordFor($order?->code) ?? 'club'));
 

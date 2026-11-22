@@ -91,6 +91,16 @@ return [
             'description' => 'Invite and remove the people on the hall\'s board and set their offices',
             'roles' => ['owner', 'admin'],
         ],
+        'manage_sections' => [
+            'label' => 'Order sections',
+            'description' => 'Create and edit the province\'s sections for each order and the people who run them',
+            'roles' => ['owner', 'admin'],
+        ],
+        'manage_provincial_officers' => [
+            'label' => 'Provincial officers',
+            'description' => 'Keep the list of the province\'s officers and their appointments',
+            'roles' => ['owner', 'admin', 'coach'],
+        ],
         'manage_settings' => [
             'label' => 'Club Settings',
             'description' => 'Configure organization profile, branding, custom domain, and permission matrix',
@@ -145,23 +155,38 @@ return [
         'board' => 'manage_board',
         // Every board role can see which lodges meet at the hall; manage_events is held by all four by default.
         'lodges' => 'manage_events',
+
+        'sections' => 'manage_sections',
+        'provincial-officers' => 'manage_provincial_officers',
+        'chapters' => 'manage_events',
+        'circulars' => 'manage_events',
     ],
 
     /**
-     * Sections of /{slug}/admin that a hall does not have: they answer 404 whoever asks.
+     * Sections of /{slug}/admin that a group (a hall, province group or province section, keyed by club type code)
+     * does not have: they answer 404 whoever asks. A province group also has no events, newsletters or accounts.
      */
-    'hall_hidden_sections' => ['members', 'users', 'candidates', 'meetings', 'officers', 'committee', 'visitors', 'subscriptions', 'dues-subscriptions', 'charity'],
+    'group_hidden_sections' => [
+        'hall' => $groupSections = ['members', 'users', 'candidates', 'meetings', 'officers', 'committee', 'visitors', 'subscriptions', 'dues-subscriptions', 'charity'],
+        'province_section' => $groupSections,
+        'province_group' => [...$groupSections, 'events', 'newsletters', 'accounting', 'pass-on'],
+    ],
 
     /**
-     * Capabilities a hall has no use for (they guard only hidden sections, or lodge-to-lodge communications), so its
-     * Roles and permissions screen leaves them out.
+     * Capabilities a group has no use for (they guard only hidden sections, or lodge-to-lodge communications), keyed by
+     * club type code, so its Roles and permissions screen leaves them out. manage_events stays on a province group:
+     * its chapters and circulars screens use it.
      */
-    'hall_hidden_capabilities' => ['manage_meetings', 'manage_members', 'manage_subscriptions', 'pass_on_communications'],
+    'group_hidden_capabilities' => [
+        'hall' => $hallCapabilities = ['manage_meetings', 'manage_members', 'manage_subscriptions', 'pass_on_communications', 'manage_sections', 'manage_provincial_officers'],
+        'province_section' => [...$hallCapabilities, 'manage_hall'],
+        'province_group' => ['manage_meetings', 'manage_members', 'manage_subscriptions', 'pass_on_communications', 'manage_hall', 'manage_billing', 'view_accounting', 'send_newsletters'],
+    ],
 
     /**
-     * Capabilities that only guard hall sections, so a lodge's Roles and permissions screen leaves them out.
+     * Capabilities that only guard group sections, so a lodge's Roles and permissions screen leaves them out.
      */
-    'lodge_hidden_capabilities' => ['manage_hall', 'manage_board'],
+    'lodge_hidden_capabilities' => ['manage_hall', 'manage_board', 'manage_sections', 'manage_provincial_officers'],
 
     /**
      * Always permitted, regardless of the club's matrix. Without this a club

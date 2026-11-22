@@ -13,12 +13,12 @@ const props = defineProps({
   club: Object,
   people: { type: Array, default: () => [] },
   officeRoles: { type: Object, default: () => ({}) },
-  roles: { type: Array, default: () => [] },
+  roles: { type: Object, default: () => ({}) },
 });
 
-// The coach role is shown as "Secretary", as on the other role screens.
-const roleLabel = r => (r === 'coach' ? 'Secretary' : r.charAt(0).toUpperCase() + r.slice(1));
-const roleOptions = computed(() => props.roles.map(r => ({ value: r, label: roleLabel(r) })));
+// The server names the roles: the coach role is "Secretary" on a hall and "Editor" on a group or section.
+const roleLabel = r => props.roles[r] ?? r;
+const roleOptions = computed(() => Object.entries(props.roles).map(([value, label]) => ({ value, label })));
 
 const invite = useForm({ name: '', email: '', office: '', role: 'coach' });
 // A familiar office pre-selects its usual role; the role can still be changed.
@@ -89,7 +89,7 @@ function confirmRemove() {
     </div>
 
     <ConfirmDialog :open="!!removing" title="Remove from the board" confirm-label="Remove" @close="removing = null" @confirm="confirmRemove">
-      {{ removing?.name }} will lose access to this hall.
+      {{ removing?.name }} will lose access to {{ club.name }}.
     </ConfirmDialog>
   </AdminLayout>
 </template>

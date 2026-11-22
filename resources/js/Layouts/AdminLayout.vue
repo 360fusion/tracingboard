@@ -51,6 +51,7 @@ const currentClubRole = computed(() => {
 
 // Sent for the club in the URL, so a superadmin viewing a hall gets the hall menu too.
 const isHall = computed(() => !!page.props.clubIsHall);
+const isGroup = computed(() => !!page.props.clubIsGroup);
 // A hall has no member area of its own: its board's portal is their all-lodges dashboard.
 const memberPortalHref = computed(() => (isHall.value ? route('members.dashboard') : route('member.dashboard', clubSlug)));
 
@@ -254,7 +255,7 @@ provide('layoutHasHeading', true);
           </Link>
 
           <Link
-            v-if="isHall"
+            v-if="isGroup"
             :href="route('admin.board.index', { clubSlug })"
             :class="[
               'flex items-center gap-3 px-3.5 py-2 rounded-xl transition-all',
@@ -271,7 +272,7 @@ provide('layoutHasHeading', true);
 
           <!-- 2. Meetings & Governance -->
           <Link 
-            v-if="!isHall"
+            v-if="!isGroup"
             :href="route('admin.meetings.index', { clubSlug })" 
             :class="[
               'flex items-center gap-3 px-3.5 py-2 rounded-xl transition-all',
@@ -304,7 +305,7 @@ provide('layoutHasHeading', true);
 
           <!-- 4. Members Hub -->
           <a 
-            v-if="!isHall"
+            v-if="!isGroup"
             :href="route('admin.club_acc.members.index', { clubSlug })" 
             :class="[
               'flex items-center gap-3 px-3.5 py-2 rounded-xl transition-all',
@@ -385,7 +386,7 @@ provide('layoutHasHeading', true);
 
           <!-- 10. Charity Steward & Provincial Festival Hub -->
           <Link
-            v-if="!isHall"
+            v-if="!isGroup"
             :href="route('admin.club_acc.charity.index', { clubSlug })"
             :class="[
               'flex items-center gap-3 px-3.5 py-2 rounded-xl transition-all',

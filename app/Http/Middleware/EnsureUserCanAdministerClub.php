@@ -59,9 +59,9 @@ class EnsureUserCanAdministerClub
             abort(404);
         }
 
-        // A hall has no members, meetings or accounts of its own; this holds for superadmins too.
-        if ($club->isHall() && preg_match('#^[^/]+/admin/([^/?]+)#', $request->path(), $matches)) {
-            abort_if(in_array($matches[1], config('club_permissions.hall_hidden_sections'), true), 404);
+        // A group has no members, meetings or accounts of its own; this holds for superadmins too.
+        if ($club->isGroup() && preg_match('#^[^/]+/admin/([^/?]+)#', $request->path(), $matches)) {
+            abort_if(in_array($matches[1], config("club_permissions.group_hidden_sections.{$club->clubType->code}", []), true), 404);
         }
 
         if ($user->actsAsSuperAdmin()) {

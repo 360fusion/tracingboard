@@ -28,10 +28,23 @@ class HallBoardController extends Controller
 
     private const ROLES = ['owner', 'admin', 'coach', 'treasurer'];
 
+    /**
+     * The access roles with the names the screens use: a hall's Secretary and a group's or section's Editor hold the coach role.
+     *
+     * @return array<string, string>
+     */
+    public static function roleLabels(Club $club): array
+    {
+        $labels = array_combine(self::ROLES, array_map('ucfirst', self::ROLES));
+        $labels['coach'] = $club->isHall() ? 'Secretary' : 'Editor';
+
+        return $labels;
+    }
+
     public function index(string $clubSlug): Response
     {
         $club = $this->findClub($clubSlug);
-        abort_unless($club->isHall(), 404);
+        abort_unless($club->isGroup(), 404);
 
         return Inertia::render('Admin/Hall/Board', [
             'club' => $club,
@@ -45,14 +58,14 @@ class HallBoardController extends Controller
                     'pending' => $u->pivot->status === ClubMemberStatus::Pending->value,
                 ])->values(),
             'officeRoles' => HallBoard::OFFICE_ROLES,
-            'roles' => self::ROLES,
+            'roles' => self::roleLabels($club),
         ]);
     }
 
     public function store(Request $request, string $clubSlug, HallBoard $board): RedirectResponse
     {
         $club = $this->findClub($clubSlug);
-        abort_unless($club->isHall(), 404);
+        abort_unless($club->isGroup(), 404);
 
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -76,7 +89,7 @@ class HallBoardController extends Controller
     public function update(Request $request, string $clubSlug, int $userId): RedirectResponse
     {
         $club = $this->findClub($clubSlug);
-        abort_unless($club->isHall(), 404);
+        abort_unless($club->isGroup(), 404);
 
         $data = $request->validate([
             'office' => ['required', 'string', 'max:100'],
@@ -105,7 +118,7 @@ class HallBoardController extends Controller
     public function destroy(Request $request, string $clubSlug, int $userId, MemberInvitationService $invitations): RedirectResponse
     {
         $club = $this->findClub($clubSlug);
-        abort_unless($club->isHall(), 404);
+        abort_unless($club->isGroup(), 404);
 
         $user = $this->boardMember($club, $userId);
 

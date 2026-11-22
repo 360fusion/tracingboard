@@ -154,7 +154,7 @@ class ClubSettingsController extends Controller
         }
 
         // The screen does not list the capabilities this kind of club has no use for, so keep whatever was stored for them.
-        $hiddenCapabilities = config($club->isHall() ? 'club_permissions.hall_hidden_capabilities' : 'club_permissions.lodge_hidden_capabilities');
+        $hiddenCapabilities = config($club->isGroup() ? "club_permissions.group_hidden_capabilities.{$club->clubType->code}" : 'club_permissions.lodge_hidden_capabilities');
         $clean += array_intersect_key($current, array_flip($hiddenCapabilities));
 
         if (! $isOwner) {

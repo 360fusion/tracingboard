@@ -25,7 +25,7 @@ class GroupHasNoMemberArea
 
             // The open sections: a group's events and its posts one by one, for its audience.
             $isOpen = $uri === 'members/{slug}/events' || str_starts_with($uri, 'members/{slug}/events/') || $uri === 'members/{slug}/news/{id}';
-            $inAudience = $club !== null && (bool) $request->user()?->groupAudienceClubIds()->contains($club->id);
+            $inAudience = $club?->isGroup() && $isOpen && $request->user()?->groupAudienceClubIds()->contains($club->id);
 
             abort_if($club?->isGroup() && ! ($isOpen && $inAudience), 404);
         }
