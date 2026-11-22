@@ -8,6 +8,7 @@ use App\Models\Club;
 use App\Models\ClubRedirect;
 use App\Models\Page;
 use App\Models\PageRedirect;
+use App\Models\ProvincialOfficer;
 use App\Models\SiteDeployTarget;
 use App\Models\SiteRelease;
 use App\Models\User;
@@ -144,6 +145,10 @@ class StaticSiteBuilder
 
         if ($club->isProvinceSection()) {
             $targets->put('chapters', 'chapters');
+        }
+
+        if ($club->isProvinceSection() && ProvincialOfficer::where('club_id', $club->id)->exists()) {
+            $targets->put('officers', 'officers');
         }
 
         $count = 0;

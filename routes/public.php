@@ -152,6 +152,7 @@ Route::post('/site/{clubSlug}/booking/{token}/said-paid', [EventOnlinePaymentCon
 Route::get('/site/{clubSlug}/booking/{token}/paypal-return', [EventOnlinePaymentController::class, 'guestPayPalReturn'])->name('public.event.booking.paypal_return')->middleware('throttle:auth-forms');
 Route::post('/site/{clubSlug}/booking/{token}/cancel', [PublicEventController::class, 'cancel'])->name('public.event.booking.cancel')->middleware('throttle:auth-forms');
 Route::get('/site/{clubSlug}/chapters', [PublicSiteController::class, 'chapters'])->name('public.site.chapters');
+Route::get('/site/{clubSlug}/officers', [PublicSiteController::class, 'officers'])->name('public.site.officers');
 Route::get('/site/{clubSlug}/files/{mediaId}', [PublicSiteExtrasController::class, 'file'])->whereNumber('mediaId')->middleware('throttle:60,1')->name('public.site.file');
 Route::get('/site/{clubSlug}/sitemap.xml', [SearchIndexController::class, 'club'])->middleware('throttle:60,1')->name('public.site.sitemap');
 Route::get('/site/{clubSlug}/calendar.ics', [PublicSiteExtrasController::class, 'calendarFeed'])->middleware('throttle:60,1')->name('public.site.calendar_feed');

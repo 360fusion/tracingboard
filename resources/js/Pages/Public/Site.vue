@@ -29,6 +29,8 @@ const props = defineProps({
     // A province group's home lists its sections; a section's chapters page lists its order's lodges or chapters.
     sections: { type: Array, default: null },
     chapters: { type: Array, default: null },
+    // A section's provincial officers page.
+    officers: { type: Array, default: null },
 });
 
 const currentThemeKey = computed(() => props.previewTheme || props.club?.website_theme || DEFAULT_THEME_KEY);
@@ -142,7 +144,7 @@ const getSiteUrl = (urlPath) => {
                     </div>
                 </div>
             </template>
-            <BlockRenderer v-else-if="!chapters"
+            <BlockRenderer v-else-if="!chapters && !officers"
                 :blocks="page.blocks"
                 :theme="theme"
                 :club="club"
@@ -161,6 +163,13 @@ const getSiteUrl = (urlPath) => {
                     </a>
                 </li>
             </ul>
+            <div v-if="officers" class="mx-auto max-w-3xl px-4 sm:px-6 py-10 space-y-3">
+                <h2 class="text-2xl font-bold">{{ page.title }}</h2>
+                <div v-for="(officer, i) in officers" :key="i" class="rounded-xl border border-slate-200 bg-white/80 p-4 text-slate-900">
+                    <div class="text-sm text-slate-600">{{ officer.office }}</div>
+                    <div class="font-semibold">{{ [officer.rank, officer.name].filter(Boolean).join(' ') }}</div>
+                </div>
+            </div>
             <div v-if="chapters" class="mx-auto max-w-3xl px-4 sm:px-6 py-10 space-y-3">
                 <h2 class="text-2xl font-bold">{{ page.title }}</h2>
                 <p v-if="!chapters.length" class="text-slate-600">No chapters are listed yet.</p>

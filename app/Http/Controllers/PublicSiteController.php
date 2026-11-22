@@ -6,6 +6,7 @@ use App\Models\Club;
 use App\Models\ClubRedirect;
 use App\Models\Page;
 use App\Models\PageRedirect;
+use App\Models\ProvincialOfficer;
 use App\Models\User;
 use App\Services\PagePublisher;
 use App\Services\Provinces\SectionChapters;
@@ -128,6 +129,24 @@ class PublicSiteController extends Controller
         $page = new Page(['club_id' => $club->id, 'title' => 'Chapters', 'slug' => 'chapters', 'is_published' => true, 'is_members_only' => false, 'blocks' => []]);
 
         return $this->renderPage($club, $page, Auth::user(), extra: ['chapters' => SectionChapters::for($club)]);
+    }
+
+    /**
+     * A section's provincial officers, drawn inside the site's own header and footer.
+     */
+    public function officers(string $clubSlug): SymfonyResponse|Response
+    {
+        $club = Club::where('slug', $clubSlug)->with(['clubType', 'membershipPlans', 'donations.contributions'])->firstOrFail();
+        $officers = $club->isProvinceSection() ? ProvincialOfficer::where('club_id', $club->id)->orderBy('position')->orderBy('id')->get(['office', 'name', 'rank']) : collect();
+
+        // A real page slugged "officers", a club that is not a section, or a section with no officers keeps the address.
+        if ($officers->isEmpty() || Page::where('club_id', $club->id)->live()->where('slug', 'officers')->exists()) {
+            return $this->showPage($clubSlug, 'officers');
+        }
+
+        $page = new Page(['club_id' => $club->id, 'title' => 'Provincial officers', 'slug' => 'officers', 'is_published' => true, 'is_members_only' => false, 'blocks' => []]);
+
+        return $this->renderPage($club, $page, Auth::user(), extra: ['officers' => $officers]);
     }
 
     /**
