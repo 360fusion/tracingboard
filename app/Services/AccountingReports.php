@@ -267,7 +267,7 @@ class AccountingReports
      * each rate × active members. A rate the Province has not set stays null rather than
      * defaulting to zero, so the lodge is told to ask rather than led to think nothing is owed.
      * Member counts are always "current": members carry no leave date, so a true
-     * as-of-date snapshot is not possible. A hall owes its Province nothing, so it has no worksheet.
+     * as-of-date snapshot is not possible. A group owes its Province nothing, so it has no worksheet.
      *
      * @return ProvincialDue|null
      */

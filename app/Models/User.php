@@ -147,13 +147,13 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
     }
 
     /**
-     * IDs of the hall clubs this user is on the board of.
+     * IDs of the groups (halls, province groups and sections) this user is active in.
      *
      * @return Collection<int, int>
      */
-    public function boardHallClubIds(): Collection
+    public function boardGroupClubIds(): Collection
     {
-        return $this->clubs()->whereHas('clubType', fn ($type) => $type->where('code', ClubType::HALL))
+        return $this->clubs()->whereHas('clubType', fn ($type) => $type->whereIn('code', ClubType::GROUP_CODES))
             ->wherePivot('status', ClubMemberStatus::Active->value)->pluck('clubs.id');
     }
 

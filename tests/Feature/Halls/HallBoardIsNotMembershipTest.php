@@ -28,7 +28,7 @@ class HallBoardIsNotMembershipTest extends TestCase
         $this->boardMemberOf($hall, $user);
 
         $this->assertTrue($user->activeClubIds()->isEmpty());
-        $this->assertSame([$hall->id], $user->boardHallClubIds()->all());
+        $this->assertSame([$hall->id], $user->boardGroupClubIds()->all());
         $this->assertTrue(MemberScope::for($user)->memberClubs->isEmpty());
 
         foreach (['', '/news', '/events', '/profile'] as $path) {

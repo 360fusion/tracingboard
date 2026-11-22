@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Domains\ClubAccounting\Models\Member;
 use App\Domains\ClubAccounting\Models\MemberSubscription;
+use App\Enums\ClubMemberStatus;
 use App\Enums\DocumentStatus;
 use App\Models\Accounting\Bill;
 use App\Models\Club;
@@ -11,7 +12,10 @@ use App\Models\ClubPaymentMethod;
 use App\Models\EventRegistration;
 use App\Models\Invoice;
 use App\Models\Lodge;
+use App\Models\LodgeCorrection;
 use App\Models\Meeting;
+use App\Models\Newsletter;
+use App\Services\Provinces\SectionChapters;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -26,6 +30,10 @@ class AnalyticsController extends Controller
     public function show(string $slug): Response
     {
         $club = $this->findClub($slug)->loadCount(['users', 'events', 'posts']);
+
+        if ($club->isProvinceGroup() || $club->isProvinceSection()) {
+            return $this->provinceDashboard($club);
+        }
 
         // 1. Members Count from Lodge Roster & Active Membership Database
         $accMembersCount = Member::where('club_id', $club->id)->active()->count();
@@ -123,6 +131,36 @@ class AnalyticsController extends Controller
                 'payments' => ClubPaymentMethod::where('club_id', $club->id)->where('is_active', true)->exists(),
                 'meetings' => Meeting::where('club_id', $club->id)->exists(),
             ],
+        ]);
+    }
+
+    /**
+     * A province group lists its sections; a section shows its chapters, upcoming events, open suggested fixes and last newsletter.
+     */
+    private function provinceDashboard(Club $club): Response
+    {
+        $sections = $club->isProvinceGroup()
+            ? $club->sections()->with(['orderClubType:id,name', 'users' => fn ($q) => $q->wherePivot('role', 'admin')->wherePivot('status', ClubMemberStatus::Active->value)])
+                ->orderBy('name')->get()->map(fn (Club $s) => [
+                    'name' => $s->name,
+                    'slug' => $s->slug,
+                    'order' => $s->orderClubType?->name,
+                    'admins' => $s->users->pluck('name')->values(),
+                ])->values()
+            : null;
+
+        $sectionStats = $club->isProvinceSection() ? [
+            'chapters_count' => SectionChapters::for($club)->count(),
+            'upcoming_events' => $club->events()->where('starts_at', '>=', now())->count(),
+            'open_fixes' => LodgeCorrection::open()->whereHas('lodge', fn ($lodge) => $lodge->where('province_id', $club->province_id)
+                ->where('club_type_id', $club->order_club_type_id)->whereNull('club_id'))->count(),
+            'last_newsletter_at' => Newsletter::where('club_id', $club->id)->whereNotNull('sent_at')->max('sent_at'),
+        ] : null;
+
+        return Inertia::render('Admin/Analytics', [
+            'club' => $club,
+            'sections' => $sections,
+            'sectionStats' => $sectionStats,
         ]);
     }
 }

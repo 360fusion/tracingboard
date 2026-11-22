@@ -158,29 +158,29 @@ const getSiteUrl = (urlPath) => {
             />
             <ul v-if="sections?.length" class="mx-auto max-w-3xl px-4 sm:px-6 py-10 space-y-3">
                 <li v-for="section in sections" :key="section.url">
-                    <a :href="getSiteUrl(section.url)" class="block rounded-xl border border-slate-200 bg-white/80 p-4 font-semibold text-slate-900 hover:bg-white">
-                        {{ section.name }}<span v-if="section.order" class="block text-sm font-normal text-slate-600">{{ section.order }}</span>
+                    <a :href="getSiteUrl(section.url)" class="block rounded-xl border border-current/20 p-4 font-semibold hover:bg-current/5">
+                        {{ section.name }}<span v-if="section.order" class="block text-sm font-normal opacity-70">{{ section.order }}</span>
                     </a>
                 </li>
             </ul>
             <div v-if="officers" class="mx-auto max-w-3xl px-4 sm:px-6 py-10 space-y-3">
                 <h2 class="text-2xl font-bold">{{ page.title }}</h2>
-                <div v-for="(officer, i) in officers" :key="i" class="rounded-xl border border-slate-200 bg-white/80 p-4 text-slate-900">
-                    <div class="text-sm text-slate-600">{{ officer.office }}</div>
+                <div v-for="(officer, i) in officers" :key="i" class="rounded-xl border border-current/20 p-4">
+                    <div class="text-sm opacity-70">{{ officer.office }}</div>
                     <div class="font-semibold">{{ [officer.rank, officer.name].filter(Boolean).join(' ') }}</div>
                 </div>
             </div>
             <div v-if="chapters" class="mx-auto max-w-3xl px-4 sm:px-6 py-10 space-y-3">
                 <h2 class="text-2xl font-bold">{{ page.title }}</h2>
-                <p v-if="!chapters.length" class="text-slate-600">No chapters are listed yet.</p>
-                <div v-for="chapter in chapters" :key="chapter.name + chapter.number" class="rounded-xl border border-slate-200 bg-white/80 p-4 text-slate-900">
+                <p v-if="!chapters.length" class="opacity-70">No chapters are listed yet.</p>
+                <div v-for="chapter in chapters" :key="chapter.name + chapter.number" class="rounded-xl border border-current/20 p-4">
                     <div class="font-semibold">
                         <a v-if="chapter.site_url" :href="chapter.site_url" class="underline">{{ chapter.name }}</a>
                         <template v-else>{{ chapter.name }}</template>
                         <span v-if="chapter.number"> No. {{ chapter.number }}</span>
                     </div>
-                    <div v-if="chapter.hall || chapter.town" class="text-sm text-slate-600">{{ [chapter.hall, chapter.town].filter(Boolean).join(', ') }}</div>
-                    <div v-if="chapter.meets" class="text-sm text-slate-600">{{ chapter.meets }}</div>
+                    <div v-if="chapter.hall || chapter.town" class="text-sm opacity-70">{{ [chapter.hall, chapter.town].filter(Boolean).join(', ') }}</div>
+                    <div v-if="chapter.meets" class="text-sm opacity-70">{{ chapter.meets }}</div>
                 </div>
             </div>
         </main>

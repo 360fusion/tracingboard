@@ -12,6 +12,8 @@ const props = defineProps({
   gettingStarted: { type: Object, default: null },
   isHall: { type: Boolean, default: false },
   hallMetrics: { type: Object, default: null },
+  sections: { type: Array, default: null },
+  sectionStats: { type: Object, default: null },
 });
 
 // The first three things a newly set-up lodge (or hall) needs, each ticked off once done.
@@ -30,6 +32,43 @@ const stillToDo = computed(() => firstSteps.value.some((step) => !step.done));
 <template>
   <AdminLayout title="Dashboard" :club="club" active-tab="dashboard">
 
+    <!-- A province group: its sections. -->
+    <div v-if="sections" class="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200/80 dark:border-slate-800/80 space-y-3">
+      <div class="flex items-center justify-between">
+        <h2 class="text-xl font-bold text-slate-900 dark:text-white">Sections</h2>
+        <Link :href="route('admin.sections.index', { clubSlug: club.slug })" class="text-xs font-semibold text-blue-600 dark:text-blue-400">Manage sections →</Link>
+      </div>
+      <p v-if="!sections.length" class="text-sm text-slate-500 dark:text-slate-400">No sections yet. Add one for each order in your province.</p>
+      <ul class="divide-y divide-slate-200 dark:divide-slate-800">
+        <li v-for="s in sections" :key="s.slug" class="py-2 text-sm">
+          <span class="font-semibold text-slate-900 dark:text-white">{{ s.name }}</span>
+          <span v-if="s.order" class="text-slate-500 dark:text-slate-400"> ({{ s.order }})</span>
+          <span class="block text-xs text-slate-500 dark:text-slate-400">{{ s.admins.length ? 'Admin: ' + s.admins.join(', ') : 'No admin yet' }}</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- A province section: its chapters, events and fixes. -->
+    <div v-else-if="sectionStats" class="grid grid-cols-2 gap-3 sm:gap-6">
+      <Link :href="route('admin.chapters.index', { clubSlug: club.slug })" class="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200/80 dark:border-slate-800/80 hover:border-blue-300 dark:hover:border-blue-700 transition-colors">
+        <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Chapters</div>
+        <div class="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white">{{ sectionStats.chapters_count }}</div>
+      </Link>
+      <Link :href="route('admin.events.index', { clubSlug: club.slug })" class="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200/80 dark:border-slate-800/80 hover:border-blue-300 dark:hover:border-blue-700 transition-colors">
+        <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Upcoming events</div>
+        <div class="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white">{{ sectionStats.upcoming_events }}</div>
+      </Link>
+      <Link :href="route('admin.chapters.fixes.index', { clubSlug: club.slug })" class="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200/80 dark:border-slate-800/80 hover:border-blue-300 dark:hover:border-blue-700 transition-colors">
+        <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Suggested fixes to review</div>
+        <div class="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white">{{ sectionStats.open_fixes }}</div>
+      </Link>
+      <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200/80 dark:border-slate-800/80">
+        <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Last newsletter</div>
+        <div class="text-sm font-semibold text-slate-900 dark:text-white mt-2">{{ sectionStats.last_newsletter_at ? sectionStats.last_newsletter_at.slice(0, 10) : 'None sent yet' }}</div>
+      </div>
+    </div>
+
+    <template v-else>
     <section v-if="stillToDo" aria-labelledby="first-steps-heading" class="mb-4 rounded-2xl border border-blue-200 bg-blue-50 p-4 sm:mb-6 sm:p-6 dark:border-blue-900/60 dark:bg-blue-950/30">
       <h2 id="first-steps-heading" class="text-base font-semibold text-slate-900 dark:text-white">Getting your {{ isHall ? 'hall' : 'lodge' }} started</h2>
       <ol class="mt-3 space-y-2">
@@ -168,5 +207,6 @@ const stillToDo = computed(() => firstSteps.value.some((step) => !step.done));
 
     </div>
 
+    </template>
   </AdminLayout>
 </template>

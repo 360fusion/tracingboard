@@ -173,6 +173,18 @@ class DefaultSitePages
             ],
         ];
 
+        // A section's chapters and officers are drawn by their own addresses, so they are linked from its home page.
+        if ($club->isProvinceSection()) {
+            $defaultPages[0]['blocks'][] = [
+                'type' => 'cta_banner',
+                'heading' => 'Our chapters and officers',
+                'button_label' => 'Chapters',
+                'button_url' => '/site/'.$club->slug.'/chapters',
+                'button2_label' => 'Provincial officers',
+                'button2_url' => '/site/'.$club->slug.'/officers',
+            ];
+        }
+
         // Only ever seeded once: after that, a missing slug means an admin renamed or removed that page on
         // purpose, not that it needs putting back. Without this flag, renaming "About" away would leave a
         // fresh blank "About" reappearing every time the site is visited.

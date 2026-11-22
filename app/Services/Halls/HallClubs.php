@@ -74,6 +74,14 @@ class HallClubs
 
     private static function landingUrlFor(Club $club, bool $mayEditHall, bool $absolute = true): string
     {
+        if ($club->isProvinceGroup()) {
+            return route('admin.sections.index', ['clubSlug' => $club->slug], $absolute);
+        }
+
+        if ($club->isProvinceSection()) {
+            return route('admin.analytics', ['slug' => $club->slug], $absolute);
+        }
+
         return $mayEditHall
             ? route('admin.hall.edit', ['clubSlug' => $club->slug], $absolute)
             : route('admin.analytics', ['slug' => $club->slug], $absolute);

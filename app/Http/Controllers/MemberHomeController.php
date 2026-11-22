@@ -40,8 +40,8 @@ class MemberHomeController extends Controller
         /** @var User $user */
         $user = $request->user();
 
-        // Someone who is only on a hall's board has no member area: their home is the hall's admin.
-        if ($user->activeClubIds()->isEmpty() && $hallId = $user->boardHallClubIds()->first()) {
+        // Someone who is only on a group's board (hall, province or section) has no member area: their home is its admin.
+        if ($user->activeClubIds()->isEmpty() && $hallId = $user->boardGroupClubIds()->first()) {
             return redirect(HallClubs::landingUrl(Club::findOrFail($hallId), $user));
         }
 
