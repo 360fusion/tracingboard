@@ -10,8 +10,8 @@ return new class extends Migration
     public function up(): void
     {
         $types = [
-            'province_group' => ['Province group', ['communications', 'website_builder'], ['club' => 'Province', 'members' => 'People'], 'slate'],
-            'province_section' => ['Province section', ['accounting', 'communications', 'events', 'newsletters', 'website_builder'], ['club' => 'Section', 'members' => 'People'], 'violet'],
+            'province_group' => ['Province group', ['communications', 'website_builder'], ['club' => 'Province', 'members' => 'People'], 'fuchsia'],
+            'province_section' => ['Province section', ['accounting', 'communications', 'events', 'newsletters', 'website_builder'], ['club' => 'Section', 'members' => 'People'], 'rose'],
         ];
 
         foreach ($types as $code => [$name, $modules, $terminology, $colour]) {

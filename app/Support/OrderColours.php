@@ -42,8 +42,8 @@ final class OrderColours
         'royal_order_scotland' => 'cyan',
         'scarlet_cord' => 'lime',
         'hall' => 'sky',
-        'province_group' => 'slate',
-        'province_section' => 'violet',
+        'province_group' => 'fuchsia',
+        'province_section' => 'rose',
     ];
 
     public static function for(string $code): string
