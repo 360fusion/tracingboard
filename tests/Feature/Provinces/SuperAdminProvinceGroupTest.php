@@ -7,6 +7,8 @@ use App\Models\ClubType;
 use App\Models\GrandLodge;
 use App\Models\Province;
 use App\Models\User;
+use App\Services\Provinces\ProvinceGroups;
+use DomainException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
@@ -47,12 +49,29 @@ class SuperAdminProvinceGroupTest extends TestCase
         $this->assertSame('pending', $pivot->status);
     }
 
-    public function test_second_group_for_the_same_province_is_refused(): void
+    public function test_repeat_setup_invites_into_the_existing_group(): void
     {
         $admin = User::factory()->create(['is_super_admin' => true]);
         $this->postGroup($admin);
-        $this->postGroup($admin)->assertSessionHas('error');
+        $this->actingAs($admin)->post(route('superadmin.provinces.group', $this->province->id), ['name' => 'Second Person', 'email' => 'second@example.com'])->assertSessionMissing('error');
 
+        $this->assertSame(1, $this->groupCount());
+        $pivot = app(ProvinceGroups::class)->groupFor($this->province)->users()->where('email', 'second@example.com')->firstOrFail()->pivot;
+        $this->assertSame('owner', $pivot->role);
+        $this->assertSame('pending', $pivot->status);
+    }
+
+    public function test_create_group_refuses_a_second_group(): void
+    {
+        $groups = app(ProvinceGroups::class);
+        $groups->createGroup($this->province);
+
+        try {
+            $groups->createGroup($this->province);
+            $this->fail('A second group was created.');
+        } catch (DomainException $e) {
+            $this->assertSame('This province already has a group.', $e->getMessage());
+        }
         $this->assertSame(1, $this->groupCount());
     }
 
