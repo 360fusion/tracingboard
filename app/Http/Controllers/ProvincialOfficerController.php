@@ -6,6 +6,7 @@ use App\Models\ProvincialOfficer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -65,8 +66,10 @@ class ProvincialOfficerController extends Controller
 
         $ids = $request->validate(['ids' => ['required', 'array'], 'ids.*' => ['integer', 'distinct']])['ids'];
 
-        if (ProvincialOfficer::where('club_id', $club->id)->whereIn('id', $ids)->count() !== count($ids)) {
-            abort(422, 'Those officers are not on this list.');
+        // Exactly this club's officers, each once: a partial list would leave unlisted rows colliding with the new positions.
+        if (ProvincialOfficer::where('club_id', $club->id)->whereIn('id', $ids)->count() !== count($ids)
+            || ProvincialOfficer::where('club_id', $club->id)->count() !== count($ids)) {
+            throw ValidationException::withMessages(['ids' => 'The list must contain every officer on this page, once each.']);
         }
 
         DB::transaction(function () use ($club, $ids) {

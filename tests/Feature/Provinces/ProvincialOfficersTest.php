@@ -54,7 +54,18 @@ class ProvincialOfficersTest extends TestCase
         $mine = ProvincialOfficer::factory()->create(['club_id' => $this->section->id]);
         $foreign = ProvincialOfficer::factory()->create();
 
-        $this->actingAs($this->editor)->putJson(route('admin.provincial-officers.reorder', $this->section->slug), ['ids' => [$mine->id, $foreign->id]])->assertStatus(422);
+        $this->actingAs($this->editor)->putJson(route('admin.provincial-officers.reorder', $this->section->slug), ['ids' => [$mine->id, $foreign->id]])->assertStatus(422)->assertJsonValidationErrors('ids');
+    }
+
+    public function test_reorder_needs_every_officer(): void
+    {
+        $a = ProvincialOfficer::factory()->create(['club_id' => $this->section->id, 'position' => 1]);
+        $b = ProvincialOfficer::factory()->create(['club_id' => $this->section->id, 'position' => 2]);
+
+        $this->actingAs($this->editor)->putJson(route('admin.provincial-officers.reorder', $this->section->slug), ['ids' => [$b->id]])
+            ->assertStatus(422)->assertJsonValidationErrors('ids');
+
+        $this->assertSame([1, 2], [$a->fresh()->position, $b->fresh()->position]);
     }
 
     public function test_officer_of_another_section_cannot_be_edited(): void
