@@ -3,6 +3,7 @@ import { ref, reactive } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import SuperAdminLayout from '@/Layouts/SuperAdminLayout.vue';
 import MembersLayout from '@/Layouts/MembersLayout.vue';
+import AdminLayout from '@/Layouts/AdminLayout.vue';
 import PageHeader from '@/Components/Ui/PageHeader.vue';
 import Tabs from '@/Components/Ui/Tabs.vue';
 import Card from '@/Components/Ui/Card.vue';
@@ -23,9 +24,11 @@ const props = defineProps({
     // A provincial admin sees this screen in the members area, limited to their province (ProvinceLodgeCorrectionController).
     routes: { type: String, default: 'superadmin.lodge_corrections' },
     layout: { type: String, default: 'superadmin' },
+    club: { type: Object, default: null },
+    params: { type: Object, default: () => ({}) },
 });
 
-const Layout = props.layout === 'members' ? MembersLayout : SuperAdminLayout;
+const Layout = { members: MembersLayout, admin: AdminLayout }[props.layout] ?? SuperAdminLayout;
 
 const TABS = [
     { key: 'open', label: 'Waiting' },
@@ -66,7 +69,7 @@ function send(correction) {
     const apply = acting.value.kind === 'apply';
     const payload = apply ? { fields: form.fields, values: form.values, note: form.note } : { reason: form.reason };
 
-    router.post(route(`${props.routes}.${apply ? 'apply' : 'reject'}`, correction.id), payload, {
+    router.post(route(`${props.routes}.${apply ? 'apply' : 'reject'}`, { ...props.params, id: correction.id }), payload, {
         preserveScroll: true,
         onSuccess: () => { acting.value = null; },
         onError: (e) => { errors.value = e; },
@@ -79,7 +82,7 @@ const inputClass = 'w-full rounded-xl border border-slate-300 bg-white px-3 py-2
 </script>
 
 <template>
-    <component :is="Layout" title="Suggested fixes" active-tab="lodges">
+    <component :is="Layout" v-bind="club ? { club } : {}" title="Suggested fixes" :active-tab="club ? 'chapters' : 'lodges'">
         <Head title="Suggested fixes" />
 
         <div class="space-y-6">
@@ -91,7 +94,7 @@ const inputClass = 'w-full rounded-xl border border-slate-300 bg-white px-3 py-2
                 :items="TABS.map((tab) => ({
                     key: tab.key,
                     label: tab.label + (tab.key === 'open' && counts.open ? ` (${counts.open})` : '') + (tab.key === 'applied' ? ` (${counts.applied})` : ''),
-                    href: route(`${routes}.index`, { status: tab.key }),
+                    href: route(`${routes}.index`, { ...params, status: tab.key }),
                 }))"
             />
 
@@ -181,7 +184,7 @@ const inputClass = 'w-full rounded-xl border border-slate-300 bg-white px-3 py-2
                                             <p v-if="errors[field] || errors[`values.${field}`]" class="text-xs text-rose-600 dark:text-rose-400">{{ errors[field] || errors[`values.${field}`] }}</p>
                                         </div>
                                     </div>
-                                    <p v-if="correction.changes.some((c) => c.field === 'hall_text')" class="text-xs text-slate-500 dark:text-slate-400">The hall they named is not on our list: {{ layout === 'members' ? 'ask the platform team to add it, then pick it above' : 'add it on the Masonic halls page, reload this page, then pick it above' }}.</p>
+                                    <p v-if="correction.changes.some((c) => c.field === 'hall_text')" class="text-xs text-slate-500 dark:text-slate-400">The hall they named is not on our list: {{ layout !== 'superadmin' ? 'ask the platform team to add it, then pick it above' : 'add it on the Masonic halls page, reload this page, then pick it above' }}.</p>
                                     <Textarea v-model="form.note" :rows="2" aria-label="Note" placeholder="A note for the record (optional)" />
                                     <p v-if="errors.fields" class="text-xs text-rose-600 dark:text-rose-400">{{ errors.fields }}</p>
                                 </template>

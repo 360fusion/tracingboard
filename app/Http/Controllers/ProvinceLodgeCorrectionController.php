@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Support\Collection;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -48,11 +49,20 @@ class ProvinceLodgeCorrectionController extends SuperAdminLodgeCorrectionControl
         $hallId = $request->validated()['values']['masonic_hall_id'] ?? null;
 
         if ($hallId !== null && in_array('masonic_hall_id', $request->validated()['fields'], true)) {
-            $provinceIds = $request->user()->administeredProvinces()->pluck('provinces.id');
-            abort_unless(MasonicHall::whereKey($hallId)->whereIn('province_id', $provinceIds)->exists(), 422, 'That hall is not in a province you look after.');
+            abort_unless(MasonicHall::whereKey($hallId)->whereIn('province_id', $this->hallProvinceIds($request))->exists(), 422, 'That hall is not in a province you look after.');
         }
 
         return parent::apply($request, $id);
+    }
+
+    /**
+     * The provinces a fix's hall may be in.
+     *
+     * @return Collection<int, int>
+     */
+    protected function hallProvinceIds(Request $request): Collection
+    {
+        return $request->user()->administeredProvinces()->pluck('provinces.id');
     }
 
     protected function screen(): array

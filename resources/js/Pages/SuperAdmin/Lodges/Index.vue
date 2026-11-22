@@ -4,6 +4,7 @@ import { ref, reactive, computed, watch } from 'vue';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import SuperAdminLayout from '@/Layouts/SuperAdminLayout.vue';
 import MembersLayout from '@/Layouts/MembersLayout.vue';
+import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { describePattern } from '@/Utils/lodgeDates';
 import Badge from '@/Components/Ui/Badge.vue';
 import Button from '@/Components/Ui/Button.vue';
@@ -32,9 +33,12 @@ const props = defineProps({
     routes: { type: String, default: 'superadmin.lodges' },
     layout: { type: String, default: 'superadmin' },
     full: { type: Boolean, default: true },
+    // A section's editors use it in the club admin (SectionLodgeController): the section and its route parameters.
+    club: { type: Object, default: null },
+    params: { type: Object, default: () => ({}) },
 });
 
-const Layout = props.layout === 'members' ? MembersLayout : SuperAdminLayout;
+const Layout = { members: MembersLayout, admin: AdminLayout }[props.layout] ?? SuperAdminLayout;
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -42,7 +46,7 @@ const search = reactive({ ...props.filters });
 
 function applyFilters() {
     const query = Object.fromEntries(Object.entries(search).filter(([, value]) => value));
-    router.get(route(`${props.routes}.index`), query, { preserveState: true, preserveScroll: true, replace: true });
+    router.get(route(`${props.routes}.index`, props.params), query, { preserveState: true, preserveScroll: true, replace: true });
 }
 
 watch(() => search.q, debounce(() => applyFilters(), 300));
@@ -114,9 +118,9 @@ function submit() {
     const options = { preserveScroll: true, onSuccess: () => { showModal.value = false; } };
 
     if (editingId.value) {
-        form.put(route(`${props.routes}.update`, editingId.value), options);
+        form.put(route(`${props.routes}.update`, { ...props.params, id: editingId.value }), options);
     } else {
-        form.post(route(`${props.routes}.store`), options);
+        form.post(route(`${props.routes}.store`, props.params), options);
     }
 }
 
@@ -142,7 +146,7 @@ const labelClass = 'block text-xs font-medium text-slate-700 mb-1.5 dark:text-sl
 </script>
 
 <template>
-    <component :is="Layout" :title="full ? 'Lodge directory' : 'Lodge listings'" active-tab="lodges">
+    <component :is="Layout" v-bind="club ? { club } : {}" :title="full ? 'Lodge directory' : 'Lodge listings'" :active-tab="club ? 'chapters' : 'lodges'">
         <Head :title="full ? 'Superadmin - Lodge directory' : 'Lodge listings'" />
 
         <div class="space-y-6">

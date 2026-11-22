@@ -1,5 +1,5 @@
 <script setup>
-import { Head } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import Card from '@/Components/Ui/Card.vue';
 import Badge from '@/Components/Ui/Badge.vue';
@@ -15,6 +15,10 @@ defineProps({
   <AdminLayout title="Chapters">
     <div class="max-w-3xl mx-auto space-y-4">
       <h1 class="text-2xl font-bold">Chapters in the province</h1>
+      <div class="flex gap-4 text-sm">
+        <Link :href="route('admin.chapters.listings.index', club.slug)" class="underline">Directory listings</Link>
+        <Link :href="route('admin.chapters.fixes.index', club.slug)" class="underline">Suggested fixes</Link>
+      </div>
       <Card v-if="!chapters.length" class="p-6 text-slate-500">No chapters are listed for this order yet.</Card>
       <Card v-for="chapter in chapters" :key="chapter.name + chapter.number" class="p-5">
         <div class="flex items-center gap-2 font-semibold">
