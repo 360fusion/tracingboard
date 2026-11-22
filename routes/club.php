@@ -152,8 +152,8 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/{clubSlug}/admin/provincial-officers/{id}', [ProvincialOfficerController::class, 'update'])->name('admin.provincial-officers.update');
     Route::delete('/{clubSlug}/admin/provincial-officers/{id}', [ProvincialOfficerController::class, 'destroy'])->name('admin.provincial-officers.destroy');
     Route::get('/{clubSlug}/admin/chapters/listings', [SectionLodgeController::class, 'index'])->name('admin.chapters.listings.index');
-    Route::post('/{clubSlug}/admin/chapters/listings', [SectionLodgeController::class, 'store'])->middleware('throttle:30,1')->name('admin.chapters.listings.store');
-    Route::put('/{clubSlug}/admin/chapters/listings/{id}', [SectionLodgeController::class, 'sectionUpdate'])->middleware('throttle:60,1')->name('admin.chapters.listings.update');
+    Route::post('/{clubSlug}/admin/chapters/listings', [SectionLodgeController::class, 'store'])->name('admin.chapters.listings.store');
+    Route::put('/{clubSlug}/admin/chapters/listings/{id}', [SectionLodgeController::class, 'sectionUpdate'])->name('admin.chapters.listings.update');
     Route::get('/{clubSlug}/admin/chapters/fixes', [SectionLodgeCorrectionController::class, 'index'])->name('admin.chapters.fixes.index');
     Route::post('/{clubSlug}/admin/chapters/fixes/{id}/apply', [SectionLodgeCorrectionController::class, 'sectionApply'])->name('admin.chapters.fixes.apply');
     Route::post('/{clubSlug}/admin/chapters/fixes/{id}/reject', [SectionLodgeCorrectionController::class, 'sectionReject'])->name('admin.chapters.fixes.reject');
