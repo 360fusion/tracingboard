@@ -76,7 +76,7 @@ class PostAdminController extends Controller
             : new Post([
                 'club_id' => $club->id,
                 'status' => 'published',
-                'visibility' => Visibility::Club,
+                'visibility' => $club->isProvinceGroup() ? Visibility::Network : Visibility::Club,
                 'published_at' => Carbon::now(),
                 'expires_at' => null,
             ]);

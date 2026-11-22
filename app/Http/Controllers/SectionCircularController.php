@@ -34,7 +34,7 @@ class SectionCircularController extends Controller
         abort_unless($club->isProvinceSection(), 404);
 
         return Inertia::render('Admin/Province/Circulars', [
-            'club' => $club,
+            'club' => $club->only(['id', 'name', 'slug']),
             'circulars' => SectionCircular::where('club_id', $club->id)->latest('id')->get()
                 ->map(fn (SectionCircular $circular) => [
                     'id' => $circular->id,
@@ -79,7 +79,7 @@ class SectionCircularController extends Controller
             $user->notify(new SectionCircularNotification($circular, $club, $chapter));
         }
 
-        return back()->with('success', 'Sent to '.$chapterIds->count().' '.Str::plural('chapter', $chapterIds->count()).'. Their Secretaries pass it on to their members.');
+        return back()->with('success', 'Sent to '.$chapterIds->count().' '.GroupAudience::chapterWord($club, $chapterIds->count()).'. Their Secretaries pass it on to their members.');
     }
 
     /**

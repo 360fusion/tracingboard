@@ -94,6 +94,15 @@ class SectionCircularsTest extends TestCase
         Notification::assertNotSentTo($this->sectionAdmin, SectionCircularNotification::class);
     }
 
+    public function test_a_mark_sections_circular_counts_lodges(): void
+    {
+        Notification::fake();
+        $markSection = Club::factory()->provinceSection(Club::findOrFail($this->section->parent_club_id), $this->markLodge->clubType)->create();
+
+        $this->actingAs($this->user($markSection, 'admin'))->post(route('admin.circulars.store', ['clubSlug' => $markSection->slug]), ['title' => 'Dates', 'body' => 'Dates'])
+            ->assertSessionHas('success', 'Sent to 1 lodge. Their Secretaries pass it on to their members.');
+    }
+
     public function test_circular_shows_on_the_chapters_pass_on_screen(): void
     {
         Notification::fake();

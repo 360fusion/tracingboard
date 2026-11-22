@@ -28,7 +28,7 @@ final class GroupAudience
             return $group->hall?->memberClubIds() ?? collect();
         }
 
-        if ($group->isProvinceSection() && $group->province_id && $group->order_club_type_id) {
+        if ($group->isProvinceSection() && $group->province_id && $group->order_club_type_id && self::sectionIsLive($group)) {
             return Club::notGroups()->where('province_id', $group->province_id)->where('club_type_id', $group->order_club_type_id)->pluck('id');
         }
 
@@ -62,6 +62,7 @@ final class GroupAudience
             if ($orders->isNotEmpty()) {
                 $query->orWhere(fn (Builder $sections) => $sections
                     ->whereHas('clubType', fn ($type) => $type->where('code', ClubType::PROVINCE_SECTION))
+                    ->where('status', 'active')->whereNotNull('parent_club_id')
                     ->where(function (Builder $pairs) use ($orders): void {
                         foreach ($orders as $club) {
                             $pairs->orWhere(fn (Builder $pair) => $pair->where('province_id', $club->province_id)->where('order_club_type_id', $club->club_type_id));
@@ -69,6 +70,22 @@ final class GroupAudience
                     }));
             }
         })->get();
+    }
+
+    /**
+     * A section taken out of its group (inactive, no parent) reaches no one.
+     */
+    public static function sectionIsLive(Club $section): bool
+    {
+        return $section->status === 'active' && $section->parent_club_id !== null;
+    }
+
+    /**
+     * What a section's order calls its clubs ("chapters", "lodges"), plural unless the count is one.
+     */
+    public static function chapterWord(Club $section, int $count = 2): string
+    {
+        return Str::plural(strtolower(Lodge::typeWordFor($section->orderClubType?->code) ?? 'club'), $count);
     }
 
     /**
@@ -80,13 +97,6 @@ final class GroupAudience
             return 'Members of lodges that meet here';
         }
 
-        if ($group->isProvinceGroup()) {
-            return 'Members of lodges and chapters'.($group->province ? " in {$group->province->name}" : '');
-        }
-
-        $order = $group->orderClubType;
-        $word = Str::plural(strtolower(Lodge::typeWordFor($order?->code) ?? 'club'));
-
-        return "Members of {$order?->name} {$word}".($group->province ? " in {$group->province->name}" : '');
+        return "Members of {$group->orderClubType?->name} ".self::chapterWord($group).($group->province ? " in {$group->province->name}" : '');
     }
 }

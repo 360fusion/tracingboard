@@ -6,6 +6,7 @@ use App\Enums\ClubMemberStatus;
 use App\Enums\ClubRole;
 use App\Models\Club;
 use App\Support\ClubPermissions;
+use App\Support\GroupAudience;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -63,6 +64,9 @@ class EnsureUserCanAdministerClub
         if ($club->isGroup() && preg_match('#^[^/]+/admin/([^/?]+)#', $request->path(), $matches)) {
             abort_if(in_array($matches[1], config("club_permissions.group_hidden_sections.{$club->clubType->code}", []), true), 404);
         }
+
+        // A section taken out of its group has no admin left (its records stay).
+        abort_if($club->isProvinceSection() && ! GroupAudience::sectionIsLive($club), 404);
 
         if ($user->actsAsSuperAdmin()) {
             return $next($request);

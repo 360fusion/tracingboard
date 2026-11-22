@@ -15,6 +15,7 @@ use App\Models\Province;
 use App\Models\User;
 use App\Services\MemberFeed;
 use App\Services\Newsletters\NewsletterAudience;
+use App\Services\Provinces\ProvinceGroups;
 use App\Support\GroupAudience;
 use App\Support\MemberScope;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -90,6 +91,24 @@ class SectionAudienceTest extends TestCase
         return $this->get($url)->assertOk()->getContent();
     }
 
+    public function test_a_removed_section_reaches_no_one_and_its_admin_is_closed(): void
+    {
+        $admin = $this->member($this->section, role: 'admin');
+        Post::create([
+            'club_id' => $this->section->id, 'author_id' => $admin->id, 'title' => 'Provincial news', 'slug' => 'provincial-news',
+            'content' => '<p>Body</p>', 'status' => 'published', 'visibility' => Visibility::Club,
+        ]);
+        $feedTitles = fn () => collect(app(MemberFeed::class)->items($this->durhamRoseCroix->fresh(), MemberScope::for($this->durhamRoseCroix->fresh())->clubs()))->pluck('title');
+        $this->assertContains('Provincial news', $feedTitles());
+
+        app(ProvinceGroups::class)->removeSection($this->section);
+
+        $this->assertTrue(GroupAudience::memberClubIds($this->section->fresh())->isEmpty());
+        $this->assertNotContains('Provincial news', $feedTitles());
+        $this->actingAs($this->durhamRoseCroix->fresh())->get(route('member.events', ['slug' => $this->section->slug]))->assertNotFound();
+        $this->actingAs($admin)->get(route('admin.analytics', ['slug' => $this->section->slug]))->assertNotFound();
+    }
+
     public function test_members_only_post_reaches_the_member_feed(): void
     {
         $post = Post::create([
@@ -143,7 +162,12 @@ class SectionAudienceTest extends TestCase
         $club = collect(Visibility::options($this->section))->firstWhere('value', Visibility::Club->value);
 
         $this->assertSame('Members of Rose Croix chapters in Durham', $club['label']);
-        $this->assertSame('Members of lodges and chapters in Durham', GroupAudience::audienceLabel(Club::findOrFail($this->section->parent_club_id)));
+        $groupOptions = collect(Visibility::options(Club::findOrFail($this->section->parent_club_id)))->pluck('value')->all();
+        $this->assertSame([Visibility::Network->value, Visibility::Public->value], $groupOptions);
+
+        $group = Club::findOrFail($this->section->parent_club_id);
+        $this->actingAs($this->member($group, role: 'owner'))->get(route('admin.posts.create', ['clubSlug' => $group->slug]))
+            ->assertInertia(fn ($page) => $page->where('post.visibility', Visibility::Network->value)->has('visibilityOptions', 2));
     }
 
     public function test_group_clubs_for_makes_at_most_two_queries(): void

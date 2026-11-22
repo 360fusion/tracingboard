@@ -83,10 +83,13 @@ enum Visibility: string
      */
     public static function options(?Club $club = null): array
     {
+        // A province group's own audience is empty, so it has no members-only option.
+        $cases = $club?->isProvinceGroup() ? [self::Network, self::Public] : self::cases();
+
         return array_map(fn (self $case): array => [
             'value' => $case->value,
             'label' => $case === self::Club && $club?->isGroup() ? GroupAudience::audienceLabel($club) : $case->label(),
             'description' => $case->description(),
-        ], self::cases());
+        ], $cases);
     }
 }
