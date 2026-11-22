@@ -78,6 +78,11 @@ class ClubSettingsController extends Controller
             $club->name = $validated['name'];
         }
 
+        // A province group's and section's province is fixed: their audience is read from it.
+        if (array_key_exists('province_id', $validated) && ($club->isProvinceGroup() || $club->isProvinceSection())) {
+            unset($validated['province_id']);
+        }
+
         if (array_key_exists('province_id', $validated)) {
             $club->province_id = $validated['province_id'];
         }
