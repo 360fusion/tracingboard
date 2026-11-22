@@ -8,6 +8,7 @@ use App\Http\Controllers\ClubSettingsController;
 use App\Models\Club;
 use App\Models\MasonicHall;
 use App\Models\Province;
+use App\Support\ClubPermissions;
 use App\Support\Currencies;
 use App\Support\MasonicRanks;
 use Illuminate\Support\Collection;
@@ -175,7 +176,7 @@ class ClubSettingsScreenData
 
         // Ensure permission matrix has all navigation page keys
         $settings['permission_matrix'] = array_merge(
-            ClubSettingsController::defaultPermissionMatrix(),
+            ClubPermissions::matrixFor($club),
             $club->settings['permission_matrix'] ?? []
         );
 

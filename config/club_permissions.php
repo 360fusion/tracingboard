@@ -185,6 +185,15 @@ return [
     ],
 
     /**
+     * Default roles that differ by club type code, applied before a club's own saved matrix (which still wins).
+     * On a province group or section the Editor (coach) also opens the dashboard, which is where they land.
+     */
+    'type_default_roles' => [
+        'province_group' => ['view_dashboard' => $groupDashboardRoles = ['owner', 'admin', 'treasurer', 'coach']],
+        'province_section' => ['view_dashboard' => $groupDashboardRoles],
+    ],
+
+    /**
      * Capabilities that only guard group sections, so a lodge's Roles and permissions screen leaves them out.
      */
     'lodge_hidden_capabilities' => ['manage_hall', 'manage_board', 'manage_sections', 'manage_provincial_officers'],

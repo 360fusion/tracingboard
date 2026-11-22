@@ -96,7 +96,7 @@ class SectionCircularController extends Controller
             return collect();
         }
 
-        $chapters = Club::whereIn('id', $chapterIds)->get()->keyBy('id');
+        $chapters = Club::with('clubType')->whereIn('id', $chapterIds)->get()->keyBy('id');
 
         $staff = DB::table('club_user')->whereIn('club_id', $chapterIds)->where('status', ClubMemberStatus::Active->value)->get(['club_id', 'user_id', 'role'])
             ->filter(fn (object $row) => ClubPermissions::allows($chapters[$row->club_id], $row->role, 'pass_on_communications'))

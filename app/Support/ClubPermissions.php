@@ -7,7 +7,7 @@ use App\Models\Club;
 /**
  * Resolves what a club role is allowed to do.
  *
- * Defaults come from config/club_permissions.php. A club may override the
+ * Defaults come from config/club_permissions.php (a few differ by club type). A club may override the
  * roles for any capability via club.settings.permission_matrix, which the
  * club settings screen edits.
  */
@@ -22,6 +22,11 @@ class ClubPermissions
     public static function matrixFor(Club $club): array
     {
         $defaults = config('club_permissions.capabilities', []);
+
+        foreach (config('club_permissions.type_default_roles.'.$club->clubType?->code, []) as $capability => $roles) {
+            $defaults[$capability]['roles'] = $roles;
+        }
+
         $overrides = $club->settings['permission_matrix'] ?? [];
 
         if (! is_array($overrides)) {

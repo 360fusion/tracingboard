@@ -97,13 +97,35 @@ class ProvinceDashboardTest extends TestCase
         $dashboard = route('admin.analytics', ['slug' => $this->group->slug]);
         $this->actingAs($this->person($this->group, 'treasurer'))->get(route('members.dashboard'))->assertRedirect($dashboard);
         $this->get($dashboard)->assertOk();
-        auth()->logout();
+    }
 
-        $user = User::factory()->unverified()->create(['password' => Hash::make('temp-secret')]);
-        $this->group->users()->attach($user->id, ['role' => 'coach', 'invitation_token' => hash('sha256', 'tok-3'), 'invited_at' => now(), 'status' => 'active']);
+    public function test_a_group_or_section_editor_lands_on_a_dashboard_they_can_open(): void
+    {
+        foreach ([$this->group, $this->section] as $i => $club) {
+            $user = User::factory()->unverified()->create(['password' => Hash::make('temp-secret')]);
+            $club->users()->attach($user->id, ['role' => 'coach', 'invitation_token' => hash('sha256', "tok-e{$i}"), 'invited_at' => now(), 'status' => 'active']);
+            $dashboard = route('admin.analytics', ['slug' => $club->slug]);
 
-        $this->post(route('invitation.submit', ['slug' => $this->group->slug, 'token' => 'tok-3']), ['password' => 'new-secure-password', 'password_confirmation' => 'new-secure-password'])
-            ->assertRedirect($dashboard);
+            $this->post(route('invitation.submit', ['slug' => $club->slug, 'token' => "tok-e{$i}"]), ['password' => 'new-secure-password', 'password_confirmation' => 'new-secure-password'])
+                ->assertRedirect($dashboard);
+            $this->actingAs($user->fresh())->get($dashboard)->assertOk();
+            auth()->logout();
+        }
+    }
+
+    public function test_a_sections_settings_screen_shows_the_editor_on_the_dashboard(): void
+    {
+        $this->actingAs($this->person($this->section))->get(route('admin.settings.show', ['clubSlug' => $this->section->slug]))->assertOk()
+            ->assertInertia(fn ($page) => $page->where('settings.permission_matrix.view_dashboard.roles', ['owner', 'admin', 'treasurer', 'coach']));
+    }
+
+    public function test_a_lodge_editor_still_cannot_open_the_dashboard_and_a_saved_matrix_wins(): void
+    {
+        $lodge = Club::factory()->create();
+        $this->actingAs($this->person($lodge, 'coach'))->get(route('admin.analytics', ['slug' => $lodge->slug]))->assertForbidden();
+
+        $this->section->update(['settings' => ['permission_matrix' => ['view_dashboard' => ['roles' => ['owner', 'admin']]]]]);
+        $this->actingAs($this->person($this->section, 'coach'))->get(route('admin.analytics', ['slug' => $this->section->slug]))->assertForbidden();
     }
 
     public function test_section_home_page_links_chapters_and_officers(): void
