@@ -164,12 +164,13 @@ return [
 
     /**
      * Sections of /{slug}/admin that a group (a hall, province group or province section, keyed by club type code)
-     * does not have: they answer 404 whoever asks. A province group also has no events, newsletters or accounts.
+     * does not have: they answer 404 whoever asks. A province group also has no events, newsletters or accounts (every
+     * manage_billing, view_accounting and send_newsletters segment, except billing: that is the platform subscription page).
      */
     'group_hidden_sections' => [
         'hall' => $groupSections = ['members', 'users', 'candidates', 'meetings', 'officers', 'committee', 'visitors', 'subscriptions', 'dues-subscriptions', 'charity'],
         'province_section' => $groupSections,
-        'province_group' => [...$groupSections, 'events', 'newsletters', 'accounting', 'pass-on'],
+        'province_group' => [...$groupSections, 'events', 'newsletters', 'notices', 'accounting', 'bank-accounts', 'bank-imports', 'bank-reconciliation', 'reconciliation-workspace', 'payment-options', 'pass-on'],
     ],
 
     /**

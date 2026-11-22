@@ -63,6 +63,8 @@ class GroupAdminSectionsTest extends TestCase
 
         $this->actingAs($owner)->get("/{$this->group->slug}/admin/events")->assertNotFound();
         $this->actingAs($owner)->get("/{$this->group->slug}/admin/accounting")->assertNotFound();
+        $this->actingAs($owner)->get("/{$this->group->slug}/admin/bank-accounts")->assertNotFound();
+        $this->actingAs($owner)->get("/{$this->group->slug}/admin/notices")->assertNotFound();
         $this->actingAs($owner)->get("/{$this->section->slug}/admin/meetings")->assertNotFound();
     }
 

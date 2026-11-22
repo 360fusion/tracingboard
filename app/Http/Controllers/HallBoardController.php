@@ -104,7 +104,7 @@ class HallBoardController extends Controller
 
             abort_unless(ClubAccess::canAssignRole($request->user(), $club, $data['role'], $current, $userId), 403, 'Your role cannot change this person.');
             if ($current === ClubRole::Owner->value && $data['role'] !== $current && $this->isLastOwner($club, $userId)) {
-                return 'A hall needs at least one owner.';
+                return 'There must be at least one owner.';
             }
 
             $club->users()->updateExistingPivot($userId, ['committee_role' => $data['office'], 'role' => $data['role']]);
@@ -128,7 +128,7 @@ class HallBoardController extends Controller
 
             abort_if($role === ClubRole::Owner->value && ! $request->user()->actsAsSuperAdmin() && ClubAccess::role($request->user(), $club) !== ClubRole::Owner->value, 403, 'Only an owner can remove another owner.');
             if ($role === ClubRole::Owner->value && $this->isLastOwner($club, $userId)) {
-                return 'A hall needs at least one owner.';
+                return 'There must be at least one owner.';
             }
 
             // Someone who never signed in is taken off again; anyone else keeps their history as a past board member.

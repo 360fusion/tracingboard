@@ -52,6 +52,8 @@ const currentClubRole = computed(() => {
 // Sent for the club in the URL, so a superadmin viewing a hall gets the hall menu too.
 const isHall = computed(() => !!page.props.clubIsHall);
 const isGroup = computed(() => !!page.props.clubIsGroup);
+// A province group has no events or accounts of its own.
+const isProvinceGroup = computed(() => !!page.props.clubIsProvinceGroup);
 // A hall has no member area of its own: its board's portal is their all-lodges dashboard.
 const memberPortalHref = computed(() => (isHall.value ? route('members.dashboard') : route('member.dashboard', clubSlug)));
 
@@ -289,6 +291,7 @@ provide('layoutHasHeading', true);
 
           <!-- 3. Events -->
           <Link 
+            v-if="!isProvinceGroup"
             :href="route('admin.events.index', { clubSlug })" 
             :class="[
               'flex items-center gap-3 px-3.5 py-2 rounded-xl transition-all',
@@ -370,6 +373,7 @@ provide('layoutHasHeading', true);
 
           <!-- 9. Accounting & ERP Ledger -->
           <Link
+            v-if="!isProvinceGroup"
             :href="route('admin.accounting.index', { clubSlug })"
             :class="[
               'flex items-center gap-3 px-3.5 py-2 rounded-xl transition-all',
