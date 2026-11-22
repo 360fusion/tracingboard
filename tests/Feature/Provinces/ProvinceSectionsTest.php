@@ -9,6 +9,7 @@ use App\Models\GrandLodge;
 use App\Models\Province;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Testing\TestResponse;
 use Inertia\Testing\AssertableInertia;
@@ -75,6 +76,28 @@ class ProvinceSectionsTest extends TestCase
                 $this->assertNotContains(ClubType::hall()->id, $codes);
                 $this->assertNotContains(ClubType::provinceGroup()->id, $codes);
             });
+    }
+
+    public function test_sections_screen_loads_admins_in_one_query(): void
+    {
+        $countQueries = function (): int {
+            DB::flushQueryLog();
+            DB::enableQueryLog();
+            $this->actingAs($this->admin)->get(route('admin.sections.index', ['clubSlug' => $this->group->slug]))->assertOk();
+
+            return count(DB::getQueryLog());
+        };
+
+        $this->section();
+        $countQueries();
+        $one = $countQueries();
+
+        foreach (['Mark', 'Royal Arch'] as $i => $name) {
+            $order = ClubType::factory()->create(['name' => $name, 'code' => 'order_'.$i]);
+            Club::factory()->provinceSection($this->group, $order)->create()->users()->attach(User::factory()->create()->id, ['role' => 'admin', 'status' => 'active']);
+        }
+
+        $this->assertSame($one, $countQueries());
     }
 
     public function test_duplicate_section_is_refused(): void

@@ -27,17 +27,20 @@ class ProvinceSectionsController extends Controller
         return Inertia::render('Admin/Province/Sections', [
             'club' => $group,
             'orders' => $this->availableOrders($group)->get(['id', 'name']),
-            'sections' => $group->sections()->with('orderClubType:id,name')->orderBy('name')->get()->map(fn (Club $s) => [
+            'sections' => $group->sections()->with([
+                'orderClubType:id,name',
+                'users' => fn ($q) => $q->wherePivot('role', 'admin')
+                    ->wherePivotIn('status', [ClubMemberStatus::Active->value, ClubMemberStatus::Pending->value])
+                    ->orderBy('users.name'),
+            ])->orderBy('name')->get()->map(fn (Club $s) => [
                 'id' => $s->id,
                 'name' => $s->name,
                 'slug' => $s->slug,
                 'order' => $s->orderClubType?->name,
-                'admins' => $s->users()->wherePivot('role', 'admin')
-                    ->wherePivotIn('status', [ClubMemberStatus::Active->value, ClubMemberStatus::Pending->value])
-                    ->orderBy('users.name')->get()->map(fn (User $u) => [
-                        'name' => $u->name,
-                        'pending' => $u->pivot->status === ClubMemberStatus::Pending->value,
-                    ])->values(),
+                'admins' => $s->users->map(fn (User $u) => [
+                    'name' => $u->name,
+                    'pending' => $u->pivot->status === ClubMemberStatus::Pending->value,
+                ])->values(),
             ])->values(),
         ]);
     }

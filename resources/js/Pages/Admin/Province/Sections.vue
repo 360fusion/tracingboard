@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue';
-import { Head, Link, router, useForm } from '@inertiajs/vue3';
+import { Head, router, useForm } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import Card from '@/Components/Ui/Card.vue';
 import Button from '@/Components/Ui/Button.vue';
@@ -62,7 +62,7 @@ function confirmRemove() {
             </div>
           </div>
           <div class="flex gap-2">
-            <Link :href="route('admin.analytics', { slug: section.slug })" class="inline-flex min-h-11 items-center px-3 text-sm font-semibold text-blue-700">Open admin</Link>
+            <a :href="`/site/${section.slug}`" class="inline-flex min-h-11 items-center px-3 text-sm font-semibold text-blue-700">View site</a>
             <Button variant="secondary" size="sm" @click="startAppoint(section)">Appoint admin</Button>
             <Button variant="danger" size="sm" @click="removing = section">Remove</Button>
           </div>
