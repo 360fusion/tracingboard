@@ -6,6 +6,7 @@ use App\Models\Club;
 use App\Models\ClubType;
 use App\Models\GrandLodge;
 use App\Models\Lodge;
+use App\Models\MasonicHall;
 use App\Models\Province;
 use App\Models\User;
 use App\Services\Lodges\LodgeCorrectionService;
@@ -104,5 +105,42 @@ class SectionListingsTest extends TestCase
 
         $this->update($lodge, $member)->assertForbidden();
         $this->assertNotSame('Renamed Chapter', $lodge->fresh()->name);
+    }
+
+    public function test_store_forces_the_sections_order(): void
+    {
+        $this->actingAs($this->editor)->post(route('admin.chapters.listings.store', $this->section->slug), [
+            'club_type_id' => $this->mark->id,
+            'province_id' => $this->durham->id,
+            'name' => 'New Chapter',
+        ])->assertRedirect();
+
+        $this->assertSame($this->roseCroix->id, Lodge::where('name', 'New Chapter')->firstOrFail()->club_type_id);
+    }
+
+    public function test_listing_outside_the_province_is_refused(): void
+    {
+        $other = Province::create(['grand_lodge_id' => $this->durham->grand_lodge_id, 'name' => 'Northumberland', 'code' => 'northumberland', 'country' => 'England']);
+        $hall = MasonicHall::factory()->create(['province_id' => $other->id]);
+        $lodge = $this->lodge($this->roseCroix, ['name' => 'Stella']);
+        $base = ['club_type_id' => $this->roseCroix->id, 'province_id' => $this->durham->id, 'name' => 'Changed'];
+        $store = route('admin.chapters.listings.store', $this->section->slug);
+        $update = route('admin.chapters.listings.update', [$this->section->slug, $lodge->id]);
+
+        $this->actingAs($this->editor)->post($store, [...$base, 'province_id' => $other->id])->assertSessionHasErrors('province_id');
+        $this->actingAs($this->editor)->post($store, [...$base, 'masonic_hall_id' => $hall->id])->assertSessionHasErrors('masonic_hall_id');
+        $this->actingAs($this->editor)->put($update, [...$base, 'province_id' => $other->id])->assertSessionHasErrors('province_id');
+        $this->actingAs($this->editor)->put($update, [...$base, 'masonic_hall_id' => $hall->id])->assertSessionHasErrors('masonic_hall_id');
+
+        $this->assertSame('Stella', $lodge->fresh()->name);
+        $this->assertSame(0, Lodge::where('name', 'Changed')->count());
+    }
+
+    public function test_non_section_club_gives_404(): void
+    {
+        $lodgeClub = Club::factory()->create();
+        $lodgeClub->users()->attach($this->editor->id, ['role' => 'coach', 'status' => 'active']);
+
+        $this->actingAs($this->editor)->get(route('admin.chapters.listings.index', $lodgeClub->slug))->assertNotFound();
     }
 }
