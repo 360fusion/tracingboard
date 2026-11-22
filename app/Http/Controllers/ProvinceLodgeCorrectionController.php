@@ -58,7 +58,7 @@ class ProvinceLodgeCorrectionController extends SuperAdminLodgeCorrectionControl
     /**
      * The provinces a fix's hall may be in.
      *
-     * @return Collection<int, int>
+     * @return Collection<int, covariant int>
      */
     protected function hallProvinceIds(Request $request): Collection
     {
