@@ -79,7 +79,18 @@ class ClubType extends Model
      */
     public function scopeOrders(Builder $query): Builder
     {
-        return $query->whereNotIn('code', self::GROUP_CODES);
+        return $query->whereIn('code', config('masonic_ranks.club_type_codes'));
+    }
+
+    /**
+     * The order's name without its body word or degree: "Rose Croix Chapter (18°)" becomes "Rose Croix".
+     */
+    public function shortName(): string
+    {
+        $name = trim((string) preg_replace('/\s*\([^)]*\)/', '', $this->name));
+        $word = Lodge::typeWordFor($this->code);
+
+        return $word ? (trim((string) preg_replace('/\s+'.$word.'$/i', '', $name)) ?: $name) : $name;
     }
 
     protected function casts(): array

@@ -97,6 +97,6 @@ final class GroupAudience
             return 'Members of lodges that meet here';
         }
 
-        return "Members of {$group->orderClubType?->name} ".self::chapterWord($group).($group->province ? " in {$group->province->name}" : '');
+        return "Members of {$group->orderClubType?->shortName()} ".self::chapterWord($group).($group->province ? " in {$group->province->name}" : '');
     }
 }

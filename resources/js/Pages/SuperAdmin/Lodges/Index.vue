@@ -146,13 +146,13 @@ const labelClass = 'block text-xs font-medium text-slate-700 mb-1.5 dark:text-sl
 </script>
 
 <template>
-    <component :is="Layout" v-bind="club ? { club } : {}" :title="full ? 'Lodge directory' : 'Lodge listings'" :active-tab="club ? 'chapters' : 'lodges'">
-        <Head :title="full ? 'Superadmin - Lodge directory' : 'Lodge listings'" />
+    <component :is="Layout" v-bind="club ? { club } : {}" :title="full ? 'Lodge directory' : club ? 'Directory listings' : 'Lodge listings'" :active-tab="club ? 'chapters' : 'lodges'">
+        <Head :title="full ? 'Superadmin - Lodge directory' : club ? 'Directory listings' : 'Lodge listings'" />
 
         <div class="space-y-6">
             <header class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                 <div class="min-w-0">
-                    <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{{ full ? 'Lodge directory' : `Lodge listings for ${provinces.map((p) => p.name).join(', ')}` }}</h1>
+                    <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{{ full ? 'Lodge directory' : club ? `Directory listings for ${club.name}` : `Lodge listings for ${provinces.map((p) => p.name).join(', ')}` }}</h1>
                     <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
                         {{ totals.all }} lodges and chapters ({{ totals.managed }} managed). The public list is at
                         <Link :href="route('lodges.index')" class="text-blue-600 hover:underline dark:text-blue-400">/lodges</Link>.
@@ -160,17 +160,17 @@ const labelClass = 'block text-xs font-medium text-slate-700 mb-1.5 dark:text-sl
                 </div>
                 <Button @click="openCreate">
                     <template #icon><UiIcon name="plus" /></template>
-                    Add a lodge
+                    {{ club ? 'Add a listing' : 'Add a lodge' }}
                 </Button>
             </header>
 
             <Card padding="sm" class="grid gap-3 md:grid-cols-3 lg:grid-cols-6">
                 <Input v-model="search.q" type="search" placeholder="Name, number, hall, town, postcode..." aria-label="Search lodges" class="lg:col-span-2" />
-                <select v-model="search.province" @change="applyFilters" :class="filterClass" aria-label="Province">
+                <select v-if="!club" v-model="search.province" @change="applyFilters" :class="filterClass" aria-label="Province">
                     <option value="">All provinces</option>
                     <option v-for="p in provinces" :key="p.code" :value="p.code">{{ p.name }}</option>
                 </select>
-                <select v-model="search.order" @change="applyFilters" :class="filterClass" aria-label="Order">
+                <select v-if="!club" v-model="search.order" @change="applyFilters" :class="filterClass" aria-label="Order">
                     <option value="">All orders</option>
                     <option v-for="o in orders" :key="o.code" :value="o.code">{{ o.name }}</option>
                 </select>
@@ -235,7 +235,7 @@ const labelClass = 'block text-xs font-medium text-slate-700 mb-1.5 dark:text-sl
             </Card>
         </div>
 
-        <Modal :open="showModal" :title="editingId ? 'Edit lodge' : 'Add a lodge'" size="lg" @close="showModal = false">
+        <Modal :open="showModal" :title="editingId ? (club ? 'Edit listing' : 'Edit lodge') : club ? 'Add a listing' : 'Add a lodge'" size="lg" @close="showModal = false">
             <form @submit.prevent="submit" class="space-y-4 text-sm">
                 <div class="grid grid-cols-3 gap-3">
                     <Input v-model="form.name" label="Name" required placeholder="e.g. Lodge of Industry" :error="form.errors.name" class="col-span-2" />

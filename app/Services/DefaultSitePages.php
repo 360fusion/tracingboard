@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Club;
+use App\Support\GroupAudience;
 use App\Support\SiteThemes;
 
 /**
@@ -172,6 +173,14 @@ class DefaultSitePages
                 ],
             ],
         ];
+
+        // A province group or section has nobody to join: no Join Us page or button, and its own strapline.
+        if ($club->isProvinceGroup() || $club->isProvinceSection()) {
+            unset($defaultPages[0]['blocks'][0]['cta_text'], $defaultPages[0]['blocks'][0]['cta_link']);
+            $defaultPages[0]['blocks'][0]['eyebrow'] = 'Official website';
+            $defaultPages[0]['blocks'][0]['subtitle'] = $club->isProvinceGroup() ? 'The orders in our province' : 'News, events and '.GroupAudience::chapterWord($club);
+            $defaultPages = array_values(array_filter($defaultPages, fn (array $page) => $page['slug'] !== 'join-us'));
+        }
 
         // A section's chapters and officers are drawn by their own addresses, so they are linked from its home page.
         if ($club->isProvinceSection()) {

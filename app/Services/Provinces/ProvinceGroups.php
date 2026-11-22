@@ -62,7 +62,7 @@ class ProvinceGroups
                 'parent_club_id' => $group->id,
                 'order_club_type_id' => $order->id,
                 'name' => $name,
-                'slug' => $this->uniqueSlug($group->slug.' '.$order->name, 'section'),
+                'slug' => $this->uniqueSlug($group->slug.' '.$order->shortName(), 'section'),
                 'status' => 'active',
             ]);
         });

@@ -10,6 +10,7 @@ use App\Models\Lodge;
 use App\Models\LodgeCorrection;
 use App\Models\Province;
 use App\Models\User;
+use App\Services\DefaultSitePages;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
@@ -34,6 +35,16 @@ class ProvinceDashboardTest extends TestCase
         $this->roseCroix = ClubType::factory()->create(['name' => 'Rose Croix', 'code' => 'rose_croix']);
         $this->group = Club::factory()->provinceGroup($this->durham)->create(['name' => 'Durham']);
         $this->section = Club::factory()->provinceSection($this->group, $this->roseCroix)->create(['name' => 'Durham Rose Croix']);
+    }
+
+    public function test_group_and_section_sites_have_no_join_us_page(): void
+    {
+        foreach ([$this->group, $this->section] as $club) {
+            app(DefaultSitePages::class)->ensure($club);
+
+            $this->assertFalse($club->pages()->where('slug', 'join-us')->exists());
+            $this->assertArrayNotHasKey('cta_text', $club->pages()->where('slug', 'home')->first()->blocks[0]);
+        }
     }
 
     private function person(Club $club, string $role = 'owner'): User

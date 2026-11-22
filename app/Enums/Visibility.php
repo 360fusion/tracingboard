@@ -89,7 +89,7 @@ enum Visibility: string
         return array_map(fn (self $case): array => [
             'value' => $case->value,
             'label' => $case === self::Club && $club?->isGroup() ? GroupAudience::audienceLabel($club) : $case->label(),
-            'description' => $case->description(),
+            'description' => $case === self::Club && $club?->isGroup() ? 'Only active members of those lodges and chapters.' : $case->description(),
         ], $cases);
     }
 }

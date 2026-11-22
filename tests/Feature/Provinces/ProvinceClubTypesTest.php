@@ -20,14 +20,24 @@ class ProvinceClubTypesTest extends TestCase
         return Province::create(['grand_lodge_id' => $grandLodge->id, 'name' => 'Durham', 'code' => 'durham', 'country' => 'England']);
     }
 
+    public function test_short_name_drops_the_body_word_and_degree(): void
+    {
+        $this->assertSame('Rose Croix', (new ClubType(['code' => 'rose_croix', 'name' => 'Rose Croix Chapter (18°)']))->shortName());
+        $this->assertSame('Mark Master Masons', (new ClubType(['code' => 'mark_lodge', 'name' => 'Mark Master Masons Lodge']))->shortName());
+        $this->assertSame('Rose Croix', (new ClubType(['code' => 'rose_croix', 'name' => 'Rose Croix']))->shortName());
+    }
+
     public function test_group_types_are_not_orders(): void
     {
         ClubType::hall();
         ClubType::provinceGroup();
         ClubType::provinceSection();
         ClubType::factory()->create(['code' => 'rose_croix']);
+        ClubType::factory()->create(['code' => 'rowing']);
 
         $codes = ClubType::orders()->pluck('code')->all();
+
+        $this->assertNotContains('rowing', $codes);
 
         $this->assertNotContains('hall', $codes);
         $this->assertNotContains('province_group', $codes);

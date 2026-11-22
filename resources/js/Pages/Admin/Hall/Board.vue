@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue';
-import { Head, router, useForm } from '@inertiajs/vue3';
+import { Head, router, useForm, usePage } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import Card from '@/Components/Ui/Card.vue';
 import Button from '@/Components/Ui/Button.vue';
@@ -15,6 +15,10 @@ const props = defineProps({
   officeRoles: { type: Object, default: () => ({}) },
   roles: { type: Object, default: () => ({}) },
 });
+
+// A hall has a board; a province group or section has people.
+const page = usePage();
+const heading = computed(() => (page.props.clubIsProvinceGroup || page.props.clubIsProvinceSection ? 'People' : 'Board'));
 
 // The server names the roles: the coach role is "Secretary" on a hall and "Editor" on a group or section.
 const roleLabel = r => props.roles[r] ?? r;
@@ -50,8 +54,8 @@ function confirmRemove() {
 </script>
 
 <template>
-  <Head title="Board" />
-  <AdminLayout title="Board">
+  <Head :title="heading" />
+  <AdminLayout :title="heading">
     <div class="max-w-3xl mx-auto space-y-4">
 
       <Card v-for="person in people" :key="person.id" class="p-5">
@@ -88,7 +92,7 @@ function confirmRemove() {
       </Card>
     </div>
 
-    <ConfirmDialog :open="!!removing" title="Remove from the board" confirm-label="Remove" @close="removing = null" @confirm="confirmRemove">
+    <ConfirmDialog :open="!!removing" :title="heading === 'Board' ? 'Remove from the board' : 'Remove this person'" confirm-label="Remove" @close="removing = null" @confirm="confirmRemove">
       {{ removing?.name }} will lose access to {{ club.name }}.
     </ConfirmDialog>
   </AdminLayout>
