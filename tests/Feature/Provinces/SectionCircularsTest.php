@@ -87,7 +87,7 @@ class SectionCircularsTest extends TestCase
         Notification::fake();
         $this->sendCircular();
 
-        Notification::assertSentTo($this->chapterSecretary, SectionCircularNotification::class);
+        Notification::assertSentTo($this->chapterSecretary, SectionCircularNotification::class, fn (SectionCircularNotification $notification) => $notification->queue === 'transactional');
         Notification::assertSentTo($this->chapterAdmin, SectionCircularNotification::class);
         Notification::assertNotSentTo($this->markSecretary, SectionCircularNotification::class);
         Notification::assertNotSentTo($this->chapterMember, SectionCircularNotification::class);
@@ -119,6 +119,7 @@ class SectionCircularsTest extends TestCase
 
         $this->actingAs($this->chapterSecretary)->get(route('member.pass_on.circular_attachment', ['slug' => $this->chapter->slug, 'id' => $circular->id]))->assertOk();
         $this->actingAs($this->markSecretary)->get(route('member.pass_on.circular_attachment', ['slug' => $this->markLodge->slug, 'id' => $circular->id]))->assertNotFound();
+        $this->actingAs($this->chapterMember)->get(route('member.pass_on.circular_attachment', ['slug' => $this->chapter->slug, 'id' => $circular->id]))->assertForbidden();
     }
 
     public function test_circular_sends_no_member_email(): void
