@@ -91,6 +91,7 @@ class HandleInertiaRequests extends Middleware
             // Whether it is any group (hall, province group or section): a club with no members of its own.
             'clubIsGroup' => fn () => (bool) $this->urlClub($request)?->isGroup(),
             'clubIsProvinceGroup' => fn () => (bool) $this->urlClub($request)?->isProvinceGroup(),
+            'clubIsProvinceSection' => fn () => (bool) $this->urlClub($request)?->isProvinceSection(),
             // The lodge site's links drop their /site/{club} prefix when it is served on the lodge's own domain.
             'onClubDomain' => $request->attributes->has('club_domain_uri'),
             // Set while a page is rendered for the club's static website (App\Services\StaticSite\StaticSiteBuilder).

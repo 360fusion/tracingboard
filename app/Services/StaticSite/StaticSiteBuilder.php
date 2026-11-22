@@ -142,6 +142,10 @@ class StaticSiteBuilder
                 $targets->put('news/'.$slug, 'news/'.$slug);
             });
 
+        if ($club->isProvinceSection()) {
+            $targets->put('chapters', 'chapters');
+        }
+
         $count = 0;
         $release->update(['pages_total' => $targets->count(), 'page_count' => 0]);
 

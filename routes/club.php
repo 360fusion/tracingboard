@@ -109,6 +109,7 @@ use App\Http\Controllers\ProvinceLodgeController;
 use App\Http\Controllers\ProvinceLodgeCorrectionController;
 use App\Http\Controllers\ProvinceSectionsController;
 use App\Http\Controllers\QuickRsvpController;
+use App\Http\Controllers\SectionChaptersController;
 use App\Http\Controllers\SignatureAdminController;
 use App\Http\Controllers\StaticSiteController;
 use App\Http\Controllers\StripeConnectController;
@@ -141,6 +142,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/{clubSlug}/admin/board/{userId}', [HallBoardController::class, 'update'])->name('admin.board.update');
     Route::delete('/{clubSlug}/admin/board/{userId}', [HallBoardController::class, 'destroy'])->name('admin.board.destroy');
     Route::get('/{clubSlug}/admin/sections', [ProvinceSectionsController::class, 'index'])->name('admin.sections.index');
+    Route::get('/{clubSlug}/admin/chapters', [SectionChaptersController::class, 'index'])->name('admin.chapters.index');
     Route::post('/{clubSlug}/admin/sections', [ProvinceSectionsController::class, 'store'])->name('admin.sections.store');
     Route::post('/{clubSlug}/admin/sections/{sectionId}/admins', [ProvinceSectionsController::class, 'storeAdmin'])->name('admin.sections.admins.store');
     Route::delete('/{clubSlug}/admin/sections/{sectionId}', [ProvinceSectionsController::class, 'destroy'])->name('admin.sections.destroy');

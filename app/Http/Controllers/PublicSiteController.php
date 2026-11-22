@@ -8,6 +8,7 @@ use App\Models\Page;
 use App\Models\PageRedirect;
 use App\Models\User;
 use App\Services\PagePublisher;
+use App\Services\Provinces\SectionChapters;
 use App\Services\PublicCalendar;
 use App\Support\ClubAccess;
 use App\Support\ClubDomain;
@@ -16,6 +17,7 @@ use App\Support\SiteChrome;
 use App\Support\SiteSeo;
 use App\Support\SiteThemes;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
@@ -76,6 +78,15 @@ class PublicSiteController extends Controller
                     return redirect()->to($manual->to_url, $manual->is_permanent ? 301 : 302);
                 }
 
+                // A province group's /site/{group}/{order} goes to that order's section.
+                $section = $club->isProvinceGroup()
+                    ? $club->sections()->where('status', 'active')->with('orderClubType')->get()->first(fn (Club $s) => Str::slug((string) $s->orderClubType?->name) === $pageSlug)
+                    : null;
+
+                if ($section) {
+                    return redirect()->to(ClubDomain::publicUrl($section, url('/site/'.$section->slug)));
+                }
+
                 return $this->notFound($club, $viewer);
             }
         } else {
@@ -90,7 +101,29 @@ class PublicSiteController extends Controller
             return ClubDomain::membersOnlyRedirect(request(), 'That page is for members only.');
         }
 
-        return $this->renderPage($club, $page, $viewer, 200, $preview);
+        // A province group's home lists its sections.
+        $sections = $club->isProvinceGroup() && $page->is_homepage
+            ? ['sections' => $club->sections()->where('status', 'active')->with('orderClubType')->get()->map(fn (Club $s) => [
+                'name' => $s->name,
+                'order' => $s->orderClubType?->name,
+                'url' => ClubDomain::publicUrl($s, url('/site/'.$s->slug)),
+            ])->sortBy('order')->values()->all()]
+            : [];
+
+        return $this->renderPage($club, $page, $viewer, 200, $preview, $sections);
+    }
+
+    /**
+     * A section's list of its order's lodges or chapters in the province, drawn inside the site's own header and footer.
+     */
+    public function chapters(string $clubSlug): SymfonyResponse|Response
+    {
+        $club = Club::where('slug', $clubSlug)->with(['clubType', 'membershipPlans', 'donations.contributions'])->firstOrFail();
+        abort_unless($club->isProvinceSection(), 404);
+
+        $page = new Page(['club_id' => $club->id, 'title' => 'Chapters', 'slug' => 'chapters', 'is_published' => true, 'is_members_only' => false, 'blocks' => []]);
+
+        return $this->renderPage($club, $page, Auth::user(), extra: ['chapters' => SectionChapters::for($club)]);
     }
 
     /**

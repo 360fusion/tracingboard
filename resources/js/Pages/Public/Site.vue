@@ -26,6 +26,9 @@ const props = defineProps({
     previewTheme: String,
     // Set for a news article: the latest other articles, shown in a column beside the article's own elements.
     articleSidebar: { type: Object, default: null },
+    // A province group's home lists its sections; a section's chapters page lists its order's lodges or chapters.
+    sections: { type: Array, default: null },
+    chapters: { type: Array, default: null },
 });
 
 const currentThemeKey = computed(() => props.previewTheme || props.club?.website_theme || DEFAULT_THEME_KEY);
@@ -139,7 +142,7 @@ const getSiteUrl = (urlPath) => {
                     </div>
                 </div>
             </template>
-            <BlockRenderer v-else
+            <BlockRenderer v-else-if="!chapters"
                 :blocks="page.blocks"
                 :theme="theme"
                 :club="club"
@@ -151,6 +154,26 @@ const getSiteUrl = (urlPath) => {
                 :interactive="true"
                 :resolve-url="getSiteUrl"
             />
+            <ul v-if="sections?.length" class="mx-auto max-w-3xl px-4 sm:px-6 py-10 space-y-3">
+                <li v-for="section in sections" :key="section.url">
+                    <a :href="getSiteUrl(section.url)" class="block rounded-xl border border-slate-200 bg-white/80 p-4 font-semibold text-slate-900 hover:bg-white">
+                        {{ section.name }}<span v-if="section.order" class="block text-sm font-normal text-slate-600">{{ section.order }}</span>
+                    </a>
+                </li>
+            </ul>
+            <div v-if="chapters" class="mx-auto max-w-3xl px-4 sm:px-6 py-10 space-y-3">
+                <h2 class="text-2xl font-bold">{{ page.title }}</h2>
+                <p v-if="!chapters.length" class="text-slate-600">No chapters are listed yet.</p>
+                <div v-for="chapter in chapters" :key="chapter.name + chapter.number" class="rounded-xl border border-slate-200 bg-white/80 p-4 text-slate-900">
+                    <div class="font-semibold">
+                        <a v-if="chapter.site_url" :href="chapter.site_url" class="underline">{{ chapter.name }}</a>
+                        <template v-else>{{ chapter.name }}</template>
+                        <span v-if="chapter.number"> No. {{ chapter.number }}</span>
+                    </div>
+                    <div v-if="chapter.hall || chapter.town" class="text-sm text-slate-600">{{ [chapter.hall, chapter.town].filter(Boolean).join(', ') }}</div>
+                    <div v-if="chapter.meets" class="text-sm text-slate-600">{{ chapter.meets }}</div>
+                </div>
+            </div>
         </main>
 
         <!-- Public Footer -->
