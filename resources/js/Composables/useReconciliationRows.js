@@ -12,7 +12,7 @@ export function useReconciliationRows(props, { rowStates, selectedTx, reconcileF
     const openManualMatchModal = () => {
       if (!selectedTx.value) return;
       // A hall has no member dues, so money in starts on a ledger account.
-      const moneyIn = page.props.clubIsHall ? 'ledger_account' : 'member_subscription';
+      const moneyIn = page.props.clubIsGroup ? 'ledger_account' : 'member_subscription';
       manualMatchType.value = selectedTx.value.amount > 0 ? moneyIn : 'supplier_bill';
       manualTargetId.value = '';
       manualNominalCode.value = '4000';

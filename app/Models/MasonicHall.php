@@ -141,26 +141,6 @@ class MasonicHall extends Model implements HasMedia
     }
 
     /**
-     * The hall clubs of the halls where the given clubs meet, with their type loaded.
-     *
-     * @param  Collection<int, Club>  $clubs
-     * @return Collection<int, Club>
-     */
-    public static function hallClubsFor(Collection $clubs): Collection
-    {
-        $hallIds = $clubs->pluck('masonic_hall_id')->filter()->unique()->values();
-
-        if ($hallIds->isEmpty()) {
-            return collect();
-        }
-
-        return Club::with('clubType')
-            ->whereHas('clubType', fn ($type) => $type->where('code', ClubType::HALL))
-            ->whereIn('id', self::whereIn('id', $hallIds)->whereNotNull('club_id')->select('club_id'))
-            ->get();
-    }
-
-    /**
      * The address on one line, skipping any part that is empty.
      */
     public function fullAddress(): string

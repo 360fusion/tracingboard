@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ClubMemberStatus;
+use App\Support\GroupAudience;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -32,7 +33,7 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
     use HasApiTokens, HasFactory, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
 
     /** @var Collection<int, int>|null */
-    private ?Collection $hallAudienceClubIds = null;
+    private ?Collection $groupAudienceClubIds = null;
 
     /**
      * Get the attributes that should be cast.
@@ -133,15 +134,15 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
     }
 
     /**
-     * IDs of the hall clubs of the halls where this user's clubs meet: a hall's "club" audience reaches them.
+     * IDs of the hall and section clubs whose "club" audience reaches this user (see GroupAudience).
      * Kept on the instance, so a loop over events does not query per event.
      *
      * @return Collection<int, int>
      */
-    public function hallAudienceClubIds(): Collection
+    public function groupAudienceClubIds(): Collection
     {
-        return $this->hallAudienceClubIds ??= MasonicHall::hallClubsFor(
-            $this->clubs()->notGroups()->wherePivot('status', ClubMemberStatus::Active->value)->get(['clubs.id', 'clubs.masonic_hall_id'])
+        return $this->groupAudienceClubIds ??= GroupAudience::groupClubsFor(
+            $this->clubs()->notGroups()->wherePivot('status', ClubMemberStatus::Active->value)->get(['clubs.id', 'clubs.masonic_hall_id', 'clubs.province_id', 'clubs.club_type_id'])
         )->pluck('id');
     }
 

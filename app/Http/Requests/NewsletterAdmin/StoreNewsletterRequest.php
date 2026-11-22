@@ -20,7 +20,7 @@ class StoreNewsletterRequest extends ClubRequest
 
         return [
             'id' => 'nullable|integer',
-            'newsletter_type_id' => [$club->isHall() ? 'required' : 'nullable', Rule::exists('newsletter_types', 'id')->where('club_id', $club->id)],
+            'newsletter_type_id' => [$club->isGroup() ? 'required' : 'nullable', Rule::exists('newsletter_types', 'id')->where('club_id', $club->id)],
             'subject' => 'required|string|max:255',
             'content' => 'required|string|max:200000',
             'target_roles' => 'required|array|max:10',

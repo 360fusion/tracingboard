@@ -83,8 +83,8 @@ class AnnualTreasurerReportService
                 'closing_ledger_balance' => $b->ledger_balance,
                 'closing_statement_balance' => $b->statement_balance,
             ])->values()->all(),
-            // A hall has no members, so no arrears or Province section.
-            'membership' => $club->isHall() ? null : [
+            // A group has no members, so no arrears or Province section.
+            'membership' => $club->isGroup() ? null : [
                 'in_arrears_count' => $arrears->count(),
                 'in_arrears' => $arrears->map(fn ($sub) => [
                     'member_name' => $sub->member?->full_name,

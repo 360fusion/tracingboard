@@ -57,8 +57,8 @@ const ICONS = {
 const allRoutes = { dashboard: 'members.dashboard', calendar: 'members.calendar', events: 'members.events', meetings: 'members.events', news: 'members.news', dues: 'members.dues', lodges: 'members.lodges' };
 const clubRoutes = { dashboard: 'member.dashboard', calendar: 'member.calendar', events: 'member.events', meetings: 'member.meetings', news: 'member.news', dues: 'member.dues' };
 
-// A hall has only its events in the member area, so its pages keep the all-lodges nav.
-const nav = computed(() => (slug.value && !props.club?.is_hall
+// A group (hall or section) has only its events and posts in the member area, so its pages keep the all-lodges nav.
+const nav = computed(() => (slug.value && !props.club?.is_group
     ? [
         { key: 'dashboard', label: 'Overview' },
         { key: 'calendar', label: 'Calendar' },
@@ -154,7 +154,7 @@ provide('layoutHasHeading', !props.ownHeading);
                         </Link>
                         <!-- Phones: the lodge's name is the dropdown listing the other lodges, as before; wider screens show the name and number. -->
                         <ClubSwitcher :club="club" :active-tab="activeTab" tone="onDark" plain class="sm:hidden" />
-                        <Link v-if="lodge" :href="route(club.is_hall ? 'member.events' : 'member.dashboard', { slug: club.slug })" class="hidden min-w-0 items-center gap-3 sm:flex">
+                        <Link v-if="lodge" :href="route(club.is_group ? 'member.events' : 'member.dashboard', { slug: club.slug })" class="hidden min-w-0 items-center gap-3 sm:flex">
                             <span class="hidden h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/20 bg-white/10 text-gold-400 sm:flex" aria-hidden="true"><UiIcon name="building" :size="20" /></span>
                             <span class="min-w-0">
                                 <span class="block truncate font-display text-xl font-semibold leading-tight text-white">{{ club.name }}</span>

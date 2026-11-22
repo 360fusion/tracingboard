@@ -259,11 +259,11 @@ class MemberPortalController extends Controller
 
         $memberPivot = $user ? $user->clubs()->where('clubs.id', $club->id)->first()?->pivot : null;
 
-        // A hall's events are open to the members of the lodges that meet there (the middleware has checked).
-        $isHallAudience = $club->isHall();
+        // A group's events are open to its audience (the middleware has checked).
+        $isGroupAudience = $club->isGroup();
 
         // Summonses and bookings are for active members only, like the other member pages.
-        if (! $isHallAudience && ($memberPivot === null || $memberPivot->status !== 'active') && ! $user?->actsAsSuperAdmin()) {
+        if (! $isGroupAudience && ($memberPivot === null || $memberPivot->status !== 'active') && ! $user?->actsAsSuperAdmin()) {
             return redirect()->route('public.site', ['clubSlug' => $club->slug]);
         }
 
@@ -311,7 +311,7 @@ class MemberPortalController extends Controller
         $events = $eventModels->map(fn (Event $event) => EventPayload::forMember($event, $eventRegistrations->get($event->id)));
 
         return Inertia::render('Member/Events', [
-            'club' => [...$club->only(['id', 'name', 'slug', 'lodge_number']), 'is_hall' => $isHallAudience],
+            'club' => [...$club->only(['id', 'name', 'slug', 'lodge_number']), 'is_group' => $isGroupAudience],
             'memberRole' => $memberPivot->role ?? 'member',
             'meetings' => $meetings,
             'events' => $events,
@@ -351,7 +351,7 @@ class MemberPortalController extends Controller
         $memberPivot = $user ? $user->clubs()->where('clubs.id', $club->id)->first()?->pivot : null;
 
         return Inertia::render('Member/PostShow', [
-            'club' => $club->only(['id', 'name', 'slug', 'lodge_number']),
+            'club' => [...$club->only(['id', 'name', 'slug', 'lodge_number']), 'is_group' => $club->isGroup()],
             'memberRole' => $memberPivot->role ?? 'member',
             'isMember' => $memberPivot !== null || (bool) $user?->actsAsSuperAdmin(),
             'lodgeSlug' => $club->lodge?->slug,

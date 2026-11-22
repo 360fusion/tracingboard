@@ -92,7 +92,7 @@ const tabClass = (isActive) => [
                 <Badge v-if="club.lodge_number">No. {{ club.lodge_number }}</Badge>
               </div>
               <Badge v-if="club.is_member" variant="success">Enrolled member</Badge>
-              <Badge v-else-if="club.is_hall" variant="success">Your lodge meets here</Badge>
+              <Badge v-else-if="club.is_group" variant="success">{{ club.is_hall ? 'Your lodge meets here' : 'Sent to your province' }}</Badge>
               <Badge v-else variant="info">Visiting subscription</Badge>
             </div>
           </div>

@@ -273,7 +273,7 @@ class AccountingReports
      */
     public function getProvincialDueWorksheet(Club $club): ?array
     {
-        if ($club->isHall()) {
+        if ($club->isGroup()) {
             return null;
         }
 

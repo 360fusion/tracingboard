@@ -21,7 +21,7 @@ const page = usePage();
 const open = ref(false);
 
 // A hall's board row is not membership: a hall has no member pages to switch to.
-const clubs = computed(() => (page.props.auth?.clubs ?? []).filter((club) => club.status === 'active' && !club.is_hall));
+const clubs = computed(() => (page.props.auth?.clubs ?? []).filter((club) => club.status === 'active' && !club.is_group));
 const slug = computed(() => props.club?.slug ?? null);
 
 const SCOPED = ['calendar', 'events', 'meetings', 'news', 'dues'];

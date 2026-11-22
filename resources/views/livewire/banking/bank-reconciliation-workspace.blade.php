@@ -4,7 +4,7 @@
         <div class="flex flex-col justify-between gap-4 md:flex-row md:items-center">
             <div>
                 <h2 class="text-xl font-bold text-slate-900 dark:text-white">Bank Reconciliation Workspace</h2>
-                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ $club->isHall() ? 'Rule-based matching for invoices and supplier bills.' : 'Rule-based matching for member dues, supplier bills and the relief chest.' }}</p>
+                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ $club->isGroup() ? 'Rule-based matching for invoices and supplier bills.' : 'Rule-based matching for member dues, supplier bills and the relief chest.' }}</p>
             </div>
 
             <div class="flex items-center gap-2">
@@ -192,7 +192,7 @@
             <div class="space-y-5">
                 <!-- Allocation Type Selector -->
                 <div class="flex items-center gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-200" role="group" aria-label="Allocate to">
-                    @unless ($club->isHall())
+                    @unless ($club->isGroup())
                     <button
                         type="button"
                         wire:click="$set('manualAllocationType', 'member_subscription')"

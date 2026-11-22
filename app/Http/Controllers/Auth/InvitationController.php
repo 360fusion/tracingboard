@@ -133,11 +133,11 @@ class InvitationController extends Controller
     }
 
     /**
-     * A hall has no member area, so its board starts in the hall's admin.
+     * A group has no member area, so its board starts in its admin.
      */
     private function landing(Club $club, User $user): RedirectResponse
     {
-        return $club->isHall()
+        return $club->isGroup()
             ? redirect(HallClubs::landingUrl($club, $user))
             : redirect()->route('member.dashboard', ['slug' => $club->slug]);
     }

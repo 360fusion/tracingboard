@@ -64,7 +64,7 @@ class MemberListController extends Controller
         ])->values();
 
         $past = $this->bookings($scope)
-            ->whereHas('event', fn ($query) => $query->whereIn('club_id', $scope->clubIds()->merge($scope->hallClubIds()))->where('status', '!=', EventStatus::Cancelled->value)->whereBetween('starts_at', [$now->subYear(), $now->startOfDay()]))
+            ->whereHas('event', fn ($query) => $query->whereIn('club_id', $scope->clubIds()->merge($scope->groupClubIds()))->where('status', '!=', EventStatus::Cancelled->value)->whereBetween('starts_at', [$now->subYear(), $now->startOfDay()]))
             ->whereIn('status', EventRegistration::HOLDING_PLACE)
             ->get()
             ->sortByDesc(fn (EventRegistration $registration) => $registration->event->starts_at)

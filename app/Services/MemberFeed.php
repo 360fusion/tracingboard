@@ -6,10 +6,10 @@ use App\Enums\EventStatus;
 use App\Models\Club;
 use App\Models\ClubUpdate;
 use App\Models\Event;
-use App\Models\MasonicHall;
 use App\Models\Newsletter;
 use App\Models\Post;
 use App\Models\User;
+use App\Support\GroupAudience;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
@@ -32,15 +32,15 @@ class MemberFeed
         }
 
         $clubIds = $clubs->pluck('id');
-        $hallClubs = MasonicHall::hallClubsFor($clubs);
-        $club = function (int $id) use ($clubs, $hallClubs): array {
-            $found = $clubs->firstWhere('id', $id) ?? $hallClubs->firstWhere('id', $id);
+        $groupClubs = GroupAudience::groupClubsFor($clubs);
+        $club = function (int $id) use ($clubs, $groupClubs): array {
+            $found = $clubs->firstWhere('id', $id) ?? $groupClubs->firstWhere('id', $id);
 
             return ['name' => $found->name, 'slug' => $found->slug, 'colour' => $found->colourKey()];
         };
         $roles = $clubs->mapWithKeys(fn (Club $c) => [$c->id => $c->pivot->role ?? 'member']);
 
-        $posts = Post::whereIn('club_id', $clubIds)->published()->visibleTo($user)
+        $posts = Post::whereIn('club_id', $clubIds->merge($groupClubs->pluck('id')))->published()->visibleTo($user)
             ->orderByRaw('COALESCE(published_at, created_at) DESC')
             ->limit($limit)->get()
             ->map(fn (Post $post) => [
@@ -54,7 +54,7 @@ class MemberFeed
                 'link' => ['name' => 'member.posts.show', 'params' => ['slug' => $club($post->club_id)['slug'], 'id' => $post->id]],
             ]);
 
-        $events = Event::whereIn('club_id', $clubIds->merge($hallClubs->pluck('id')))->visibleTo($user)
+        $events = Event::whereIn('club_id', $clubIds->merge($groupClubs->pluck('id')))->visibleTo($user)
             ->where('status', EventStatus::Upcoming->value)
             ->where('starts_at', '>=', now())
             ->latest()->limit($limit)->get()

@@ -71,8 +71,8 @@ class EventRegistrationService
                 $member = $existing->user;
             } elseif ($member && EventRegistration::where('event_id', $event->id)->where('user_id', $member->id)->exists()) {
                 throw ValidationException::withMessages(['member_id' => $member->name.' already has a booking for this event. Edit that booking instead.']);
-            } elseif ($member && $event->club->isHall() && ! self::hallBookers($event->club)->whereKey($member->id)->exists()) {
-                throw ValidationException::withMessages(['member_id' => 'That person has not booked an event at this hall before.']);
+            } elseif ($member && $event->club->isGroup() && ! self::groupBookers($event->club)->whereKey($member->id)->exists()) {
+                throw ValidationException::withMessages(['member_id' => 'That person has not booked an event here before.']);
             }
 
             return $this->persist($event, $existing, $member, $data, $actor, $overCapacity);
@@ -80,16 +80,16 @@ class EventRegistrationService
     }
 
     /**
-     * Users who have booked any event of this hall: the only people its organiser can pick by search.
+     * Users who have booked any event of this group (hall or section): the only people its organiser can pick by search.
      * Attendee rows only carry the booker's own user id, so registrations are the whole set. Someone who only said
      * they were not coming (declined) never booked; a cancelled booking still counts.
      *
      * @return Builder<User>
      */
-    public static function hallBookers(Club $hall): Builder
+    public static function groupBookers(Club $group): Builder
     {
         return User::whereIn('id', EventRegistration::select('user_id')->whereNotNull('user_id')->where('status', '!=', 'declined')
-            ->whereIn('event_id', Event::select('id')->where('club_id', $hall->id)));
+            ->whereIn('event_id', Event::select('id')->where('club_id', $group->id)));
     }
 
     /**

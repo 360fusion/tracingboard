@@ -199,7 +199,21 @@ class Lodge extends Model
 
     public static function displayNameFor(string $name, ?string $typeCode): string
     {
-        $word = match ($typeCode) {
+        $word = self::typeWordFor($typeCode);
+
+        if ($word === null || preg_match('/\b(lodge|chapter|preceptory|council|conclave|tabernacle|college|consistory)\b/i', $name)) {
+            return $name;
+        }
+
+        return $name.' '.$word;
+    }
+
+    /**
+     * What one body of an order is called: "Lodge", "Chapter", "Preceptory"...
+     */
+    public static function typeWordFor(?string $typeCode): ?string
+    {
+        return match ($typeCode) {
             'craft_lodge', 'mark_lodge', 'royal_ark_mariner' => 'Lodge',
             'royal_arch', 'rose_croix' => 'Chapter',
             'knights_templar' => 'Preceptory',
@@ -209,12 +223,6 @@ class Lodge extends Model
             'sria_college' => 'College',
             default => null,
         };
-
-        if ($word === null || preg_match('/\b(lodge|chapter|preceptory|council|conclave|tabernacle|college|consistory)\b/i', $name)) {
-            return $name;
-        }
-
-        return $name.' '.$word;
     }
 
     /**

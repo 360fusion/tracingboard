@@ -47,7 +47,7 @@ class MemberCalendar
             ->get(['meeting_id', 'attendance_status', 'payment_status', 'said_paid_at'])
             ->keyBy('meeting_id');
 
-        $events = Event::with('club')->whereIn('club_id', $clubIds->merge($scope->hallClubIds()))
+        $events = Event::with('club')->whereIn('club_id', $clubIds->merge($scope->groupClubIds()))
             ->published()
             ->visibleTo($user)
             ->where('status', '!=', 'cancelled')
@@ -85,7 +85,7 @@ class MemberCalendar
                 'url' => route('member.meetings.summons', ['slug' => $club->slug, 'id' => $meeting->id], false),
             ];
         })->concat($events->map(function (Event $event) use ($scope, $eventReplies) {
-            $club = $scope->clubFor($event->club_id) ?? $scope->hallClubs()->firstWhere('id', $event->club_id);
+            $club = $scope->clubFor($event->club_id) ?? $scope->groupClubs()->firstWhere('id', $event->club_id);
             $registration = $eventReplies[$event->id] ?? null;
 
             return [

@@ -8,7 +8,6 @@ use App\Models\Club;
 use App\Models\ClubPaymentMethod;
 use App\Models\Event;
 use App\Models\EventRegistration;
-use App\Models\MasonicHall;
 use App\Models\Meeting;
 use App\Models\MeetingRsvp;
 use App\Models\User;
@@ -18,6 +17,7 @@ use App\Services\Meetings\MeetingReplies;
 use App\Services\MemberFeed;
 use App\Services\MemberInbox;
 use App\Support\Currencies;
+use App\Support\GroupAudience;
 use App\Support\MemberScope;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -90,7 +90,7 @@ class MemberHomeController extends Controller
         }
 
         $clubIds = $clubs->pluck('id');
-        $hallClubs = MasonicHall::hallClubsFor($clubs);
+        $groupClubs = GroupAudience::groupClubsFor($clubs);
 
         $meetings = Meeting::with('club')->whereIn('club_id', $clubIds)
             ->where('status', 'published')
@@ -105,7 +105,7 @@ class MemberHomeController extends Controller
             ->get()
             ->keyBy('meeting_id');
 
-        $events = Event::with('club')->whereIn('club_id', $clubIds->merge($hallClubs->pluck('id')))
+        $events = Event::with('club')->whereIn('club_id', $clubIds->merge($groupClubs->pluck('id')))
             ->visibleTo($user)
             ->where('status', EventStatus::Upcoming->value)
             ->where('starts_at', '>=', now())
@@ -119,7 +119,7 @@ class MemberHomeController extends Controller
             ->get()
             ->keyBy('event_id');
 
-        $owes = fn (float $amount, int $clubId): ?string => $amount > 0 ? Currencies::format($amount, $clubs->firstWhere('id', $clubId) ?? $hallClubs->firstWhere('id', $clubId)) : null;
+        $owes = fn (float $amount, int $clubId): ?string => $amount > 0 ? Currencies::format($amount, $clubs->firstWhere('id', $clubId) ?? $groupClubs->firstWhere('id', $clubId)) : null;
 
         $diningPayment = app(MeetingDiningPayment::class);
         $takesOnline = [];
@@ -147,8 +147,8 @@ class MemberHomeController extends Controller
                 'closed' => $meeting->rsvpClosed(),
                 'url' => route('member.meetings.summons', ['slug' => $club->slug, 'id' => $meeting->id], false),
             ];
-        })->concat($events->map(function (Event $event) use ($clubs, $hallClubs, $eventReplies, $owes) {
-            $club = $clubs->firstWhere('id', $event->club_id) ?? $hallClubs->firstWhere('id', $event->club_id);
+        })->concat($events->map(function (Event $event) use ($clubs, $groupClubs, $eventReplies, $owes) {
+            $club = $clubs->firstWhere('id', $event->club_id) ?? $groupClubs->firstWhere('id', $event->club_id);
             $booking = $eventReplies[$event->id] ?? null;
             $settled = ! $booking || $booking->status !== 'attending' || in_array($booking->payment_status, ['waived', 'refunded'], true);
 

@@ -7,6 +7,7 @@ use App\Models\Club;
 use App\Models\Newsletter;
 use App\Models\NewsletterSubscription;
 use App\Models\User;
+use App\Support\GroupAudience;
 use Illuminate\Support\Collection;
 
 /**
@@ -27,10 +28,10 @@ class NewsletterAudience
         $club = $newsletter->club;
         $type = $newsletter->newsletterType;
         $roles = Newsletter::rolesReached($newsletter->target_roles ?: ['member']);
-        $mandatory = ! $club->isHall() && ($type === null || $type->is_mandatory);
+        $mandatory = ! $club->isGroup() && ($type === null || $type->is_mandatory);
 
-        // A hall newsletter needs a channel, or its lodge members would have no way to opt out.
-        if ($club->isHall() && $type === null) {
+        // A group's newsletter needs a channel, or its audience would have no way to opt out.
+        if ($club->isGroup() && $type === null) {
             return collect();
         }
 
@@ -57,18 +58,18 @@ class NewsletterAudience
     }
 
     /**
-     * Active members of the club. A hall has none of its own: its members are those of the lodges that meet there
-     * (any role; the board's rows on the hall club do not count).
+     * Active members of the club. A group has none of its own: its members are those of the clubs it reaches
+     * (any role; the board's rows on the group club do not count; see GroupAudience).
      *
      * @param  list<string>|null  $roles
      * @return Collection<int, User>
      */
     private function memberUsers(Club $club, ?array $roles): Collection
     {
-        if ($club->isHall()) {
-            $lodgeIds = $club->hall?->memberClubIds() ?? collect();
+        if ($club->isGroup()) {
+            $clubIds = GroupAudience::memberClubIds($club);
 
-            return User::whereHas('clubs', fn ($q) => $q->whereIn('clubs.id', $lodgeIds)->where('club_user.status', ClubMemberStatus::Active->value))->get();
+            return User::whereHas('clubs', fn ($q) => $q->whereIn('clubs.id', $clubIds)->where('club_user.status', ClubMemberStatus::Active->value))->get();
         }
 
         $members = $club->users()->wherePivot('status', ClubMemberStatus::Active->value);

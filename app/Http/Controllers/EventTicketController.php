@@ -33,7 +33,7 @@ class EventTicketController extends Controller
         $doorUrl = URL::signedRoute('admin.events.ticket', ['clubSlug' => $club->slug, 'id' => $event->id, 'registration' => $booking->id]);
 
         return Inertia::render('Member/EventTicket', [
-            'club' => ['name' => $club->name, 'slug' => $club->slug, 'is_hall' => $club->isHall()],
+            'club' => ['name' => $club->name, 'slug' => $club->slug, 'is_group' => $club->isGroup()],
             'event' => $this->eventPayload($event),
             'booking' => $this->bookingPayload($booking),
             'qrSvg' => $this->qrSvg($doorUrl),

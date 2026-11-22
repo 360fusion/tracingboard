@@ -13,7 +13,7 @@ import Select from '@/Components/Ui/Select.vue';
 import UiIcon from '@/Components/Ui/UiIcon.vue';
 
 // A hall has no members, dues, Province or charity giving, so lodge-only parts are hidden or reworded.
-const isHall = computed(() => !!usePage().props.clubIsHall);
+const isGroup = computed(() => !!usePage().props.clubIsGroup);
 
 
 const transactionTypeOptions = [
@@ -216,7 +216,7 @@ const statementLinesFilter = defineModel('statementLinesFilter', { type: [String
         </button>
 
         <button
-          v-if="!isHall"
+          v-if="!isGroup"
           type="button"
           @click="reconSubTab = 'gift_aid'"
           :aria-current="reconSubTab === 'gift_aid' ? 'page' : undefined"

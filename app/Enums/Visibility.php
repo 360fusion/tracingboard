@@ -4,6 +4,7 @@ namespace App\Enums;
 
 use App\Models\Club;
 use App\Models\User;
+use App\Support\GroupAudience;
 
 /**
  * Who may see (or respond to) a piece of club content.
@@ -71,7 +72,7 @@ enum Visibility: string
 
         return match ($this) {
             self::Network => $viewer->activeClubIds()->isNotEmpty(),
-            self::Club => $viewer->activeClubIds()->contains($clubId) || $viewer->hallAudienceClubIds()->contains($clubId),
+            self::Club => $viewer->activeClubIds()->contains($clubId) || $viewer->groupAudienceClubIds()->contains($clubId),
         };
     }
 
@@ -84,7 +85,7 @@ enum Visibility: string
     {
         return array_map(fn (self $case): array => [
             'value' => $case->value,
-            'label' => $case === self::Club && $club?->isHall() ? 'Members of lodges that meet here' : $case->label(),
+            'label' => $case === self::Club && $club?->isGroup() ? GroupAudience::audienceLabel($club) : $case->label(),
             'description' => $case->description(),
         ], self::cases());
     }

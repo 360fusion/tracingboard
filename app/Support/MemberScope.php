@@ -5,7 +5,6 @@ namespace App\Support;
 use App\Enums\ClubMemberStatus;
 use App\Enums\ClubRole;
 use App\Models\Club;
-use App\Models\MasonicHall;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -18,7 +17,7 @@ use Illuminate\Support\Collection;
 final class MemberScope
 {
     /** @var Collection<int, Club>|null */
-    private ?Collection $hallClubs = null;
+    private ?Collection $groupClubs = null;
 
     /**
      * @param  Collection<int, Club>  $memberClubs  every club the user is an active member of
@@ -49,18 +48,18 @@ final class MemberScope
     }
 
     /**
-     * Scope for the member event pages: the same as for(), except that a hall's events are open to the members of
-     * the lodges that meet there. The hall is the scope's club only; it never joins memberClubs.
+     * Scope for the member event and post pages: the same as for(), except that a hall's or section's are open to
+     * its audience (see GroupAudience). The group is the scope's club only; it never joins memberClubs.
      */
     public static function forEvents(User $user, string $slug): self
     {
         $club = Club::where('slug', $slug)->with('clubType')->first();
 
-        if (! $club?->isHall()) {
+        if (! $club?->isGroup()) {
             return self::for($user, $slug);
         }
 
-        abort_unless($user->hallAudienceClubIds()->contains($club->id), 404);
+        abort_unless($user->groupAudienceClubIds()->contains($club->id), 404);
 
         return new self($user, self::for($user)->memberClubs, $club);
     }
@@ -111,26 +110,26 @@ final class MemberScope
     }
 
     /**
-     * Hall clubs whose "club" events reach this scope's clubs (events only: a hall has no meetings or posts for members).
+     * Hall and section clubs whose "club" events and posts reach this scope's clubs (a group has no meetings for members).
      *
      * @return Collection<int, Club>
      */
-    public function hallClubs(): Collection
+    public function groupClubs(): Collection
     {
-        return $this->hallClubs ??= MasonicHall::hallClubsFor($this->clubs());
+        return $this->groupClubs ??= GroupAudience::groupClubsFor($this->clubs());
     }
 
     /**
      * @return Collection<int, int>
      */
-    public function hallClubIds(): Collection
+    public function groupClubIds(): Collection
     {
-        return $this->hallClubs()->pluck('id');
+        return $this->groupClubs()->pluck('id');
     }
 
     public function clubFor(int $clubId): ?Club
     {
-        return $this->clubs()->firstWhere('id', $clubId) ?? $this->hallClubs()->firstWhere('id', $clubId);
+        return $this->clubs()->firstWhere('id', $clubId) ?? $this->groupClubs()->firstWhere('id', $clubId);
     }
 
     public function roleIn(int $clubId): string

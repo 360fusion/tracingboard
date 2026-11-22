@@ -34,13 +34,13 @@ class MemberSubscriptionsController extends Controller
             ->pluck('club_id')
             ->toArray();
 
-        // Halls where the user's lodges meet send to them unless they opt out, the same as their own lodges.
-        $hallIds = $user->hallAudienceClubIds()->all();
+        // Halls and sections whose audience includes the user send to them unless they opt out, the same as their own lodges.
+        $groupIds = $user->groupAudienceClubIds()->all();
 
-        $allClubIds = array_unique(array_merge($userClubIds, $subscribedClubIds, $hallIds));
-        // A hall with no channels yet has nothing to switch, so it is left out rather than shown empty.
-        $allClubs = Club::whereIn('id', $allClubIds)->with('newsletterTypes')->get()
-            ->reject(fn (Club $club) => in_array($club->id, $hallIds, true) && $club->newsletterTypes->isEmpty())
+        $allClubIds = array_unique(array_merge($userClubIds, $subscribedClubIds, $groupIds));
+        // A group with no channels yet has nothing to switch, so it is left out rather than shown empty.
+        $allClubs = Club::whereIn('id', $allClubIds)->with(['newsletterTypes', 'clubType'])->get()
+            ->reject(fn (Club $club) => in_array($club->id, $groupIds, true) && $club->newsletterTypes->isEmpty())
             ->values();
 
         // User active subscriptions
@@ -55,16 +55,16 @@ class MemberSubscriptionsController extends Controller
             ->get()
             ->keyBy(fn ($item) => $item->club_id.'_'.$item->newsletter_type_id);
 
-        $clubMatrix = $allClubs->map(function ($club) use ($userClubIds, $hallIds, $userSubscriptions, $optedOut) {
-            $isHall = in_array($club->id, $hallIds, true);
-            $isMember = in_array($club->id, $userClubIds, true) || $isHall;
+        $clubMatrix = $allClubs->map(function ($club) use ($userClubIds, $groupIds, $userSubscriptions, $optedOut) {
+            $isGroup = in_array($club->id, $groupIds, true);
+            $isMember = in_array($club->id, $userClubIds, true) || $isGroup;
 
-            $channels = $club->newsletterTypes->map(function ($type) use ($club, $isMember, $isHall, $userSubscriptions, $optedOut) {
+            $channels = $club->newsletterTypes->map(function ($type) use ($club, $isMember, $isGroup, $userSubscriptions, $optedOut) {
                 $key = $club->id.'_'.$type->id;
                 $hasExplicitSub = isset($userSubscriptions[$key]);
 
                 // Active status: mandatory channels for internal members are active by default, or if explicitly subscribed
-                $isActive = $isMember ? (($type->is_mandatory && ! $isHall) || ! isset($optedOut[$key])) : $hasExplicitSub;
+                $isActive = $isMember ? (($type->is_mandatory && ! $isGroup) || ! isset($optedOut[$key])) : $hasExplicitSub;
 
                 return [
                     'id' => $type->id,
@@ -72,7 +72,7 @@ class MemberSubscriptionsController extends Controller
                     'description' => $type->description,
                     'color' => $type->color,
                     'icon' => $type->icon,
-                    'is_mandatory' => $type->is_mandatory && $isMember && ! $isHall,
+                    'is_mandatory' => $type->is_mandatory && $isMember && ! $isGroup,
                     'is_active' => $isActive,
                 ];
             });
@@ -82,8 +82,9 @@ class MemberSubscriptionsController extends Controller
                 'name' => $club->name,
                 'slug' => $club->slug,
                 'lodge_number' => $club->lodge_number,
-                'is_member' => $isMember && ! $isHall,
-                'is_hall' => $isHall,
+                'is_member' => $isMember && ! $isGroup,
+                'is_hall' => $isGroup && $club->isHall(),
+                'is_group' => $isGroup,
                 'channels' => $channels,
             ];
         });
@@ -129,15 +130,15 @@ class MemberSubscriptionsController extends Controller
             ->where('user_id', $user->id)
             ->first();
 
-        // A hall is only theirs to manage when one of their lodges meets there (or they already have a row on it).
-        if ($club->isHall()) {
-            $isMember = $user->hallAudienceClubIds()->contains($club->id);
+        // A group is only theirs to manage when it reaches one of their lodges (or they already have a row on it).
+        if ($club->isGroup()) {
+            $isMember = $user->groupAudienceClubIds()->contains($club->id);
             abort_unless($isMember || $existing, 404);
         } else {
             $isMember = $user->clubs()->notGroups()->where('clubs.id', $club->id)->exists();
         }
 
-        if ($isMember && $type->is_mandatory && ! $club->isHall()) {
+        if ($isMember && $type->is_mandatory && ! $club->isGroup()) {
             return redirect()->back()->withErrors(['channel' => 'Official notices cannot be switched off.']);
         }
 

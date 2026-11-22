@@ -153,7 +153,7 @@ class NewsletterAdminController extends Controller
             'club' => $club,
             'newsletter' => $newsletter,
             'types' => $types,
-            'isHall' => $club->isHall(),
+            'isGroup' => $club->isGroup(),
             'posts' => $posts,
             'pickerApprovedUpdates' => $pickerApprovedUpdates,
             'pickerMeetings' => $pickerMeetings,

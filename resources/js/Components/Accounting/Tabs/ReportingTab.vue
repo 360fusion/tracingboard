@@ -26,7 +26,7 @@ import UiIcon from '@/Components/Ui/UiIcon.vue';
 import { formatMoney } from '@/Utils/currency';
 
 // A hall has no members, dues, Province or charity giving, so lodge-only parts are hidden or reworded.
-const isHall = computed(() => !!usePage().props.clubIsHall);
+const isGroup = computed(() => !!usePage().props.clubIsGroup);
 
 
 // Shared looks for the report gallery: a card per report, the preset range buttons, and download links styled as kit buttons.
@@ -249,7 +249,7 @@ defineProps({
         </button>
 
         <!-- Due to Province -->
-        <button v-if="!isHall" type="button" @click="navigateTo('reporting', 'provincial_due')" :class="reportCardClass">
+        <button v-if="!isGroup" type="button" @click="navigateTo('reporting', 'provincial_due')" :class="reportCardClass">
           <div class="flex items-center justify-between">
             <span class="text-slate-500 dark:text-slate-400 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400"><UiIcon name="building" :size="20" /></span>
             <Badge>Province</Badge>
@@ -272,7 +272,7 @@ defineProps({
           </div>
           <div>
             <h4 class="text-sm font-semibold text-slate-900 dark:text-white group-hover:text-blue-700 dark:group-hover:text-blue-300">Aged receivables</h4>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">{{ isHall ? 'Outstanding invoices grouped by aging buckets.' : 'Outstanding member dues & invoices grouped by aging buckets.' }}</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">{{ isGroup ? 'Outstanding invoices grouped by aging buckets.' : 'Outstanding member dues & invoices grouped by aging buckets.' }}</p>
           </div>
           <div class="pt-2 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2 text-xs font-medium">
             <span class="text-slate-600 dark:text-slate-300 tabular-nums">Total: {{ formatMoney(reports.aged_receivables ? reports.aged_receivables.total : 0) }}</span>
@@ -532,7 +532,7 @@ defineProps({
         </div>
 
         <!-- Report: Due to Province -->
-        <ProvincialDueReport v-if="selectedReport === 'provincial_due' && !isHall" :members="members" :reports="reports" />
+        <ProvincialDueReport v-if="selectedReport === 'provincial_due' && !isGroup" :members="members" :reports="reports" />
 
         <!-- Report: VAT Return -->
         <VatReturnReport v-if="selectedReport === 'vat_return'" :club="club" :reports="reports" />

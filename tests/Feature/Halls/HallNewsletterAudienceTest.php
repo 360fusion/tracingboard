@@ -174,6 +174,6 @@ class HallNewsletterAudienceTest extends TestCase
     public function test_hall_newsletter_form_flags_the_club_as_a_hall(): void
     {
         $this->actingAs($this->admin)->get(route('admin.newsletters.create', ['clubSlug' => $this->hallClub->slug]))
-            ->assertInertia(fn (Assert $page) => $page->where('isHall', true));
+            ->assertInertia(fn (Assert $page) => $page->where('isGroup', true));
     }
 }

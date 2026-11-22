@@ -41,8 +41,8 @@ class EventOrganiserBookingController extends Controller
         // "!" is the escape character, so a typed % or _ is matched literally.
         $like = '%'.str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $term).'%';
 
-        if ($club->isHall()) {
-            return $this->hallSearch($event, $club, $like);
+        if ($club->isGroup()) {
+            return $this->groupSearch($event, $club, $like);
         }
 
         $members = $club->users()
@@ -72,11 +72,11 @@ class EventOrganiserBookingController extends Controller
     }
 
     /**
-     * A hall has no members of its own: only people who have booked one of its events before can be found.
+     * A group has no members of its own: only people who have booked one of its events before can be found.
      */
-    private function hallSearch(Event $event, Club $club, string $like): JsonResponse
+    private function groupSearch(Event $event, Club $club, string $like): JsonResponse
     {
-        $users = EventRegistrationService::hallBookers($club)
+        $users = EventRegistrationService::groupBookers($club)
             ->where(fn ($q) => $q->whereRaw("users.name LIKE ? ESCAPE '!'", [$like])
                 ->orWhereRaw("users.email LIKE ? ESCAPE '!'", [$like]))
             ->orderBy('users.name')
@@ -146,13 +146,13 @@ class EventOrganiserBookingController extends Controller
         $member = null;
 
         if (! empty($validated['member_id'])) {
-            // A hall has no members: only people who booked there before count, and a missing id gives the same answer as a non-booker.
-            $member = $club->isHall()
-                ? EventRegistrationService::hallBookers($club)->whereKey($validated['member_id'])->first()
+            // A group has no members: only people who booked there before count, and a missing id gives the same answer as a non-booker.
+            $member = $club->isGroup()
+                ? EventRegistrationService::groupBookers($club)->whereKey($validated['member_id'])->first()
                 : $club->users()->wherePivot('status', ClubMemberStatus::Active->value)->where('users.id', $validated['member_id'])->first();
 
             if (! $member) {
-                throw ValidationException::withMessages(['member_id' => $club->isHall() ? 'That person has not booked an event at this hall before.' : 'That person is not an active member of this club.']);
+                throw ValidationException::withMessages(['member_id' => $club->isGroup() ? 'That person has not booked an event here before.' : 'That person is not an active member of this club.']);
             }
         }
 

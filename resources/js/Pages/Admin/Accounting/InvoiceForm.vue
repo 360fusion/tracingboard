@@ -16,7 +16,7 @@ import { currencySymbol, formatMoney } from '@/Utils/currency';
 import { localDate } from '@/Utils/localDateTime';
 
 // A hall has no members or dues, so its invoices are worded for hire fees.
-const isHall = computed(() => !!usePage().props.clubIsHall);
+const isGroup = computed(() => !!usePage().props.clubIsGroup);
 
 const props = defineProps({
   club: { type: Object, required: true },
@@ -90,7 +90,7 @@ const title = computed(() => (isEdit.value ? `Edit invoice ${props.invoice.invoi
     <div class="mx-auto max-w-3xl space-y-6">
       <PageHeader
         :title="title"
-        :description="isEdit ? 'Change who it is for, what it is for, the amount or the status.' : (isHall ? 'Ask someone to pay a hire fee or another charge.' : 'Ask a member to pay dues, fees or another charge.')"
+        :description="isEdit ? 'Change who it is for, what it is for, the amount or the status.' : (isGroup ? 'Ask someone to pay a hire fee or another charge.' : 'Ask a member to pay dues, fees or another charge.')"
         :breadcrumbs="[
           { label: 'Accounting', href: route('admin.accounting.index', club.slug) },
           { label: 'Sales', href: salesUrl },

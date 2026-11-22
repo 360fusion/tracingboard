@@ -16,8 +16,8 @@ class AnnualReturnOfMembersController extends Controller
     public function __invoke(Request $request, string $clubSlug, AnnualReturnOfMembers $return): Response
     {
         $club = $this->findClub($clubSlug);
-        // A hall has no members to return to its Province.
-        abort_if($club->isHall(), 404);
+        // A group has no members to return to its Province.
+        abort_if($club->isGroup(), 404);
         $current = $club->financialYearFor(now());
         $year = min($current, max(2000, (int) $request->query('year', (string) $current)));
         $data = $return->build($club, $year) + ['currentYear' => $current];

@@ -88,6 +88,8 @@ class HandleInertiaRequests extends Middleware
             'currency' => fn () => $this->currencyFor($request),
             // Whether the club named in the URL is a hall, so the admin menu is the hall's for anyone viewing it (superadmins too).
             'clubIsHall' => fn () => (bool) $this->urlClub($request)?->isHall(),
+            // Whether it is any group (hall, province group or section): a club with no members of its own.
+            'clubIsGroup' => fn () => (bool) $this->urlClub($request)?->isGroup(),
             // The lodge site's links drop their /site/{club} prefix when it is served on the lodge's own domain.
             'onClubDomain' => $request->attributes->has('club_domain_uri'),
             // Set while a page is rendered for the club's static website (App\Services\StaticSite\StaticSiteBuilder).
@@ -113,8 +115,9 @@ class HandleInertiaRequests extends Middleware
                     'number' => $c->lodge_number,
                     'type_name' => $c->clubType?->name,
                     'is_hall' => $c->isHall(),
-                    // A hall has no member area: switching to it opens its admin where this person starts.
-                    'landing_url' => $c->isHall() ? HallClubs::landingUrlFromPivot($c, $user) : null,
+                    'is_group' => $c->isGroup(),
+                    // A group has no member area: switching to it opens its admin where this person starts.
+                    'landing_url' => $c->isGroup() ? HallClubs::landingUrlFromPivot($c, $user) : null,
                     'role' => $c->pivot->role ?? 'member',
                     'member_number' => $c->pivot->member_number ?? '',
                     'status' => $c->pivot->status ?? 'active',

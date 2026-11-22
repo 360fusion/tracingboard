@@ -85,7 +85,7 @@ class BankReconciliationWorkspace extends Component
 
         $this->selectedTransactionId = $tx->id;
         // A hall has no member dues, so money in starts on a ledger account.
-        $this->manualAllocationType = $tx->amount > 0 ? ($club->isHall() ? 'ledger_account' : 'member_subscription') : 'supplier_bill';
+        $this->manualAllocationType = $tx->amount > 0 ? ($club->isGroup() ? 'ledger_account' : 'member_subscription') : 'supplier_bill';
         $this->manualSearch = '';
         $this->manualNominalCode = (string) $this->nominalAccountsFor($tx)->first()?->code;
         $this->showManualDrawer = true;
