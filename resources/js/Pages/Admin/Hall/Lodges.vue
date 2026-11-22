@@ -10,6 +10,7 @@ defineProps({
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
+// Mirrors SectionChapters::meets() in PHP; keep the two wordings the same.
 function pattern(s) {
   const months = (s.months ?? []).map(Number);
   const when = months.length === 12 ? 'every month' : months.map(m => MONTHS[m - 1]).join(', ');

@@ -119,7 +119,11 @@ class PublicSiteController extends Controller
     public function chapters(string $clubSlug): SymfonyResponse|Response
     {
         $club = Club::where('slug', $clubSlug)->with(['clubType', 'membershipPlans', 'donations.contributions'])->firstOrFail();
-        abort_unless($club->isProvinceSection(), 404);
+
+        // A real page slugged "chapters" (or any club that is not a section) keeps the address.
+        if (! $club->isProvinceSection() || Page::where('club_id', $club->id)->live()->where('slug', 'chapters')->exists()) {
+            return $this->showPage($clubSlug, 'chapters');
+        }
 
         $page = new Page(['club_id' => $club->id, 'title' => 'Chapters', 'slug' => 'chapters', 'is_published' => true, 'is_members_only' => false, 'blocks' => []]);
 

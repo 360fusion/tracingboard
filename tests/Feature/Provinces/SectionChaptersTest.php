@@ -6,6 +6,7 @@ use App\Models\Club;
 use App\Models\ClubType;
 use App\Models\GrandLodge;
 use App\Models\Lodge;
+use App\Models\Page;
 use App\Models\Province;
 use App\Models\User;
 use App\Services\Provinces\SectionChapters;
@@ -125,5 +126,35 @@ class SectionChaptersTest extends TestCase
         $this->get('/site/'.$this->group->slug)
             ->assertOk()
             ->assertInertia(fn ($page) => $page->where('sections.0.name', 'Durham Rose Croix')->where('sections.0.order', 'Rose Croix'));
+    }
+
+    public function test_real_pages_slugged_chapters_are_not_hidden(): void
+    {
+        $lodge = Club::factory()->create();
+        $lodge->ensureDefaultPages();
+        $make = fn (Club $club) => Page::create(['club_id' => $club->id, 'title' => 'Our chapters', 'slug' => 'chapters', 'is_published' => true, 'blocks' => []]);
+        $make($lodge);
+        $make($this->section);
+
+        foreach ([$lodge, $this->section] as $club) {
+            $this->get(route('public.site.chapters', ['clubSlug' => $club->slug]))
+                ->assertOk()->assertInertia(fn ($page) => $page->where('page.title', 'Our chapters')->missing('chapters'));
+        }
+    }
+
+    public function test_group_page_named_like_an_order_wins_over_the_redirect(): void
+    {
+        $this->group->ensureDefaultPages();
+        Page::create(['club_id' => $this->group->id, 'title' => 'Rose Croix news', 'slug' => 'rose-croix', 'is_published' => true, 'blocks' => []]);
+
+        $this->get('/site/'.$this->group->slug.'/rose-croix')->assertOk()->assertInertia(fn ($page) => $page->where('page.title', 'Rose Croix news'));
+    }
+
+    public function test_club_with_an_unlisted_directory_row_still_appears(): void
+    {
+        $club = Club::factory()->create(['name' => 'Quiet Chapter', 'club_type_id' => $this->roseCroix->id, 'province_id' => $this->durham->id]);
+        $this->lodge($this->durham, $this->roseCroix, 'Quiet Chapter', ['club_id' => $club->id, 'status' => 'inactive']);
+
+        $this->assertSame(['Quiet Chapter'], SectionChapters::for($this->section)->pluck('name')->all());
     }
 }

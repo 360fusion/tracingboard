@@ -21,7 +21,9 @@ class SectionChapters
     {
         $match = ['province_id' => $section->province_id, 'club_type_id' => $section->order_club_type_id];
 
-        $listed = Lodge::listed()->where($match)->with(['masonicHall', 'schedules', 'club', 'clubType'])->get()->map(fn (Lodge $lodge) => [
+        $lodges = Lodge::listed()->where($match)->with(['masonicHall', 'schedules', 'club', 'clubType'])->get();
+
+        $listed = $lodges->map(fn (Lodge $lodge) => [
             'name' => $lodge->displayName(),
             'number' => $lodge->number,
             'on_platform' => $lodge->club !== null,
@@ -31,7 +33,7 @@ class SectionChapters
             'meets' => self::meets($lodge->schedules) ?? $lodge->meets_text,
         ]);
 
-        $managed = Club::notGroups()->where($match)->whereDoesntHave('lodge')->with('masonicHall')->get()->map(fn (Club $club) => [
+        $managed = Club::notGroups()->where($match)->whereNotIn('id', $lodges->pluck('club_id')->filter())->with('masonicHall')->get()->map(fn (Club $club) => [
             'name' => $club->name,
             'number' => $club->lodge_number,
             'on_platform' => true,
@@ -45,6 +47,8 @@ class SectionChapters
     }
 
     /**
+     * Mirrors pattern() in resources/js/Pages/Admin/Hall/Lodges.vue; keep the two wordings the same.
+     *
      * @param  Collection<int, LodgeSchedule>  $schedules
      */
     private static function meets(Collection $schedules): ?string
