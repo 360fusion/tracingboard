@@ -193,7 +193,7 @@ const updateMemberRole = (userId, newRole) => {
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div class="flex flex-wrap items-center gap-3">
-              <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Club settings</h2>
+              <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Settings</h2>
               <Badge variant="info">{{ club.slug }}</Badge>
             </div>
             <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Configure policies, feature modules, branding, automated notifications, and permission matrices for your club.</p>
@@ -291,7 +291,7 @@ const updateMemberRole = (userId, newRole) => {
           <UiIcon name="check" :size="14" />
         </span>
         <div>
-          <div class="text-sm font-semibold text-white">Club settings saved</div>
+          <div class="text-sm font-semibold text-white">Settings saved</div>
           <div class="text-xs text-emerald-200">Your organization configuration has been updated.</div>
         </div>
       </div>

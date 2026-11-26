@@ -493,8 +493,15 @@ class ClubTypeSeeder extends Seeder
             [
                 'name' => 'Invitation to sign in',
                 'subject' => '{{club_name}} has invited you to Tracing Board',
-                'body_html' => '<p>Dear {{member_name}},</p><p>{{club_name}} has invited you to see its meetings, reply to summonses and book dinners online.</p><p><a href="{{invite_url}}" style="display:inline-block;padding:10px 20px;background:#2563eb;color:#ffffff;text-decoration:none;border-radius:6px;font-weight:bold;">Choose your password</a></p><p>This link works for {{expiry_days}} days.</p>',
-                'available_placeholders' => ['member_name', 'club_name', 'invite_url', 'expiry_days'],
+                'body_html' => '<p>Dear {{member_name}},</p>'
+                    .'<p>{{inviter_name}} has invited you to join <strong>{{club_name}}</strong> on Tracing Board, as {{role_name}}.</p>'
+                    .'<p>With your account you can:</p>{{what_you_can_do}}'
+                    .'<p>To get started, choose a password:</p>'
+                    .'<p><a href="{{invite_url}}" style="display:inline-block;padding:10px 20px;background:#2563eb;color:#ffffff;text-decoration:none;border-radius:6px;font-weight:bold;">Choose your password</a></p>'
+                    .'<p>This link works for {{expiry_days}} days. If it has run out, ask whoever invited you to send a new one.</p>'
+                    .'<p>After that, sign in at <a href="{{sign_in_url}}">{{sign_in_url}}</a> with this email address, {{email}}.</p>'
+                    .'<p style="color:#64748b;font-size:13px;">If you were not expecting this email, you can ignore it.</p>',
+                'available_placeholders' => ['member_name', 'club_name', 'invite_url', 'expiry_days', 'inviter_name', 'role_name', 'what_you_can_do', 'email', 'sign_in_url'],
             ]
         );
 

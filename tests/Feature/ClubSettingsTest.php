@@ -76,7 +76,7 @@ class ClubSettingsTest extends TestCase
             ->put(route('admin.settings.update', ['clubSlug' => $this->club->slug]), $payload);
 
         $response->assertRedirect();
-        $response->assertSessionHas('success', 'Club settings updated successfully.');
+        $response->assertSessionHas('success', 'Settings updated successfully.');
 
         $this->club->refresh();
         $this->assertEquals('updated@oxfordrowing.co.uk', $this->club->settings['contact_email']);

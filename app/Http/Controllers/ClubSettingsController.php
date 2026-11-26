@@ -132,7 +132,7 @@ class ClubSettingsController extends Controller
         $club->settings = $mergedSettings;
         $club->save();
 
-        return redirect()->back()->with('success', 'Club settings updated successfully.');
+        return redirect()->back()->with('success', 'Settings updated successfully.');
     }
 
     /**

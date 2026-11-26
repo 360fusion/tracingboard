@@ -37,6 +37,26 @@ class SuperAdminHallBoardTest extends TestCase
         $this->assertNull($pivot->committee_role);
     }
 
+    public function test_hall_invitation_email_is_worded_for_a_hall_board(): void
+    {
+        Mail::fake();
+        $migration = require database_path('migrations/2026_11_26_111552_improve_account_invitation_email.php');
+        DB::table('default_email_templates')->where('template_key', 'account_invitation')->update(['body_html' => $migration::NEW_BODY]);
+        $hall = MasonicHall::factory()->create();
+
+        $this->postBoard(User::factory()->create(['is_super_admin' => true, 'name' => 'Sam Super']), $hall);
+
+        Mail::assertQueued(MemberInvitationMail::class, function (MemberInvitationMail $mail) {
+            $html = $mail->render();
+
+            return str_contains($html, 'Sam Super has invited you')
+                && str_contains($html, 'as an owner')
+                && str_contains($html, 'Invite the rest of the board')
+                && str_contains($html, 'olive@example.com')
+                && ! str_contains($html, 'summonses');
+        });
+    }
+
     public function test_second_call_invites_into_the_same_club_and_creates_no_new_one(): void
     {
         Mail::fake();

@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Enums\ClubRole;
 use App\Models\Club;
 use App\Models\User;
 
@@ -34,6 +35,9 @@ class MemberInvitationMail extends EventTemplatedMail
 
     protected function values(): array
     {
+        $pivot = $this->club->users()->whereKey($this->user->id)->first()?->pivot;
+        $role = $pivot->role ?? ClubRole::Member->value;
+
         return [
             'text' => [
                 'member_name' => $this->user->name,
@@ -41,9 +45,67 @@ class MemberInvitationMail extends EventTemplatedMail
                 'invite_url' => $this->acceptUrl,
                 'expiry_days' => $this->club->inviteExpirationDays(),
                 'inviter_name' => $this->inviter->name ?? $this->club->name,
+                'role_name' => $pivot?->committee_role ?: self::roleName($role),
+                'email' => $this->user->email,
+                'sign_in_url' => route('login'),
             ],
-            'html' => [],
+            'html' => [
+                'what_you_can_do' => '<ul>'.collect($this->whatYouCanDo($role))->map(fn (string $line) => '<li>'.e($line).'</li>')->implode('').'</ul>',
+            ],
         ];
+    }
+
+    private static function roleName(string $role): string
+    {
+        return match ($role) {
+            ClubRole::Owner->value => 'an owner',
+            ClubRole::Admin->value => 'an administrator',
+            ClubRole::Treasurer->value => 'Treasurer',
+            ClubRole::Coach->value, ClubRole::Secretary->value => 'Secretary',
+            ClubRole::Examiner->value => 'examiner or auditor',
+            ClubRole::Visitor->value => 'a visitor',
+            default => 'a member',
+        };
+    }
+
+    /**
+     * What the account lets this person do, in the words of the kind of club and their role.
+     *
+     * @return array<int, string>
+     */
+    private function whatYouCanDo(string $role): array
+    {
+        $runsIt = in_array($role, [ClubRole::Owner->value, ClubRole::Admin->value], true);
+
+        if ($this->club->isHall()) {
+            return array_filter([
+                "Keep the hall's details and its page in the lodge directory up to date",
+                'Put on events for the lodges that meet at the hall, or for the public, and take bookings online',
+                "Run the hall's website and send newsletters to the lodges' members",
+                $runsIt || $role === ClubRole::Treasurer->value ? "Keep the hall's accounts" : null,
+                $runsIt ? 'Invite the rest of the board and choose what each person can do' : null,
+            ]);
+        }
+
+        if ($this->club->isGroup()) {
+            return array_filter([
+                "Keep {$this->club->name}'s pages and events up to date",
+                $runsIt ? 'Invite others to help and choose what each person can do' : null,
+            ]);
+        }
+
+        return array_filter([
+            'See upcoming meetings and reply to summonses',
+            'Book dinners and events, and pay online where the lodge allows it',
+            'Keep your own contact details up to date',
+            match ($role) {
+                ClubRole::Owner->value, ClubRole::Admin->value => 'Help run the lodge: members, meetings, events and the website',
+                ClubRole::Treasurer->value => "Keep the lodge's accounts, dues and bank records",
+                ClubRole::Coach->value, ClubRole::Secretary->value => 'Send summonses and keep meetings and members\' records',
+                ClubRole::Examiner->value => "Look over the lodge's accounts",
+                default => null,
+            },
+        ]);
     }
 
     protected function fallbackSubject(): string
