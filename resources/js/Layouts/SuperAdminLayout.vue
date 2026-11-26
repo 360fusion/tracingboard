@@ -9,6 +9,7 @@ import UiIcon from '@/Components/Ui/UiIcon.vue';
 const platformLinks = [
   { route: 'superadmin.users.index', path: '/superadmin/users', icon: 'users', label: 'Users' },
   { route: 'superadmin.clubs.index', path: '/superadmin/clubs', icon: 'building', label: 'Clubs and plans' },
+  { route: 'superadmin.invitations.index', path: '/superadmin/invitations', icon: 'user-add', label: 'Invitations' },
   { route: 'superadmin.stripe_events.index', path: '/superadmin/stripe-events', icon: 'receipt', label: 'Stripe events' },
   { route: 'superadmin.health.index', path: '/superadmin/system-health', icon: 'shield', label: 'System health' },
 ];

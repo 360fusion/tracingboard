@@ -116,7 +116,7 @@ class SuperAdminLodgeController extends Controller
                 'website_url' => $lodge->website_url,
                 'description' => $lodge->description,
                 'is_managed' => $lodge->isManaged(),
-                'club' => $lodge->club ? ['name' => $lodge->club->name, 'slug' => $lodge->club->slug] : null,
+                'club' => $lodge->club ? ['id' => $lodge->club->id, 'name' => $lodge->club->name, 'slug' => $lodge->club->slug] : null,
                 'schedule' => $lodge->schedules->first()?->only(['occurrence', 'day_of_week', 'months', 'start_time', 'source']),
                 'schedules' => $lodge->schedules->map->only(['occurrence', 'day_of_week', 'months', 'start_time'])->values(),
                 'sources' => $lodge->sources->sortBy(fn ($source) => LodgeSource::TIERS[$source->kind] ?? 3)->map(fn ($source) => [

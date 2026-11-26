@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\PlatformPaymentsAdminController;
+use App\Http\Controllers\SuperAdminAccountController;
 use App\Http\Controllers\SuperAdminAuditLogController;
 use App\Http\Controllers\SuperAdminClubTypeController;
 use App\Http\Controllers\SuperAdminContactMessageController;
@@ -25,6 +26,12 @@ Route::middleware(['auth', EnsureUserIsSuperAdmin::class, RecordSuperAdminAction
     Route::get('/superadmin/page-speed', [SuperAdminPageSpeedController::class, 'index'])->name('superadmin.page_speed.index');
     Route::get('/superadmin', [SuperAdminController::class, 'dashboard'])->name('superadmin.dashboard');
     Route::get('/superadmin/users', [SuperAdminPlatformController::class, 'users'])->name('superadmin.users.index');
+    Route::get('/superadmin/account-setup/search', [SuperAdminAccountController::class, 'search'])->name('superadmin.accounts.search');
+    Route::get('/superadmin/lodges/{lodge}', [SuperAdminAccountController::class, 'lodge'])->whereNumber('lodge')->name('superadmin.lodges.show');
+    Route::get('/superadmin/accounts/{club}', [SuperAdminAccountController::class, 'show'])->name('superadmin.accounts.show');
+    Route::get('/superadmin/invitations', [SuperAdminAccountController::class, 'invitations'])->name('superadmin.invitations.index');
+    Route::post('/superadmin/invitations/{club}/{user}/resend', [SuperAdminAccountController::class, 'resend'])->name('superadmin.invitations.resend');
+    Route::delete('/superadmin/invitations/{club}/{user}', [SuperAdminAccountController::class, 'cancel'])->name('superadmin.invitations.cancel');
     Route::get('/superadmin/clubs', [SuperAdminPlatformController::class, 'clubs'])->name('superadmin.clubs.index');
     Route::get('/superadmin/stripe-events', [SuperAdminPlatformController::class, 'stripeEvents'])->name('superadmin.stripe_events.index');
     Route::get('/superadmin/system-health', [SuperAdminPlatformController::class, 'health'])->name('superadmin.health.index');

@@ -221,7 +221,8 @@ const labelClass = 'block text-xs font-medium text-slate-700 mb-1.5 dark:text-sl
                         <tbody class="divide-y divide-slate-200 text-xs dark:divide-slate-800">
                             <tr v-for="l in lodges.data" :key="l.id" class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
                                 <td class="py-3 px-4 font-semibold text-slate-900 dark:text-white">
-                                    {{ l.display_name }}<span v-if="l.number" class="font-normal text-slate-500 dark:text-slate-400"> · No. {{ l.number }}</span>
+                                    <Link v-if="full" :href="route('superadmin.lodges.show', l.id)" class="text-blue-600 hover:underline dark:text-blue-400">{{ l.display_name }}</Link>
+                                    <template v-else>{{ l.display_name }}</template><span v-if="l.number" class="font-normal text-slate-500 dark:text-slate-400"> · No. {{ l.number }}</span>
                                     <Badge v-if="l.is_managed" variant="success" class="ml-1">Managed</Badge>
                                     <Badge v-if="l.status !== 'active'" variant="warning" class="ml-1">{{ l.status }}</Badge>
                                 </td>

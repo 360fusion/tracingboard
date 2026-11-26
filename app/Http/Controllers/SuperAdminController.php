@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Domains\ClubAccounting\Models\CharityGrant;
+use App\Enums\ClubMemberStatus;
+use App\Enums\ClubRole;
 use App\Models\Club;
 use App\Models\ClubType;
 use App\Models\Meeting;
@@ -35,7 +37,7 @@ class SuperAdminController extends Controller
             'count' => $ct->clubs_count,
         ]);
 
-        $clubs = Club::with(['clubType', 'province'])
+        $clubs = Club::with(['clubType', 'province', 'users' => fn ($q) => $q->wherePivotIn('role', [ClubRole::Owner->value, ClubRole::Admin->value])->wherePivotIn('status', [ClubMemberStatus::Active->value, ClubMemberStatus::Pending->value])])
             ->withCount('users')
             ->orderBy('created_at', 'desc')
             ->get()
@@ -48,6 +50,11 @@ class SuperAdminController extends Controller
                 'province' => $c->province->name ?? '—',
                 'members_count' => $c->users_count,
                 'created_at' => $c->created_at ? $c->created_at->format('d M Y') : '—',
+                'people' => $c->users->map(fn (User $u) => [
+                    'name' => $u->name,
+                    'role' => SuperAdminAccountController::roleLabel($u->pivot->role),
+                    'status' => SuperAdminAccountController::status($u->pivot, $c->inviteExpirationDays()),
+                ])->values(),
             ]);
 
         return Inertia::render('SuperAdmin/Dashboard', [
@@ -59,6 +66,7 @@ class SuperAdminController extends Controller
             ],
             'clubsByType' => $clubsByType,
             'clubs' => $clubs,
+            'setUpTypes' => SuperAdminAccountController::setUpTypes(),
         ]);
     }
 
