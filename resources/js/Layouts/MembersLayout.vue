@@ -172,14 +172,14 @@ provide('layoutHasHeading', !props.ownHeading);
                 </div>
 
                 <!-- Phones (the app, and the web below md) use the bottom tabs instead; the other pages are in the account menu. -->
-                <nav v-if="!isNativeApp" class="mx-auto hidden max-w-6xl overflow-x-auto px-4 sm:px-6 md:block" aria-label="Members">
+                <nav v-if="!isNativeApp" class="mx-auto hidden max-w-6xl overflow-x-auto overflow-y-hidden px-4 sm:px-6 md:block" aria-label="Members">
                     <ul class="flex gap-1">
                         <li v-for="item in nav" :key="item.key">
                             <Link
                                 :href="item.href"
                                 prefetch
                                 :aria-current="activeTab === item.key ? 'page' : undefined"
-                                :class="['-mb-px block whitespace-nowrap border-b-2 px-3 py-2.5 text-sm font-medium transition-colors', activeTab === item.key ? (lodge ? 'border-white text-white' : 'border-blue-400 text-white') : (lodge ? 'border-transparent text-white/70 hover:text-white' : 'border-transparent text-slate-400 hover:text-white')]"
+                                :class="['block whitespace-nowrap border-b-2 px-3 py-2.5 text-sm font-medium transition-colors', activeTab === item.key ? (lodge ? 'border-white text-white' : 'border-blue-400 text-white') : (lodge ? 'border-transparent text-white/70 hover:text-white' : 'border-transparent text-slate-400 hover:text-white')]"
                             >
                                 {{ item.label }}
                             </Link>
