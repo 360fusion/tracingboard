@@ -1,5 +1,5 @@
 <script setup>
-import { reactive } from 'vue';
+import { reactive, ref } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import SuperAdminLayout from '@/Layouts/SuperAdminLayout.vue';
 import PageHeader from '@/Components/Ui/PageHeader.vue';
@@ -9,11 +9,16 @@ import Button from '@/Components/Ui/Button.vue';
 import Input from '@/Components/Ui/Input.vue';
 import Select from '@/Components/Ui/Select.vue';
 import Pagination from '@/Components/Ui/Pagination.vue';
+import UiIcon from '@/Components/Ui/UiIcon.vue';
+import SetUpAccountDialog from '@/Components/SuperAdmin/SetUpAccountDialog.vue';
 
 const props = defineProps({
     people: { type: Object, required: true },
     filters: { type: Object, required: true },
+    setUpTypes: { type: Array, default: () => [] },
 });
+
+const setUpOpen = ref(false);
 
 const STATUS = { invited: ['warning', 'Invited'], expired: ['danger', 'Invite expired'], active: ['success', 'Active'] };
 const STATUS_OPTIONS = [
@@ -42,7 +47,14 @@ function cancel(person) {
 <template>
     <SuperAdminLayout title="Invitations">
         <div class="space-y-6">
-            <PageHeader title="Invitations" description="Everyone who runs an account: who has been invited, who has signed in. Resend an invitation or cancel one that is no longer wanted." />
+            <PageHeader title="Invitations" description="Everyone who runs an account: who has been invited, who has signed in. Resend an invitation or cancel one that is no longer wanted.">
+                <template #actions>
+                    <Button @click="setUpOpen = true">
+                        <template #icon><UiIcon name="user-add" /></template>
+                        Set up account
+                    </Button>
+                </template>
+            </PageHeader>
 
             <Card padding="none" class="overflow-hidden">
                 <form class="flex flex-wrap items-end gap-3 border-b border-slate-200 p-4 dark:border-slate-800" @submit.prevent="applyFilters">
@@ -95,5 +107,7 @@ function cancel(person) {
                 </div>
             </Card>
         </div>
+
+        <SetUpAccountDialog v-model:open="setUpOpen" :set-up-types="setUpTypes" />
     </SuperAdminLayout>
 </template>

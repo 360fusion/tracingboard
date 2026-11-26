@@ -48,7 +48,7 @@ class SuperAdminAccountTest extends TestCase
         $club->users()->attach(User::factory()->create(['name' => 'Alan Active'])->id, ['role' => 'admin', 'status' => 'active']);
 
         $this->actingAs($this->superAdmin)->get(route('superadmin.invitations.index'))
-            ->assertInertia(fn (AssertableInertia $page) => $page->component('SuperAdmin/Invitations/Index')
+            ->assertInertia(fn (AssertableInertia $page) => $page->component('SuperAdmin/Invitations/Index')->has('setUpTypes')
                 ->has('people.data', 2)
                 ->where('people.data', fn ($rows) => collect($rows)->pluck('status', 'name')->all() === ['Ivy Invited' => 'invited', 'Alan Active' => 'active']));
 

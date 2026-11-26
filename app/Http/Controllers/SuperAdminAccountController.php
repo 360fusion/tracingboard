@@ -100,6 +100,7 @@ class SuperAdminAccountController extends Controller
                 'invited_by' => $row->inviter_name,
             ]),
             'filters' => ['q' => $search, 'status' => $filters['status'] ?? ''],
+            'setUpTypes' => self::setUpTypes(),
         ]);
     }
 
