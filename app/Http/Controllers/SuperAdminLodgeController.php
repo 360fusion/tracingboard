@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Domains\ClubAccounting\Services\MemberInvitationException;
+use App\Enums\ClubRole;
 use App\Http\Requests\SuperAdminLodge\IndexSuperAdminLodgeRequest;
 use App\Http\Requests\SuperAdminLodge\LinkClubRequest;
 use App\Models\Club;
@@ -11,12 +13,15 @@ use App\Models\LodgeSchedule;
 use App\Models\LodgeSource;
 use App\Models\MasonicHall;
 use App\Models\Province;
+use App\Services\Halls\HallBoard;
 use App\Services\Lodges\LodgeClaimService;
 use App\Support\Months;
+use DomainException;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -184,6 +189,26 @@ class SuperAdminLodgeController extends Controller
         $claims->link($lodge, Club::findOrFail($validated['club_id']));
 
         return back()->with('success', "'{$lodge->displayName()}' is now linked to its club.");
+    }
+
+    /**
+     * Set up a club account for a listing (if it has none) and invite someone as an owner of it.
+     */
+    public function setUpAccount(Request $request, int $id, LodgeClaimService $claims, HallBoard $people): RedirectResponse
+    {
+        $lodge = Lodge::findOrFail($id);
+        $data = $request->validate(['name' => 'required|string|max:255', 'email' => 'required|email|max:255']);
+
+        try {
+            DB::transaction(function () use ($lodge, $data, $claims, $people, $request) {
+                $club = $lodge->club ?? $claims->createClub($lodge);
+                $people->invite($club, $data['name'], $data['email'], '', ClubRole::Owner->value, $request->user());
+            });
+        } catch (DomainException|MemberInvitationException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return back()->with('success', "Invitation sent to {$data['email']}.");
     }
 
     public function unlinkClub(Request $request, int $id, LodgeClaimService $claims): RedirectResponse

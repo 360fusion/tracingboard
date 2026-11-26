@@ -110,23 +110,10 @@ class LodgeClaimService
     {
         $club = DB::transaction(function () use ($claim, $admin, $note) {
             $lodge = $this->lockForApproval($claim);
-
-            $club = Club::create([
-                'club_type_id' => $lodge->club_type_id,
-                'province_id' => $lodge->province_id,
-                'masonic_hall_id' => $lodge->masonic_hall_id,
-                'name' => $lodge->displayName(),
-                'slug' => $this->uniqueClubSlug($lodge),
-                'lodge_number' => $lodge->number,
-                'town_city' => $lodge->masonicHall?->town,
-                'province_region' => $lodge->province?->name,
-                'status' => 'active',
-                'settings' => array_filter(['installation_month' => Months::name($lodge->installation_month)]),
-            ]);
+            $club = $this->newClubFor($lodge);
 
             $club->users()->attach($claim->user_id, ['role' => ClubRole::Owner->value, 'status' => ClubMemberStatus::Active->value]);
             $this->addClaimantToRoster($claim, $club);
-            $this->copyMeetingPattern($lodge, $club);
             $this->finishApproval($claim, $lodge, $club, $admin, 'approved', $note);
 
             return $club;
@@ -135,6 +122,26 @@ class LodgeClaimService
         $claim->load(['lodge', 'user', 'club'])->user->notify(LodgeClaimNotification::approved($claim));
 
         return $club;
+    }
+
+    /**
+     * A superadmin sets up a club account for a listing without a claim. Any open claims are superseded, as when a
+     * listing is linked directly; the caller invites the people who will run it.
+     */
+    public function createClub(Lodge $lodge): Club
+    {
+        return DB::transaction(function () use ($lodge) {
+            $locked = Lodge::whereKey($lodge->id)->lockForUpdate()->with(['masonicHall', 'province', 'clubType', 'schedules'])->firstOrFail();
+
+            if ($locked->isManaged()) {
+                throw ValidationException::withMessages(['lodge' => 'This lodge already has a club account.']);
+            }
+
+            $club = $this->newClubFor($locked);
+            $this->link($locked, $club);
+
+            return $club;
+        });
     }
 
     /**
@@ -254,6 +261,26 @@ class LodgeClaimService
             'current_office' => $office,
             'masonic_rank' => $office === LodgeOffice::WorshipfulMaster ? 'WBro' : 'Bro',
         ])->save();
+    }
+
+    private function newClubFor(Lodge $lodge): Club
+    {
+        $club = Club::create([
+            'club_type_id' => $lodge->club_type_id,
+            'province_id' => $lodge->province_id,
+            'masonic_hall_id' => $lodge->masonic_hall_id,
+            'name' => $lodge->displayName(),
+            'slug' => $this->uniqueClubSlug($lodge),
+            'lodge_number' => $lodge->number,
+            'town_city' => $lodge->masonicHall?->town,
+            'province_region' => $lodge->province?->name,
+            'status' => 'active',
+            'settings' => array_filter(['installation_month' => Months::name($lodge->installation_month)]),
+        ]);
+
+        $this->copyMeetingPattern($lodge, $club);
+
+        return $club;
     }
 
     private function copyMeetingPattern(Lodge $lodge, Club $club): void

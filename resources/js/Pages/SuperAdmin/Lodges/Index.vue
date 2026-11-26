@@ -134,6 +134,24 @@ function unlinkClub() {
     }
 }
 
+const accountLodge = ref(null);
+const accountForm = useForm({ name: '', email: '' });
+
+function openAccount(lodge) {
+    accountLodge.value = lodge;
+    accountForm.reset();
+    accountForm.clearErrors();
+}
+
+function submitAccount() {
+    accountForm.post(route('superadmin.lodges.account', accountLodge.value.id), {
+        preserveScroll: true,
+        onSuccess: () => {
+            accountLodge.value = null;
+        },
+    });
+}
+
 function remove(lodge) {
     if (confirm(`Delete '${lodge.display_name}'?`)) {
         useForm({}).delete(route('superadmin.lodges.destroy', lodge.id), { preserveScroll: true });
@@ -219,6 +237,7 @@ const labelClass = 'block text-xs font-medium text-slate-700 mb-1.5 dark:text-sl
                                     <div class="flex items-center justify-end gap-2">
                                         <Button v-if="full || !l.is_managed" variant="secondary" size="sm" @click="openEdit(l)">Edit</Button>
                                         <span v-else class="text-slate-500 dark:text-slate-400" title="A lodge with its own club account keeps its listing up to date itself.">Kept by the lodge</span>
+                                        <Button v-if="full" variant="secondary" size="sm" @click="openAccount(l)">{{ l.club ? 'Invite to account' : 'Set up account' }}</Button>
                                         <Button v-if="full" variant="secondary" size="sm" @click="remove(l)">Delete</Button>
                                     </div>
                                 </td>
@@ -357,6 +376,18 @@ const labelClass = 'block text-xs font-medium text-slate-700 mb-1.5 dark:text-sl
                 <div class="flex justify-end gap-2 pt-4 border-t border-slate-200 dark:border-slate-800">
                     <Button variant="secondary" @click="showModal = false">Cancel</Button>
                     <Button type="submit" :loading="form.processing">{{ editingId ? 'Save' : 'Add lodge' }}</Button>
+                </div>
+            </form>
+        </Modal>
+
+        <Modal :open="!!accountLodge" :title="`${accountLodge?.club ? 'Invite to' : 'Set up account for'} ${accountLodge?.display_name ?? ''}`" @close="accountLodge = null">
+            <form class="space-y-3" @submit.prevent="submitAccount">
+                <p class="text-sm text-slate-600 dark:text-slate-400">This person is invited by email as an owner of the lodge's account. The account is made from this listing if the lodge has none.</p>
+                <Input v-model="accountForm.name" label="Name" required :error="accountForm.errors.name" />
+                <Input v-model="accountForm.email" type="email" label="Email" required :error="accountForm.errors.email" />
+                <div class="flex justify-end gap-2">
+                    <Button variant="secondary" @click="accountLodge = null">Cancel</Button>
+                    <Button type="submit" :loading="accountForm.processing">Send invitation</Button>
                 </div>
             </form>
         </Modal>

@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Domains\ClubAccounting\Enums\LodgeOffice;
 use App\Domains\ClubAccounting\Models\Member;
+use App\Mail\MemberInvitationMail;
 use App\Models\Club;
 use App\Models\ClubType;
 use App\Models\Lodge;
@@ -17,6 +18,7 @@ use App\Models\User;
 use App\Notifications\LodgeClaimNotification;
 use App\Services\Lodges\LodgeClaimService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 use LogicException;
 use Tests\TestCase;
@@ -374,6 +376,31 @@ class LodgeClaimTest extends TestCase
         $this->actingAs($this->superAdmin)->delete(route('superadmin.lodges.unlink_club', $this->lodge->id))->assertSessionHas('success');
         $this->assertNull($this->lodge->refresh()->club_id);
         $this->assertModelExists($club);
+    }
+
+    public function test_a_superadmin_sets_up_an_account_for_a_listing_and_invites_owners(): void
+    {
+        Notification::fake();
+        Mail::fake();
+        $claim = $this->submit();
+
+        $this->actingAs($this->superAdmin)->post(route('superadmin.lodges.account', $this->lodge->id), ['name' => 'Olive Owner', 'email' => 'olive@example.com'])
+            ->assertSessionHasNoErrors()->assertSessionHas('success');
+
+        $club = Club::findOrFail($this->lodge->refresh()->club_id);
+        $this->assertSame($this->lodge->number, $club->lodge_number);
+        $this->assertSame('superseded', $claim->refresh()->status);
+        $this->assertSame('owner', $club->users()->where('email', 'olive@example.com')->firstOrFail()->pivot->role);
+        Mail::assertQueued(MemberInvitationMail::class, fn ($mail) => $mail->hasTo('olive@example.com'));
+
+        $clubs = Club::count();
+        $this->actingAs($this->superAdmin)->post(route('superadmin.lodges.account', $this->lodge->id), ['name' => 'Second Owner', 'email' => 'second@example.com']);
+        $this->assertSame($clubs, Club::count());
+        $this->assertSame('owner', $club->users()->where('email', 'second@example.com')->firstOrFail()->pivot->role);
+
+        $this->actingAs($this->superAdmin)->post(route('superadmin.lodges.account', $this->lodge->id), ['name' => 'Olive Owner', 'email' => 'olive@example.com'])->assertSessionHas('error');
+        $this->actingAs($this->secretary)->post(route('superadmin.lodges.account', Lodge::factory()->create(['slug' => 'other'])->id), ['name' => 'X', 'email' => 'x@example.com']);
+        $this->assertSame($clubs, Club::count());
     }
 
     public function test_taking_back_a_claimed_listing_is_written_into_its_history(): void

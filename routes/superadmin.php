@@ -67,6 +67,7 @@ Route::middleware(['auth', EnsureUserIsSuperAdmin::class, RecordSuperAdminAction
     Route::post('/superadmin/lodges', [SuperAdminLodgeController::class, 'store'])->name('superadmin.lodges.store');
     Route::put('/superadmin/lodges/{id}', [SuperAdminLodgeController::class, 'update'])->name('superadmin.lodges.update');
     Route::post('/superadmin/lodges/{id}/link-club', [SuperAdminLodgeController::class, 'linkClub'])->name('superadmin.lodges.link_club');
+    Route::post('/superadmin/lodges/{id}/account', [SuperAdminLodgeController::class, 'setUpAccount'])->name('superadmin.lodges.account');
     Route::delete('/superadmin/lodges/{id}/link-club', [SuperAdminLodgeController::class, 'unlinkClub'])->name('superadmin.lodges.unlink_club');
     Route::get('/superadmin/contact-messages', [SuperAdminContactMessageController::class, 'index'])->name('superadmin.contact_messages.index');
     Route::post('/superadmin/contact-messages/{id}/handle', [SuperAdminContactMessageController::class, 'handle'])->whereNumber('id')->name('superadmin.contact_messages.handle');
