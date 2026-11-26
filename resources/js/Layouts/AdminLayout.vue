@@ -87,7 +87,7 @@ const currentActiveTab = computed(() => {
     if (path.includes('/admin/activity')) return 'activity';
     if (path.includes('/admin/webhooks')) return 'webhooks';
     if (path.includes('/admin/settings') || path.includes('/admin/profile')) return 'settings';
-    if (path.includes('/admin/analytics') || path.endsWith('/admin') || path.endsWith('/admin/')) return 'dashboard';
+    if (path.includes('/admin/dashboard') || path.endsWith('/admin') || path.endsWith('/admin/')) return 'dashboard';
   }
 
   if (props.activeTab && props.activeTab !== 'dashboard') {

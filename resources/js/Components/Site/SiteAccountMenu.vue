@@ -22,7 +22,7 @@ const row = computed(() => (page.props.auth?.clubs ?? []).find((c) => c.slug ===
 const membership = computed(() => (row.value?.is_group ? null : row.value));
 const isStaff = computed(() => !!row.value && row.value.role !== 'member');
 // A coach cannot open the dashboard, so they go to the area their role covers (as in AccountMenu).
-const adminHref = computed(() => (row.value?.role === 'coach' ? `/${props.club.slug}/admin/events` : `/${props.club.slug}/admin/analytics`));
+const adminHref = computed(() => (row.value?.role === 'coach' ? `/${props.club.slug}/admin/events` : `/${props.club.slug}/admin/dashboard`));
 
 const base = computed(() => `/members/${props.club.slug}`);
 

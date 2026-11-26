@@ -72,7 +72,7 @@ class SuperAdminPlatformController extends Controller
         return $this->table('Clubs', 'Every club, its plan and its Stripe subscription. Search by name or address.', [
             ['key' => 'name', 'label' => 'Club'], ['key' => 'slug', 'label' => 'Address'], ['key' => 'members', 'label' => 'Active people'],
             ['key' => 'plan', 'label' => 'Plan'], ['key' => 'subscription', 'label' => 'Stripe status'], ['key' => 'stripe_customer', 'label' => 'Stripe customer'], ['key' => 'created', 'label' => 'Created'],
-        ], $clubs, search: true, q: $search);
+        ], $clubs, search: true, q: $search, setUpTypes: SuperAdminAccountController::setUpTypes());
     }
 
     public function stripeEvents(): Response
@@ -96,7 +96,11 @@ class SuperAdminPlatformController extends Controller
     }
 
     /** @param  list<array<string, mixed>>  $columns */
-    private function table(string $title, string $description, array $columns, mixed $rows, bool $search = false, string $q = ''): Response
+    /**
+     * @param  list<array<string, mixed>>  $columns
+     * @param  list<array{value: string, label: string}>  $setUpTypes  shows the Set up account button when given
+     */
+    private function table(string $title, string $description, array $columns, mixed $rows, bool $search = false, string $q = '', array $setUpTypes = []): Response
     {
         $paginated = $rows instanceof LengthAwarePaginator;
 
@@ -108,6 +112,7 @@ class SuperAdminPlatformController extends Controller
             'links' => $paginated ? $rows->linkCollection()->toArray() : [],
             'search' => $search,
             'q' => $q,
+            'setUpTypes' => $setUpTypes,
         ]);
     }
 }

@@ -141,8 +141,9 @@ class ClubUrlStructureTest extends TestCase
         $member = $this->userWithRole('member');
 
         // admin.analytics names its club {slug} rather than {clubSlug}; it must still be gated.
-        $this->actingAs($member)->get('/oxford-lodge/admin/analytics')->assertForbidden();
-        $this->actingAs($this->userWithRole('admin'))->get('/oxford-lodge/admin/analytics')->assertOk();
+        $this->actingAs($member)->get('/oxford-lodge/admin/dashboard')->assertForbidden();
+        $this->actingAs($this->userWithRole('admin'))->get('/oxford-lodge/admin/dashboard')->assertOk();
+        $this->actingAs($this->userWithRole('admin'))->get('/oxford-lodge/admin/analytics')->assertRedirect('/oxford-lodge/admin/dashboard');
     }
 
     public function test_admin_area_still_requires_membership_of_that_club(): void

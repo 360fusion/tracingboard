@@ -44,6 +44,16 @@ class SuperAdminPlatformTest extends TestCase
         }
     }
 
+    public function test_only_the_clubs_list_offers_set_up_account(): void
+    {
+        $admin = $this->superadmin();
+
+        $this->actingAs($admin)->get(route('superadmin.clubs.index'))
+            ->assertInertia(fn (AssertableInertia $page) => $page->where('setUpTypes.0.value', 'hall'));
+        $this->actingAs($admin)->get(route('superadmin.users.index'))
+            ->assertInertia(fn (AssertableInertia $page) => $page->where('setUpTypes', []));
+    }
+
     public function test_the_users_list_searches_and_says_who_is_closing(): void
     {
         $admin = $this->superadmin();

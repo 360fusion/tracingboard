@@ -7,6 +7,9 @@ import Card from '@/Components/Ui/Card.vue';
 import Badge from '@/Components/Ui/Badge.vue';
 import Pagination from '@/Components/Ui/Pagination.vue';
 import Input from '@/Components/Ui/Input.vue';
+import Button from '@/Components/Ui/Button.vue';
+import UiIcon from '@/Components/Ui/UiIcon.vue';
+import SetUpAccountDialog from '@/Components/SuperAdmin/SetUpAccountDialog.vue';
 
 // One read-only table for the platform lists; each column is { key, label } and `badge: true` shows a yes/no mark.
 const props = defineProps({
@@ -17,7 +20,11 @@ const props = defineProps({
   links: { type: Array, default: () => [] },
   search: { type: Boolean, default: false },
   q: { type: String, default: '' },
+  // Given on the clubs list: shows the Set up account button.
+  setUpTypes: { type: Array, default: () => [] },
 });
+
+const setUpOpen = ref(false);
 
 const query = ref(props.q);
 const find = () => router.get(window.location.pathname, query.value ? { q: query.value } : {}, { preserveState: true, replace: true });
@@ -28,7 +35,14 @@ const find = () => router.get(window.location.pathname, query.value ? { q: query
     <Head :title="`Superadmin - ${title}`" />
 
     <div class="space-y-6">
-      <PageHeader :title="title" :description="description" />
+      <PageHeader :title="title" :description="description">
+        <template v-if="setUpTypes.length" #actions>
+          <Button @click="setUpOpen = true">
+            <template #icon><UiIcon name="user-add" /></template>
+            Set up account
+          </Button>
+        </template>
+      </PageHeader>
 
       <form v-if="search" class="max-w-sm" @submit.prevent="find">
         <Input v-model="query" label="Search" placeholder="Type, then press Enter" />
@@ -53,5 +67,7 @@ const find = () => router.get(window.location.pathname, query.value ? { q: query
 
       <Pagination :links="links" />
     </div>
+
+    <SetUpAccountDialog v-if="setUpTypes.length" v-model:open="setUpOpen" :set-up-types="setUpTypes" />
   </SuperAdminLayout>
 </template>

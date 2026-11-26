@@ -196,8 +196,9 @@ Route::middleware(['auth'])->group(function () {
     // CSV Member Import & Export Routes
     Route::get('/{slug}/members/export', [MemberImportExportController::class, 'export'])->name('clubs.members.export')->middleware('club.admin:manage_members');
 
-    // Executive Analytics Route
-    Route::get('/{slug}/admin/analytics', [AnalyticsController::class, 'show'])->name('admin.analytics');
+    // The admin dashboard (the route keeps its old name; the old address still works for bookmarks and sent links)
+    Route::get('/{slug}/admin/dashboard', [AnalyticsController::class, 'show'])->name('admin.analytics');
+    Route::permanentRedirect('/{slug}/admin/analytics', '/{slug}/admin/dashboard');
 
     // Invoice & Receipt Routes
     Route::get('/{slug}/invoices/{id}/download', [InvoiceController::class, 'download'])->name('invoices.download');

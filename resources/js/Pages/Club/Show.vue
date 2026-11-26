@@ -143,7 +143,7 @@ const primaryLink = 'inline-flex items-center justify-center gap-1.5 rounded-xl 
                     <Button variant="secondary" size="sm" :href="`/${club.slug}/admin/pages`">
                         <UiIcon name="palette" /> CMS builder
                     </Button>
-                    <Button variant="secondary" size="sm" :href="`/${club.slug}/admin/analytics`">
+                    <Button variant="secondary" size="sm" :href="`/${club.slug}/admin/dashboard`">
                         <UiIcon name="chart" /> Analytics
                     </Button>
                     <a :href="`/site/${club.slug}`" target="_blank" :class="secondaryLink">
