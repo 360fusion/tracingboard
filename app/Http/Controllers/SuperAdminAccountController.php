@@ -76,7 +76,7 @@ class SuperAdminAccountController extends Controller
             ->when($search !== '', fn ($q) => $q->where(fn ($q) => $q->whereLike('users.name', "%{$search}%")->orWhereLike('users.email', "%{$search}%")->orWhereLike('clubs.name', "%{$search}%")))
             ->when(($filters['status'] ?? null) === 'invited', fn ($q) => $q->whereNotNull('club_user.invitation_token')->whereNull('club_user.invitation_accepted_at'))
             ->when(($filters['status'] ?? null) === 'active', fn ($q) => $q->where(fn ($q) => $q->whereNull('club_user.invitation_token')->orWhereNotNull('club_user.invitation_accepted_at')))
-            ->orderByDesc('club_user.invited_at')->orderByDesc('club_user.id')
+            ->orderByRaw('club_user.invited_at is null')->orderByDesc('club_user.invited_at')->orderByDesc('club_user.id')
             ->select([
                 'club_user.club_id', 'club_user.user_id', 'club_user.role', 'club_user.committee_role', 'club_user.status',
                 'club_user.invitation_token', 'club_user.invitation_accepted_at', 'club_user.invited_at',
