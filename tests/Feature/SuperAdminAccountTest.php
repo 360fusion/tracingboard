@@ -118,6 +118,22 @@ class SuperAdminAccountTest extends TestCase
         $this->actingAs($this->superAdmin)->get(route('superadmin.lodges.show', $lodge->id))->assertRedirect(route('superadmin.accounts.show', $lodge->refresh()->club_id));
     }
 
+    public function test_a_member_is_invited_from_the_account_page(): void
+    {
+        $club = Club::factory()->create();
+
+        $this->actingAs($this->superAdmin)->post(route('superadmin.accounts.invite', $club->id), ['name' => 'Mo Member', 'email' => 'mo@example.com', 'role' => 'owner'])
+            ->assertSessionHas('success');
+
+        $this->assertSame('member', $club->users()->where('email', 'mo@example.com')->firstOrFail()->pivot->role);
+        $this->assertTrue(Member::where('club_id', $club->id)->where('email', 'mo@example.com')->exists());
+        Mail::assertQueued(MemberInvitationMail::class, fn ($mail) => $mail->hasTo('mo@example.com'));
+
+        $this->actingAs($this->superAdmin)->post(route('superadmin.accounts.invite', $club->id), ['name' => 'Mo Member', 'email' => 'mo@example.com'])->assertSessionHas('error');
+        $this->actingAs(User::factory()->create())->post(route('superadmin.accounts.invite', $club->id), ['name' => 'X', 'email' => 'x@example.com']);
+        $this->assertFalse($club->users()->where('email', 'x@example.com')->exists());
+    }
+
     public function test_only_superadmins_reach_these_pages(): void
     {
         $user = User::factory()->create();

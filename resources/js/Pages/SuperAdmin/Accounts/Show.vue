@@ -7,6 +7,7 @@ import Badge from '@/Components/Ui/Badge.vue';
 import Button from '@/Components/Ui/Button.vue';
 import Input from '@/Components/Ui/Input.vue';
 import Modal from '@/Components/Ui/Modal.vue';
+import UiIcon from '@/Components/Ui/UiIcon.vue';
 import { useForm } from '@inertiajs/vue3';
 
 const props = defineProps({
@@ -18,6 +19,19 @@ const props = defineProps({
 
 const setUpOpen = ref(false);
 const setUpForm = useForm({ name: '', email: '' });
+
+const inviteOpen = ref(false);
+const inviteForm = useForm({ name: '', email: '' });
+
+function openInvite() {
+    inviteForm.reset();
+    inviteForm.clearErrors();
+    inviteOpen.value = true;
+}
+
+function submitInvite() {
+    inviteForm.post(route('superadmin.accounts.invite', props.club.id), { preserveScroll: true, onSuccess: () => { inviteOpen.value = false; } });
+}
 
 function submitSetUp() {
     setUpForm.post(route('superadmin.lodges.account', props.lodgeId), { onSuccess: () => { setUpOpen.value = false; } });
@@ -63,7 +77,11 @@ const signedIn = computed(() => props.people.filter((p) => p.sign_in === 'active
                 <template #actions>
                     <Button v-if="lodgeId" @click="setUpOpen = true">Set up account</Button>
                     <template v-else>
-                        <Button :href="route('admin.analytics', club.slug)">Open its admin</Button>
+                        <Button @click="openInvite">
+                            <template #icon><UiIcon name="user-add" /></template>
+                            Invite member
+                        </Button>
+                        <Button variant="secondary" :href="route('admin.analytics', club.slug)">Open its admin</Button>
                         <Button variant="secondary" :href="`/site/${club.slug}`" external>Public website</Button>
                     </template>
                     <Button v-if="club.listing_slug" variant="secondary" :href="route('lodges.show', club.listing_slug)" external>Directory listing</Button>
@@ -114,6 +132,18 @@ const signedIn = computed(() => props.people.filter((p) => p.sign_in === 'active
                 </div>
             </Card>
         </div>
+
+        <Modal :open="inviteOpen" :title="`Invite a member to ${club.name}`" @close="inviteOpen = false">
+            <form class="space-y-3" @submit.prevent="submitInvite">
+                <p class="text-sm text-slate-600 dark:text-slate-400">They are added to the roster as a member and get an email with a link to choose their password.</p>
+                <Input v-model="inviteForm.name" label="Their name" required :error="inviteForm.errors.name" />
+                <Input v-model="inviteForm.email" type="email" label="Their email" required :error="inviteForm.errors.email" />
+                <div class="flex justify-end gap-2">
+                    <Button variant="secondary" @click="inviteOpen = false">Cancel</Button>
+                    <Button type="submit" :loading="inviteForm.processing">Send invitation</Button>
+                </div>
+            </form>
+        </Modal>
 
         <Modal :open="setUpOpen" :title="`Set up account for ${club.name}`" @close="setUpOpen = false">
             <form class="space-y-3" @submit.prevent="submitSetUp">

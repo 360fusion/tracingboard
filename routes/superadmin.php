@@ -29,6 +29,7 @@ Route::middleware(['auth', EnsureUserIsSuperAdmin::class, RecordSuperAdminAction
     Route::get('/superadmin/account-setup/search', [SuperAdminAccountController::class, 'search'])->name('superadmin.accounts.search');
     Route::get('/superadmin/lodges/{lodge}', [SuperAdminAccountController::class, 'lodge'])->whereNumber('lodge')->name('superadmin.lodges.show');
     Route::get('/superadmin/accounts/{club}', [SuperAdminAccountController::class, 'show'])->name('superadmin.accounts.show');
+    Route::post('/superadmin/accounts/{club}/invite', [SuperAdminAccountController::class, 'invite'])->name('superadmin.accounts.invite');
     Route::get('/superadmin/invitations', [SuperAdminAccountController::class, 'invitations'])->name('superadmin.invitations.index');
     Route::post('/superadmin/invitations/{club}/{user}/resend', [SuperAdminAccountController::class, 'resend'])->name('superadmin.invitations.resend');
     Route::delete('/superadmin/invitations/{club}/{user}', [SuperAdminAccountController::class, 'cancel'])->name('superadmin.invitations.cancel');

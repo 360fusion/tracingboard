@@ -11,7 +11,9 @@ use App\Models\Club;
 use App\Models\ClubType;
 use App\Models\Lodge;
 use App\Models\MasonicHall;
+use App\Services\Halls\HallBoard;
 use App\Support\PlanCatalog;
+use DomainException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -180,6 +182,26 @@ class SuperAdminAccountController extends Controller
             'lodgeId' => $lodge->id,
             'people' => [],
         ]);
+    }
+
+    /**
+     * Invite someone into an account from its details page as a member.
+     */
+    public function invite(Request $request, int $club, HallBoard $people): RedirectResponse
+    {
+        $club = Club::findOrFail($club);
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+        ]);
+
+        try {
+            $people->invite($club, $data['name'], $data['email'], '', ClubRole::Member->value, $request->user());
+        } catch (DomainException|MemberInvitationException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return back()->with('success', "Invitation sent to {$data['email']}.");
     }
 
     public function resend(Request $request, int $club, int $user, MemberInvitationService $invitations): RedirectResponse

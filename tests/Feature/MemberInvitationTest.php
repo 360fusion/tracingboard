@@ -90,6 +90,24 @@ class MemberInvitationTest extends TestCase
         );
     }
 
+    public function test_an_invited_owner_starts_in_the_lodge_admin(): void
+    {
+        $user = User::factory()->unverified()->create(['password' => Hash::make('temp-secret')]);
+        $token = 'test-token-owner-1';
+
+        $this->club->users()->attach($user->id, [
+            'role' => 'owner',
+            'invitation_token' => hash('sha256', $token),
+            'invited_at' => now(),
+            'status' => 'pending',
+        ]);
+
+        $this->post(route('invitation.submit', ['slug' => $this->club->slug, 'token' => $token]), [
+            'password' => 'new-secure-password',
+            'password_confirmation' => 'new-secure-password',
+        ])->assertRedirect(route('admin.analytics', ['slug' => $this->club->slug]));
+    }
+
     public function test_invited_member_can_set_password_and_activate_account(): void
     {
         $user = User::factory()->unverified()->create(['password' => Hash::make('temp-secret')]);

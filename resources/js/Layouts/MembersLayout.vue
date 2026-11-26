@@ -86,11 +86,11 @@ const nav = computed(() => (slug.value && !props.club?.is_group
 // The lodge this page belongs to, from the signed-in member's lodges: its colour, number and order for the header.
 const lodge = computed(() => (slug.value ? ((page.props.auth?.clubs ?? []).find((c) => c.slug === slug.value) ?? { colour: null }) : null));
 const lodgeColour = computed(() => orderColour(lodge.value?.colour));
-// "No. 1418 · Craft Lodge", and when the page knows it (the overview), when the lodge meets.
+// "No. 1418 · Craft Lodge".
 const lodgeLine = computed(() => {
     const number = props.club?.lodge_number ?? lodge.value?.number;
 
-    return [number ? `No. ${number}` : null, lodge.value?.type_name, props.club?.meets].filter(Boolean).join(' · ');
+    return [number ? `No. ${number}` : null, lodge.value?.type_name].filter(Boolean).join(' · ');
 });
 
 // The strip behind the phone's clock (app.css) follows the header's colour.

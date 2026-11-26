@@ -120,7 +120,7 @@ class MemberPortalController extends Controller
         $member = Member::where('club_id', $club->id)->where('user_id', $user->id)->first();
 
         return Inertia::render('Member/Dashboard', [
-            'club' => [...$club->only(['id', 'name', 'slug', 'lodge_number']), 'meets' => $club->lodge?->meets_text],
+            'club' => $club->only(['id', 'name', 'slug', 'lodge_number']),
             'isPending' => $isPending,
             'memberRole' => $role,
             'duesOwed' => round((float) $duesOwed, 2),

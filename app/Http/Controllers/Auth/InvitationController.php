@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Domains\ClubAccounting\Services\MemberInvitationService;
+use App\Enums\ClubRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Invitation\AcceptRequest;
 use App\Models\Club;
@@ -133,12 +134,19 @@ class InvitationController extends Controller
     }
 
     /**
-     * A group has no member area, so its board starts in its admin.
+     * A group has no member area, so its board starts in its admin. A lodge's owner or admin (someone setting the
+     * lodge up) starts in its admin too; everyone else in the member area.
      */
     private function landing(Club $club, User $user): RedirectResponse
     {
-        return $club->isGroup()
-            ? redirect(HallClubs::landingUrl($club, $user))
+        if ($club->isGroup()) {
+            return redirect(HallClubs::landingUrl($club, $user));
+        }
+
+        $role = $club->users()->whereKey($user->id)->first()?->pivot->role;
+
+        return in_array($role, [ClubRole::Owner->value, ClubRole::Admin->value], true)
+            ? redirect()->route('admin.analytics', ['slug' => $club->slug])
             : redirect()->route('member.dashboard', ['slug' => $club->slug]);
     }
 
