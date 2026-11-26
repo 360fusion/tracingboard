@@ -7,6 +7,7 @@ use App\Models\SiteDeployTarget;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
+use Launchpad\Models\WorkspaceEvent;
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
@@ -29,8 +30,8 @@ Schedule::command('app:prune-member-imports')->dailyAt('03:30')->withoutOverlapp
 Schedule::command('app:prune-media')->dailyAt('03:45')->withoutOverlapping();
 // Trims each lodge's website page history to its own limits (newest N versions per page, and an age limit).
 Schedule::command('app:prune-page-revisions')->dailyAt('04:00')->withoutOverlapping();
-// Page timings from members' devices are kept 90 days (PageTiming::prunable).
-Schedule::command('model:prune', ['--model' => [PageTiming::class]])->dailyAt('04:15')->withoutOverlapping();
+// Page timings from members' devices are kept 90 days (PageTiming::prunable); workspace activity by Launchpad's setting.
+Schedule::command('model:prune', ['--model' => [PageTiming::class, WorkspaceEvent::class]])->dailyAt('04:15')->withoutOverlapping();
 Schedule::command('app:send-invitation-reminders')->dailyAt('10:00')->withoutOverlapping();
 // Sends each club's automated digest when its channel's day and hour come round.
 Schedule::command('app:send-weekly-digest --scheduled')->hourly()->withoutOverlapping();
@@ -43,6 +44,13 @@ Schedule::command('lodges:check-sources')->weeklyOn(0, '02:00')->withoutOverlapp
 Schedule::command('lodges:remind-secretaries')->dailyAt('09:30')->withoutOverlapping();
 // Blanks accounts whose owners asked to close them 30 or more days ago (see App\Support\AccountPurging).
 Schedule::command('accounts:purge-closed')->dailyAt('03:15')->withoutOverlapping();
+// Launchpad schedules its own account purge and a prune of tables this app never creates (it skips Launchpad's
+// migrations), so both fail every night; the app's purge above and the prune of WorkspaceEvent replace them.
+foreach (Schedule::events() as $event) {
+    if (str_contains((string) $event->command, 'launchpad:purge-closed') || str_contains((string) $event->command, 'ApiTokenUsage')) {
+        $event->skip(fn () => true);
+    }
+}
 // Rebuilds the published website of every club whose domain shows the files, so things that change with time
 // (events passing, articles scheduled to appear) reach it; edits themselves rebuild within minutes (RebuildsStaticSite).
 Artisan::command('app:rebuild-static-sites', function () {
